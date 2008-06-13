@@ -1,0 +1,45 @@
+
+Important:
+
+  * Inherited Codes from Aggregation codes, or a better mode to put codes to codes themselves.
+
+Medium:
+
+  * Consistency Check
+
+  * TIE Integration
+    
+  * Fetching:
+     * Better fetching dialog including Fetch by date, Fetch by number   
+
+  * Visualization:
+    * Fix Bounding Box scaling for picking.
+  
+Enhancement:
+
+  * Add id of primary document to title of Document View
+
+  * Switch to a TreeTable implementation that can also show a filter by metadata attributes.
+
+  * PrimaryDocumentTree
+     * Support to reparent replies (probably just drag and drop support in general)
+     * Renaming of nodes
+
+  * View Tracking:
+    * Updates to the tree should not be cause it to forget which nodes where open
+  
+  * In Codebox:
+    * Make ref codes clickable
+    
+  * Perform a Lucene reindexing/integrity check in the background, independently 
+    from GmanDA itself.
+    
+  * Add a status bar, that allows access to the std- and err-out
+
+  * Switch to JFace / SWT
+  
+  * Bug in GlazedLists: Column header gets white on click -> Wait for GL 1.8
+  * Use RegularExpression TextMatcher from GL 1.8
+  
+  * Configuration dialogs for all registered PreferenceItems.
+  

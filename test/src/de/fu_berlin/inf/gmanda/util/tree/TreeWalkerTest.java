@@ -1,0 +1,85 @@
+package de.fu_berlin.inf.gmanda.util.tree;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import junit.framework.TestCase;
+
+public class TreeWalkerTest extends TestCase {
+
+	public class Node {
+		List<Node> children = new LinkedList<Node>();
+		
+		String s;
+		
+		public Node(Node parent, String s){
+			this.s = s;
+			if (parent != null)
+				parent.children.add(this);
+		}
+		
+		public String toString(){
+			return s;
+		}
+	}
+	
+	Node root;
+	
+	@SuppressWarnings("unused")
+	public void setUp(){
+		root = new Node(null, "1");
+		
+		Node child11  = new Node(root, "2");
+		Node child111 = new Node(child11, "3");
+		Node child112 = new Node(child11, "4");
+		
+		Node child12 = new Node(root, "5");
+		Node child121 = new Node(child12, "6");
+		Node child122 = new Node(child12, "7");
+		
+	}
+	
+	public void testIterator() {
+		
+		int i = 0;
+		
+		for (Node n : new TreeWalker<Node>(root, new TreeMaker<Node>(){
+			public TreeStructure<Node> toStructure(final Node t) {
+				return new TreeStructure<Node>(){
+
+					public Node get() {
+						return t;
+					}
+
+					public Collection<Node> getChildren() {
+						return t.children;
+					}
+					
+				};
+			}
+		})){
+			i++;
+			assertEquals(String.valueOf(i), n.toString());
+		};
+		
+		assertEquals(7, i);
+	}
+
+	public void testVisitCollectionOfTTreeVisitorOfTTreeMakerOfT() {
+		fail("Not yet implemented");
+	}
+
+	public void testVisitTTreeVisitorOfTTreeMakerOfT() {
+		fail("Not yet implemented");
+	}
+
+	public void testFindCollectionOfTTreeAcceptorOfTTreeMakerOfT() {
+		fail("Not yet implemented");
+	}
+
+	public void testFindTTreeAcceptorOfTTreeMakerOfT() {
+		fail("Not yet implemented");
+	}
+
+}

@@ -1,0 +1,282 @@
+
+2008-06-10
+
+   * Improved perspective management
+   * Added possibility to directly choose the Code for which details should be shown 
+
+2008-06-03
+
+   * F4 as short cut for formatting codes
+   * Code Detail View for looking at the description of codes
+   * ProgressBar on Saving
+
+2008-06-02
+
+   * Trails can now be executed on the current project to restore lost work.
+
+2008-05-24
+
+   * Improved refetching operations
+   * Statistical information export 
+
+2008-05-20
+
+   * Fixed issue regarding empty codes still showing up in filter results for '*'
+   * The - operator now filters only primary documents in which the code is 
+     contained in all segments of a code
+
+2008-05-19
+
+   * Added logging of editing activities (called trail logging)
+   * Fixed bug related to storing of Visualization Presets
+   * Fixed bug making it impossible to use an empty filter in Visualization
+   * Improved renaming of codes now does not affect description of codes
+   * Improved removal of codes in case of codes having a description
+   * Added command line options:
+      * --notrail: disable trail logging
+      * [file to open] Open the given file
+
+2008-05-14
+
+   * Fixed bug in ResetView of Visualization that was not centering the view correctly.
+   * Improved color highlighting in document tree.
+
+2008-05-12
+
+   * Better timeline information in visualization and a zoomable grid for days and months
+   * Improvements regarding back and forward in views, now better in corporates filters
+   * Started implementation for coding codes
+   * Fixed resize problem with CodeBox.
+   * Restricted '*' while filtering to all PDs and not the mailing-lists
+   * Fixed bug in ordering code
+   * Generified VariableProxy
+   * Saving of project file removes empty codings
+   * Fixed bug with Window not being resized on start-up
+   * Removed brute-force text search. Use Lucene instead.
+   * Fixed highlighting of text
+   * Run OpenURL-Action in background to not block the application and show errors to user
+   
+2008-04-30
+
+   * Better selection in visualisation, highlighted by a circle
+   * Bug fixes to selecting nodes that currently not visible in the document tree
+   * Extended syntax for partitioning in visualisation:
+      * 'code'      All sub-codes are shown
+      * '**'        Each code gets separate partition
+      * ''          Single partition with all codes
+      * '*'         All top-level codes are shown
+      * '*.*'       All top-level and second-level codes are shown
+      * 'code.*'    Only sub-codes of at most one level below code are shown
+      * 'code.*.*'  Only sub-codes of at most two level below are shown, etc.
+      
+2008-04-29
+
+   * Fixed bug concerning cancelation of closing by ALT-F4 or X
+
+2008-04-28
+
+   * Refixed bug from 2008-04-24
+   * Added Tooltips for Views.
+   * Colors in Document Tree View are now stored in configuration
+   * Fixed an ordering bug in the Document Tree
+   * Fixed a serialization issue concerning \r\n on Windows.
+
+2008-04-27
+
+   * CTRL-M toggles current view to fullscreen
+   * Renamed some views as suggested by Lutz
+   * Improvements for search in document tree: Supports * (all coded messages) and - (remove from results)
+   * Improved default colors in document tree. Yellow 
+     means now that the email contains the filtered for code.
+   * More documentation tooltips as suggested by Lutz.
+   * Improved Lucene reindexing.
+
+2008-04-26
+
+  * Support for file locking (Thanks Martin!)
+  * Allow reloading to discard changes
+  * Improved error reporting on errors while loading
+  * Canceling loading by user no longer shows cryptic error message
+  * Fixed bug in SaveAs code 
+  * Refixed bug from 2008-04-24
+
+2008-04-25
+
+  * Fixed bug in Refetching code that had made GmanDA unusable since 2 weeks for
+    people needing to refetch.
+
+2008-04-24 
+
+  * Fixed bug that caused a non-critical exception when closing GmanDA.
+
+2008-04-22
+
+  * Started implementation of Locking mechanism
+  * Switched CodeList to be a JTable to allow sorting by # of PDs and # of subcodes.
+
+2008-04-14
+
+  * Fixed blocking issue associated with lazy refetching of documents
+  * Fixed progress dialog issue regarding lazy refetching
+  * Added action for making all PDs available by refetching
+  * Improved AutoCompleter to probe on open  
+
+2008-04-11
+
+  * Fixed ordering in XML format. This chance does not require a new file version.
+  * Improvements to Preference Storage
+  * Started unification of caching storage structure.
+  * Introduced gmane:// filenames so that files are portable to other users. 
+  * Fileversion bumped to V3.
+
+2008-04-10
+
+  * Fix position bug in AutoCompleter
+
+2008-04-09
+
+  * Data Migration ideas implemented
+  * Fixes to Lucene Integration
+  * Fixed to boolean search syntax
+  * Fixes to sorting of searched PDs.
+
+2008-03-19
+
+  * Scroll to search results
+  * Started work on framework for preference UI integration
+  * Browser style Back and Forward navigation (Alt->Left to return to last 
+    Primary Document, Alt->Right to next)
+
+2008-03-17
+
+  * Lucene integration
+  * In Autocompleter PgDown and PgUp now work
+  * In Autocompleter you can use ctrl+space to copy the common prefix of all
+    entries in the current list to your current selection. 
+  * [BUG] Fixed bug with PrimaryDocumentView being to aggressive about the space
+    it needs.
+  * [BUG] Fixed memory leak in PrimaryDocumentTree
+
+2008-03-06
+
+  * Better reset zooming for visualisation
+  * Picking in visualisation
+  * Ranking in visualisation: Number, Name, Start/End/Median date
+  * Began migration to Joda Time for ISO8601 time stamps
+  * Enabled US Locale by default for Month names
+  * [BUG] Sort filtered display of Primary Documents by ID
+
+2008-03-03
+
+  * First implementation of some visualization features
+  * Added support for deleting nodes
+
+2008-02-29
+
+  * Added support for highlighting already visited messages.
+  * Refactored search UI.
+
+2008-02-08
+
+  * Fixed bug in refetch
+  * Added Next and previous hits arrows
+  * Icons for tree actions
+  * Improved file format to be more diff friendly
+
+2008-02-07
+
+  * Fixed bug in TreePath
+  * Improved Serialization to be Diff-Friendly 
+  * Improved Refetching Behavior  
+
+2008-02-06
+
+  * DockingFramework
+  * Fixed bugs with *bold* and _underline_
+
+2008-02-05
+
+  * Scrollbars for CodeBox
+
+2008-02-01
+
+  * List refetching support
+  * Fixed bug in reference handling
+  * Cleanups to listener infrastructure
+  * Fixed bug in Mailing list name extraction
+
+2008-01-31
+ 
+  * Added Filtering for multiple codes
+  * Added Filtering modes for Single Node and Threading 
+
+2008-01-30
+
+  * Made links clickable
+  * Improved URL displaying in TextView
+  * Added filtering support using GlazedLists in CodeList
+
+2008-01-29
+
+  * Gmanda Icon 
+  * Improvement for Email2HTML
+  * Refetching of Messages
+  * MimeMessage improvements
+  * Exporting to DSV to use for Text Information Extraction
+
+2008-01-24
+
+  * Improved Search
+  * Improved Email2HTML
+  * Refetch of individual emails
+
+2008-01-19
+
+  * Fixed bug in caching of text contents
+  * Improved Autocompleter handling
+  * Allow project loading cancelation
+
+2008-01-18:
+
+  * Only fetch messages within date range
+  * Add cancelation support to searching
+
+2008-01-16:
+
+  * Support for fetching from Gmanda directly.
+  * Improvements for the progress dialogs.
+  * Improved Error reporting for fetching from Gmane.
+  * Improved whitespace handling in CodeBox.
+ 
+2008-01-15:
+
+  * Fixed whitespace problem with storing/loading.
+  * Keep primary document selection during filtering if applicable.
+  * Fixed bug in autocompleter accepting null values.
+
+2008-01-14:
+
+  * Fixed caret update problem in AutoCompleter
+  * Fixed email address decoding problems
+
+2008-01-10:
+  * Add escaping using "..." to codes
+  * Enable wordwrap for Codebox
+  * Fixed duplicate entry bug in CodeModel
+  * Fixed bug in primary document tree related to nested nodes. 
+
+2008-01-09:
+  * Improved jump to ID action for projects with several mailing lists.
+  
+2008-01-07:
+  * Jump to ID action
+  * Fix bug with down and up action related to index being outside of list size.
+  * Fixed bug with resetting selection in CodeList.
+
+2008-01-01:
+  * Metafilter updates selection
+  * AutoCompleter
+
+2007-12-20:
+  * Search
+  * Rename codes

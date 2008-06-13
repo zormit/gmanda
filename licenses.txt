@@ -1,0 +1,21 @@
+Licenses overview
+-----------------
+
+GmanDA itself                                                GPLv3
+
+GNUMail (gnumail.jar, gnumail-providers.jar),                GPLv2 with Classpath Exception 
+GNU InetLib (inetlib.jar),
+GNU JAF (activation.jar)
+
+DockingFrames (dockingFrames*.jar,                           LGPLv2
+GlazedLists (glazedlists-*.jar),                                 
+
+Piccolo (piccolo*.jar)                                       BSD
+PicoContainer (picocontainer-*.jar)
+XStream (xpp*.jar, xstream*.jar)                  
+
+commons-*,                                                   ASL 2.0
+Lucene (lucene-core-*.jar),
+Joda Time (joda-time-*.jar)
+
+args4J (args4j-*.jar)                                        MIT
