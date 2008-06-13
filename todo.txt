@@ -14,6 +14,10 @@ Medium:
 
   * Visualization:
     * Fix Bounding Box scaling for picking.
+    
+  * Integrate drag and drop coding
+  
+  * Add support for coding videos by adapting Laura's code.  
   
 Enhancement:
 

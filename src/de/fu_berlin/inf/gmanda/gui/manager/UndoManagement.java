@@ -50,18 +50,20 @@ public class UndoManagement {
 			public boolean setVariable(Project newProject, Project oldProject) {
 
 				assert oldProject == currentProject;
-				
+
 				if (newProject == oldProject)
 					return true;
 
 				boolean shouldChange = true;
-				
-				if (oldProject != null && (newProject == null || 
-					// on reloading, we do not perform a close check...
-					!ObjectUtils.equals(oldProject.saveFile, newProject.saveFile))) {
+
+				boolean sameSaveFile = oldProject != null && newProject != null
+					&& ObjectUtils.equals(oldProject.saveFile, newProject.saveFile);
+
+				if (!(oldProject == null || sameSaveFile)) {
+					// on reloading we do not perform the close check
 					shouldChange = isCloseAllowed();
-				} 
- 
+				}
+
 				if (shouldChange) {
 					if (currentProject != null)
 						currentProject.getGlobalChangeNotifier().remove(listener);
@@ -94,7 +96,14 @@ public class UndoManagement {
 
 	public void save() {
 
-		assert currentProject == projectProxy.getVariable();
+		/*
+		 * We cannot assert the following, since it might be that we come into
+		 * save() from isCloseAllowed(), which is called by the project variable
+		 * proxy. This might cause the value in the projectProxy to be not the
+		 * same as the currently opened project.
+		 * 
+		 * assert currentProject == projectProxy.getVariable();
+		 */
 
 		if (currentProject == null)
 			return;
@@ -225,22 +234,22 @@ public class UndoManagement {
 	}
 
 	public void load(File file) {
-		
+
 		LockHandle lockHandle;
-		
-		if (currentProject != null && file.equals(currentProject.getSaveFile()) && isModified()){
-			// Okay, the user asks us to load the same file that is currently open
+
+		if (currentProject != null && file.equals(currentProject.getSaveFile()) && isModified()) {
+			// Okay, the user asks us to load the same file that is currently
+			// open
 			if (JOptionPane.showConfirmDialog(null,
-				"Do you want to reload your current project file? All changes will be lost!")
-				!= JOptionPane.YES_OPTION) {
+				"Do you want to reload your current project file? All changes will be lost!") != JOptionPane.YES_OPTION) {
 				return;
 			}
 		}
-		
-		// Try to acquire lock for the file, this will throw an 
+
+		// Try to acquire lock for the file, this will throw an
 		// exception if a lock could not be gotten.
 		lockHandle = lockManager.getLock(file);
-		
+
 		try {
 			Project project = loader.load(file, null);
 
@@ -258,9 +267,9 @@ public class UndoManagement {
 
 		} catch (Exception e) {
 			lockHandle.release();
-		
-			if (e instanceof WrappedException){
-				throw (WrappedException)e;
+
+			if (e instanceof WrappedException) {
+				throw (WrappedException) e;
 			} else {
 				throw new ReportToUserException(e);
 			}
@@ -268,13 +277,13 @@ public class UndoManagement {
 	}
 
 	public void load() {
-		
+
 		// First warn the user that s/he is closing
 		if (!isCloseAllowed())
 			return; // we were denied to close old project
 
 		File file = chooser.getOpenFile();
-		
+
 		// User canceled file open dialog
 		if (file == null)
 			return;
