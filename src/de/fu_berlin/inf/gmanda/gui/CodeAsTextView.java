@@ -3,6 +3,7 @@ package de.fu_berlin.inf.gmanda.gui;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		if (!isVisible())
 			return;
-		
+
 		docs.clear();
 
 		Project p = project.getVariable();
@@ -114,15 +115,15 @@ public class CodeAsTextView extends JScrollPane {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html>");
 		sb.append("<body style=\"font-family: monospace; font-size: 12pt;\">");
-		
+
 		List<String> variations = new LinkedList<String>(codeToShow.getVariations());
 		Collections.reverse(variations);
 		for (String s : variations) {
 			sb.append(codeToHTML(p, s));
 		}
-		
+
 		sb.append("</body></html>");
-		
+
 		pane.setText(sb.toString());
 
 		SwingUtilities.invokeLater(new Runnable() {
@@ -133,24 +134,32 @@ public class CodeAsTextView extends JScrollPane {
 		});
 	}
 
-	public String codeToHTML(Project p, String code){
+	public String codeToHTML(Project p, String code) {
 
-		List<PrimaryDocument> newFilterList = p.getCodeModel().getPrimaryDocuments(code);
+		List<PrimaryDocument> newFilterList = new ArrayList<PrimaryDocument>(p.getCodeModel()
+			.getPrimaryDocuments(code));
+
+		Collections.sort(newFilterList);
 
 		if (newFilterList == null)
 			return "";
 
 		StringBuilder sb = new StringBuilder();
-		
+
 		sb.append("<h3>").append(code).append("</h3>");
 		sb.append("<ul>");
+
+		List<PrimaryDocument> noValueList = new LinkedList<PrimaryDocument>();
+
 		for (PrimaryDocument pd : newFilterList) {
 
 			Collection<String> allValues = new CodedString(pd.getCode()).getAllValues(code);
-			
-			if (allValues == null || allValues.size() == 0)
+
+			if (allValues == null || allValues.size() == 0) {
+				noValueList.add(pd);
 				continue;
-			
+			}
+
 			sb.append("<li>");
 			if (pd.getFilename() != null) {
 				sb.append(String.format("<a href='%s'>%s</a>", pd.getFilename(), pd.getFilename()));
@@ -158,16 +167,25 @@ public class CodeAsTextView extends JScrollPane {
 			} else {
 				sb.append("Document with no file");
 			}
+			sb.append("<ul>");
+			for (String s : allValues) {
+				sb.append("<li>").append(s.replaceAll("\n", "<p>")).append("</li>");
+			}
+			sb.append("</ul>");
+			sb.append("</li>");
+		}
 
-			if (allValues != null) {
-				sb.append("<ul>");
-				for (String s : allValues) {
-					sb.append("<li>").append(s).append("</li>");
+		if (noValueList.size() > 0) {
+			sb.append("<li> Occurances with no values: ");
+			for (PrimaryDocument pd : noValueList) {
+				if (pd.getFilename() != null) {
+					sb.append(String.format("<a href='%s'>%s</a>", pd.getFilename(), pd
+						.getFilename()));
 				}
-				sb.append("</ul>");
 			}
 			sb.append("</li>");
 		}
+
 		sb.append("<li> All occurances: ");
 		for (PrimaryDocument pd : newFilterList) {
 			if (pd.getFilename() != null) {
@@ -176,11 +194,11 @@ public class CodeAsTextView extends JScrollPane {
 			}
 		}
 		sb.append("</li>");
-		
+
 		sb.append("</ul>");
 		return sb.toString();
 	}
-	
+
 	public String getTitle() {
 		return "Code Detail View";
 	}

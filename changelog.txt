@@ -1,4 +1,8 @@
 
+2008-06-23
+
+   * Better parsing of value strings.
+
 2008-06-10
 
    * Improved perspective management
