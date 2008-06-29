@@ -169,7 +169,7 @@ public class CodeAsTextView extends JScrollPane {
 			}
 			sb.append("<ul>");
 			for (String s : allValues) {
-				sb.append("<li>").append(s.replaceAll("\n", "<p>")).append("</li>");
+				sb.append("<li>").append(s.replaceAll("\n[ \t]*\n", "<p><p>")).append("</li>");
 			}
 			sb.append("</ul>");
 			sb.append("</li>");
