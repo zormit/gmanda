@@ -133,6 +133,16 @@ public class CodeAsTextView extends JScrollPane {
 			}
 		});
 	}
+	
+	public String toShortId(String s){
+		return s.replaceAll("(gmane(://|\\.)|devel\\.|comp\\.)", "");
+	}
+	
+	public String toA(PrimaryDocument pd){
+		String s = pd.getFilename();
+		
+		return String.format("<a href='%s'>%s</a><br>", s, toShortId(s));
+	}
 
 	public String codeToHTML(Project p, String code) {
 
@@ -153,6 +163,10 @@ public class CodeAsTextView extends JScrollPane {
 
 		for (PrimaryDocument pd : newFilterList) {
 
+			if (pd.getFilename() != null){
+				docs.put(pd.getFilename(), pd);
+			}
+			
 			Collection<String> allValues = new CodedString(pd.getCode()).getAllValues(code);
 
 			if (allValues == null || allValues.size() == 0) {
@@ -162,8 +176,7 @@ public class CodeAsTextView extends JScrollPane {
 
 			sb.append("<li>");
 			if (pd.getFilename() != null) {
-				sb.append(String.format("<a href='%s'>%s</a>", pd.getFilename(), pd.getFilename()));
-				docs.put(pd.getFilename(), pd);
+				sb.append(toA(pd));
 			} else {
 				sb.append("Document with no file");
 			}
@@ -176,24 +189,24 @@ public class CodeAsTextView extends JScrollPane {
 		}
 
 		if (noValueList.size() > 0) {
-			sb.append("<li> Occurances with no values: ");
+			sb.append("<li> Occurances with no values:<br>");
 			for (PrimaryDocument pd : noValueList) {
 				if (pd.getFilename() != null) {
-					sb.append(String.format("<a href='%s'>%s</a>", pd.getFilename(), pd
-						.getFilename()));
+					sb.append(toA(pd));
 				}
 			}
 			sb.append("</li>");
 		}
 
-		sb.append("<li> All occurances: ");
-		for (PrimaryDocument pd : newFilterList) {
-			if (pd.getFilename() != null) {
-				sb.append(String.format("<a href='%s'>%s</a>", pd.getFilename(), pd.getFilename()));
-				docs.put(pd.getFilename(), pd);
-			}
-		}
-		sb.append("</li>");
+
+		//		sb.append("<li> All occurances:<br>");
+		//		for (PrimaryDocument pd : newFilterList) {
+		//			if (pd.getFilename() != null) {
+		//				sb.append(toA(pd));
+		//				docs.put(pd.getFilename(), pd);
+		//			}
+		//		}
+		//		sb.append("</li>");
 
 		sb.append("</ul>");
 		return sb.toString();
