@@ -5,8 +5,8 @@ import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import de.fu_berlin.inf.gmanda.gui.preferences.ColorProperties;
 import de.fu_berlin.inf.gmanda.proxies.FilterProxy;
+import de.fu_berlin.inf.gmanda.util.preferences.ColorProperties;
 
 public class JNodeCellRenderer extends DefaultTreeCellRenderer {
 

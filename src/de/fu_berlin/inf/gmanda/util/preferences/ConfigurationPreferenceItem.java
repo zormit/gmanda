@@ -1,13 +1,16 @@
-package de.fu_berlin.inf.gmanda.gui.preferences;
+package de.fu_berlin.inf.gmanda.util.preferences;
+
+import java.util.HashSet;
 
 import de.fu_berlin.inf.gmanda.util.Configuration;
+import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.StringUtils.FromConverter;
 import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
 
 public class ConfigurationPreferenceItem<T> implements PreferenceItem<T> {
 
 	PreferenceItem<T> defaultValue;
-
+	
 	String key;
 
 	Configuration configuration;
@@ -50,10 +53,6 @@ public class ConfigurationPreferenceItem<T> implements PreferenceItem<T> {
 		}
 		return s;
 	}
-	
-	public void setValueAsString(String s){
-		configuration.setProperty(key, s);
-	}
 
 	public T getValue() {
 		String s = this.configuration.getProperty(key);
@@ -65,6 +64,19 @@ public class ConfigurationPreferenceItem<T> implements PreferenceItem<T> {
 
 	public void setValue(T t) {
 		configuration.setProperty(key, to.toString(t));
+		for (VariableProxyListener<T> listener : listeners){
+			listener.setVariable(t);
+		}
+	}
+
+	HashSet<VariableProxyListener<T>> listeners = new HashSet<VariableProxyListener<T>>();
+	
+	public void addListener(VariableProxyListener<T> listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(VariableProxyListener<T> listener) {
+		listeners.remove(listener);
 	}
 	
 }

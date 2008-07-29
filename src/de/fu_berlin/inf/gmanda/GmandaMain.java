@@ -89,7 +89,6 @@ import de.fu_berlin.inf.gmanda.gui.misc.ProjectFileChooser;
 import de.fu_berlin.inf.gmanda.gui.misc.StorageFileChooser;
 import de.fu_berlin.inf.gmanda.gui.preferences.CacheDirectoryProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.CodedColorProperty;
-import de.fu_berlin.inf.gmanda.gui.preferences.ColorProperties;
 import de.fu_berlin.inf.gmanda.gui.preferences.MatchColorProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.PreferenceWindow;
 import de.fu_berlin.inf.gmanda.gui.preferences.PrimaryDocumentDirectoryProperty;
@@ -134,6 +133,7 @@ import de.fu_berlin.inf.gmanda.startup.LocaleInitializer;
 import de.fu_berlin.inf.gmanda.startup.Starter;
 import de.fu_berlin.inf.gmanda.startup.Stoppable;
 import de.fu_berlin.inf.gmanda.util.Configuration;
+import de.fu_berlin.inf.gmanda.util.preferences.ColorProperties;
 import de.fu_berlin.inf.gmanda.util.preferences.FileConverter;
 
 public class GmandaMain {

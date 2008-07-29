@@ -5,7 +5,6 @@ package de.fu_berlin.inf.gmanda.util.preferences;
 
 import java.awt.Color;
 
-import de.fu_berlin.inf.gmanda.gui.preferences.ConfigurationPreferenceItem;
 import de.fu_berlin.inf.gmanda.util.Configuration;
 import de.fu_berlin.inf.gmanda.util.StringUtils.FromConverter;
 import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;

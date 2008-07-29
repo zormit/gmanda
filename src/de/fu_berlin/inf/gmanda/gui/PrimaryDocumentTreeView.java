@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import de.fu_berlin.inf.gmanda.gui.docking.DockableView;
-import de.fu_berlin.inf.gmanda.gui.preferences.ColorProperties;
+import de.fu_berlin.inf.gmanda.util.preferences.ColorProperties;
 
 public class PrimaryDocumentTreeView extends JPanel implements DockableView {
 

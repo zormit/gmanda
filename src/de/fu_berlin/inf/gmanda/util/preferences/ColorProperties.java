@@ -1,6 +1,9 @@
-package de.fu_berlin.inf.gmanda.gui.preferences;
+package de.fu_berlin.inf.gmanda.util.preferences;
 
-import de.fu_berlin.inf.gmanda.util.preferences.ColorPreferenceItem;
+import de.fu_berlin.inf.gmanda.gui.preferences.CodedColorProperty;
+import de.fu_berlin.inf.gmanda.gui.preferences.MatchColorProperty;
+import de.fu_berlin.inf.gmanda.gui.preferences.SeenColorProperty;
+import de.fu_berlin.inf.gmanda.gui.preferences.SelectedColorProperty;
 
 public class ColorProperties {
 
