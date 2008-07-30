@@ -1,4 +1,9 @@
 
+2008-07-30
+
+   * Close Buttons for all Tabs
+   * Switched to DockingFrames 1.0.6 preview 3
+
 2008-06-23
 
    * Better parsing of value strings.

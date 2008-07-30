@@ -14,14 +14,16 @@ import bibliothek.gui.DockStation;
 import bibliothek.gui.Dockable;
 import bibliothek.gui.dock.DefaultDockable;
 import bibliothek.gui.dock.SplitDockStation;
+import bibliothek.gui.dock.action.ActionGuard;
+import bibliothek.gui.dock.action.DefaultDockActionSource;
+import bibliothek.gui.dock.action.DockActionSource;
+import bibliothek.gui.dock.action.LocationHint;
+import bibliothek.gui.dock.facile.action.CloseAction;
 import bibliothek.gui.dock.layout.PredefinedDockSituation;
 import bibliothek.gui.dock.station.split.SplitDockGrid;
-import bibliothek.gui.dock.util.DockProperties;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-
-import de.fu_berlin.inf.gmanda.gui.docking.TooltipTabPainter.ToolTipGetter;
 
 /**
  * 
@@ -38,6 +40,8 @@ public class ViewManager {
 	SplitDockGrid reset;
 
 	Component rootComponent;
+	
+	CloseAction closeAction;
 
 	BiMap<DockableView, Dockable> dockables = new HashBiMap<DockableView, Dockable>();
 
@@ -45,6 +49,8 @@ public class ViewManager {
 		dockSituation = new PredefinedDockSituation();
 		rootDockStation = new SplitDockStation();
 		dockSituation.put("station", rootDockStation);
+
+		closeAction = new CloseAction(null);
 		
 		// Register all views
 		for (DockableView view : views){
@@ -70,8 +76,9 @@ public class ViewManager {
 
 	public void register(DockableView view) {
 		if (!dockables.containsKey(view)) {
-			Dockable dockable = new DefaultDockable(view.getComponent(), view.getTitle());
-
+			DefaultDockable dockable = new DefaultDockable(view.getComponent(), view.getTitle());
+			dockable.setTitleToolTip(view.getTooltip());
+			
 			dockSituation.put(view.getId(), dockable);
 
 			dockables.put(view, dockable);
@@ -93,24 +100,30 @@ public class ViewManager {
 
 		dockFrontend = new DockFrontend(w);
 		EclipseTheme theme = new EclipseTheme();
-		dockFrontend.getController().setTheme(theme);
-		dockFrontend.addRoot(rootDockStation, "station");
-
+		
 		DockController controller = dockFrontend.getController();
 
-		DockProperties props = controller.getProperties();
-		props.set(EclipseTheme.TAB_PAINTER, new TooltipTabPainter(props
-			.get(EclipseTheme.TAB_PAINTER), new ToolTipGetter() {
-			public String getToolTip(Dockable d) {
-				DockableView view = dockables.inverse().get(d);
-				if (view != null) {
-					return view.getTooltip();
-				} else {
-					return "";
-				}
+		controller.setTheme(theme);
+		
+		closeAction.setController(controller);
+		
+		final DefaultDockActionSource source = new DefaultDockActionSource (new LocationHint (
+			LocationHint.DOCKABLE,
+			LocationHint.RIGHT_OF_ALL)) ;
+		source.add(closeAction);
+		
+		controller.addActionGuard(new ActionGuard(){
+			public DockActionSource getSource(Dockable arg0) {
+				return source;
 			}
-		}));
 
+			public boolean react(Dockable arg0) {
+				return true;
+			}
+		});
+		
+		dockFrontend.addRoot(rootDockStation, "station");
+		
 		rootComponent = rootDockStation.getComponent();
 		return rootComponent;
 	}
@@ -139,9 +152,8 @@ public class ViewManager {
 			rootDockStation.setFullScreen(null);
 			return true;
 		} catch (IOException e) {
-			e.printStackTrace();
+			return false;
 		}
-		return false;
 	}
 
 	public void reset() {
