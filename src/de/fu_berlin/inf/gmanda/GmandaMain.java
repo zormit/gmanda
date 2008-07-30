@@ -25,6 +25,7 @@ import org.picocontainer.injectors.AbstractInjector.UnsatisfiableDependenciesExc
 
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
 import de.fu_berlin.inf.gmanda.gui.CodeAsTextView;
+import de.fu_berlin.inf.gmanda.gui.CodeBox;
 import de.fu_berlin.inf.gmanda.gui.CodeBoxView;
 import de.fu_berlin.inf.gmanda.gui.CodeDetailBox;
 import de.fu_berlin.inf.gmanda.gui.CodeDetailView;
@@ -50,6 +51,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.FetchGmaneListToFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FormatCodeAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ForwardSelectionAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FullscreenTextViewAction;
+import de.fu_berlin.inf.gmanda.gui.actions.InsertDateAction;
 import de.fu_berlin.inf.gmanda.gui.actions.JumpToIdAction;
 import de.fu_berlin.inf.gmanda.gui.actions.LoadAction;
 import de.fu_berlin.inf.gmanda.gui.actions.LoadGmaneListAction;
@@ -174,6 +176,7 @@ public class GmandaMain {
 			.addComponent(TextView.class)
 			.addComponent(PrimaryDocumentTree.class)
 			.addComponent(CodeBoxView.class)
+			.addComponent(CodeBox.class)
 			.addComponent(MetadataView.class)
 			.addComponent(MetadataList.class)
 			.addComponent(CodeList.class)
@@ -201,27 +204,36 @@ public class GmandaMain {
 			.addComponent(DefaultPerspective.class)
 			.addComponent(VisualizationPerspective.class)
 			// Actions
-			.addComponent(CloseAction.class).addComponent(ExitAction.class).addComponent(
-				LoadAction.class).addComponent(LoadPrimaryDocumentAction.class).addComponent(
-				LoadGmaneListAction.class).addComponent(NewAction.class).addComponent(
-				SaveAction.class).addComponent(SaveAsAction.class).addComponent(
-				ResetFilterAction.class).addComponent(RenameCodesAction.class).addComponent(
-				JumpToIdAction.class).addComponent(FetchGmaneListToFileAction.class).addComponent(
-				SetCacheLocationAction.class)
-				.addComponent(RefetchAction.class).addComponent(
-				CreateDSVFileAction.class)
-				.addComponent(RefetchRecursiveAction.class)
-				.addComponent(RefetchListAction.class)
-				.addComponent(RepeatSearchAction.class).addComponent(DeletePrimaryDocumentAction.class)
-				.addComponent(FullscreenTextViewAction.class)
-				.addComponent(BasicStatisticalReportAction.class)
-			.addComponent(SearchWithLuceneAction.class).addComponent(ReindexWithLuceneAction.class)
+			.addComponent(CloseAction.class)
+			.addComponent(ExitAction.class)
+			.addComponent(LoadAction.class)
+			.addComponent(LoadPrimaryDocumentAction.class)
+			.addComponent(LoadGmaneListAction.class)
+			.addComponent(NewAction.class)
+			.addComponent(SaveAction.class)
+			.addComponent(SaveAsAction.class)
+			.addComponent(ResetFilterAction.class)
+			.addComponent(RenameCodesAction.class)
+			.addComponent(JumpToIdAction.class)
+			.addComponent(FetchGmaneListToFileAction.class)
+			.addComponent(SetCacheLocationAction.class)
+			.addComponent(RefetchAction.class)
+			.addComponent(CreateDSVFileAction.class)
+			.addComponent(RefetchRecursiveAction.class)
+			.addComponent(RefetchListAction.class)
+			.addComponent(RepeatSearchAction.class)
+			.addComponent(DeletePrimaryDocumentAction.class)
+			.addComponent(FullscreenTextViewAction.class)
+			.addComponent(BasicStatisticalReportAction.class)
+			.addComponent(SearchWithLuceneAction.class)
+			.addComponent(ReindexWithLuceneAction.class)
 			.addComponent(ShowPreferencesAction.class)
 			.addComponent(BackSelectionAction.class)
 			.addComponent(ForwardSelectionAction.class)
 			.addComponent(MakeAllAvailableAction.class)
 			.addComponent(ExecuteTrailAction.class)
 			.addComponent(FormatCodeAction.class)
+			.addComponent(InsertDateAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)
@@ -234,13 +246,18 @@ public class GmandaMain {
 			.addComponent(DockableViewMenu.class)
 			.addComponent(DockablePerspectiveMenu.class)
 			// Loading Support
-			.addComponent(MyXStream.class).addComponent(ProjectLoader.class).addComponent(
-				PlainTextImporter.class).addComponent(GmaneImporter.class).addComponent(
-				ProjectFileChooser.class).addComponent(StorageFileChooser.class).addComponent(
-				GmaneMboxFetcher.class).addComponent(GmaneFacade.class)
+			.addComponent(MyXStream.class)
+			.addComponent(ProjectLoader.class)
+			.addComponent(PlainTextImporter.class)
+			.addComponent(GmaneImporter.class)
+			.addComponent(ProjectFileChooser.class)
+			.addComponent(StorageFileChooser.class)
+			.addComponent(GmaneMboxFetcher.class)
+			.addComponent(GmaneFacade.class)
 			// Properties
 			.addComponent(ScrollOnShowProperty.class)
-			.addComponent(PrimaryDocumentDirectoryProperty.class).addComponent(CacheDirectoryProperty.class)
+			.addComponent(PrimaryDocumentDirectoryProperty.class)
+			.addComponent(CacheDirectoryProperty.class)
 			.addComponent(ColorProperties.class)
 			.addComponent(SeenColorProperty.class)
 			.addComponent(MatchColorProperty.class)

@@ -3,6 +3,7 @@
 
    * Close Buttons for all Tabs
    * Switched to DockingFrames 1.0.6 preview 3
+   * Added Shortcut (F5) to insert current ISO-date.
 
 2008-06-23
 

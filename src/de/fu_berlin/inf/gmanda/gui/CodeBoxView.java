@@ -17,9 +17,6 @@ import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 public class CodeBoxView extends JScrollPane {
 
 	public CodeBoxView(ProjectProxy project, SelectionProxy selection) {
-		CodeBox codeBox = new CodeBox(this, project, selection);
-		setViewportView(codeBox);
-		
 		setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		
 		setBorder(BorderFactory.createTitledBorder("Codes"));

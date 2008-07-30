@@ -19,6 +19,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
@@ -30,7 +31,7 @@ import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.gui.AutoCompleter;
 import de.fu_berlin.inf.gmanda.util.gui.AutoCompleter.AutoCompleterControl;
 
-class CodeBox extends JTextArea {
+public class CodeBox extends JTextArea {
 
 	CodeBoxView codeBoxView;
 
@@ -53,6 +54,8 @@ class CodeBox extends JTextArea {
 	public CodeBox(CodeBoxView codeBoxView, ProjectProxy project, SelectionProxy selection) {
 		super();
 		this.codeBoxView = codeBoxView;
+		
+		codeBoxView.setViewportView(this);
 
 		// setBorder(BorderFactory.createEmptyBorder());
 		setWrapStyleWord(true);
@@ -287,5 +290,23 @@ class CodeBox extends JTextArea {
 				}
 			}
 		});
+	}
+	
+	public void insertDateAction(){
+		
+		if (currentlyShowing == null)
+			return;
+		
+		int caret = getCaretPosition();
+
+		String text = getText();
+
+		String before = text.substring(0, caret);
+		String after = text.substring(caret);
+		
+		String toInsert = new DateTime().toString("YYYY-MM-dd'T'HH:mm");
+		
+		setText(before + toInsert + after);
+		setCaretPosition(before.length() + toInsert.length());
 	}
 }
