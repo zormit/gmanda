@@ -54,7 +54,7 @@ public class CodeBox extends JTextArea {
 	public CodeBox(CodeBoxView codeBoxView, ProjectProxy project, SelectionProxy selection) {
 		super();
 		this.codeBoxView = codeBoxView;
-		
+
 		codeBoxView.setViewportView(this);
 
 		// setBorder(BorderFactory.createEmptyBorder());
@@ -64,8 +64,9 @@ public class CodeBox extends JTextArea {
 		Set<AWTKeyStroke> newForwardKeys = new HashSet<AWTKeyStroke>();
 		newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
 		newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
-		
-		this.codeBoxView.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, newForwardKeys);
+
+		this.codeBoxView.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
+			newForwardKeys);
 		this.codeBoxView.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 
 		project.add(new VariableProxyListener<Project>() {
@@ -112,7 +113,7 @@ public class CodeBox extends JTextArea {
 		 */
 		completer = new AutoCompleter<String>(new AutoCompleterControl<String>() {
 
-			public void insertText(String selected){
+			public void insertText(String selected) {
 				int caret = getCaretPosition();
 
 				String text = getText();
@@ -135,9 +136,9 @@ public class CodeBox extends JTextArea {
 				}
 
 				/*
-				 * If the selected item is identical to the current code,
-				 * then we do not do anything but put the caret at the end
-				 * of the code
+				 * If the selected item is identical to the current code, then
+				 * we do not do anything but put the caret at the end of the
+				 * code
 				 */
 				if (first < 0) {
 					followingText = after;
@@ -152,32 +153,33 @@ public class CodeBox extends JTextArea {
 				setText(before + selected + after);
 				setCaretPosition(before.length() + selected.length());
 			}
-			
+
 			public void acceptedListItem(String selected) {
 				insertText(selected);
 			}
-			
+
 			public boolean probeAccept(List<String> currentList) {
-			
+
 				if (currentList.size() == 0)
 					return true;
-				
-				if (currentList.size() == 1){
+
+				if (currentList.size() == 1) {
 					acceptedListItem(currentList.get(0));
 					return true;
 				}
-				
+
 				Iterator<String> it = currentList.iterator();
-				
+
 				String prefix = it.next();
-				
-				while (it.hasNext()){
-					prefix = de.fu_berlin.inf.gmanda.util.StringUtils.commonPrefix(prefix, it.next());
+
+				while (it.hasNext()) {
+					prefix = de.fu_berlin.inf.gmanda.util.StringUtils.commonPrefix(prefix, it
+						.next());
 				}
-				
+
 				if (prefix.length() > 0)
 					insertText(prefix);
-				
+
 				return false;
 			}
 
@@ -217,18 +219,22 @@ public class CodeBox extends JTextArea {
 
 				list.clear();
 
-				for (String s : currentModel.getList()) {
-
+				if (leadingText.trim().length() == 0) {
+					list.addAll(currentModel.getList());
+				} else {
 					String currentWholeText = (leadingText + followingText).trim();
 
-					if (s.startsWith(leadingText.trim()) && !currentWholeText.startsWith(s)) {
-						// System.out.println(String.format("%s - %s - %s",
-						// StringEscapeUtils.escapeJava(s),
-						// StringEscapeUtils.escapeJava(leadingText.trim()),
-						// StringEscapeUtils.escapeJava((leadingText +
-						// followingText).trim())));
+					for (String s : currentModel.getList()) {
 
-						list.add(s);
+						if (s.startsWith(leadingText.trim()) && !currentWholeText.startsWith(s)) {
+							// System.out.println(String.format("%s - %s - %s",
+							// StringEscapeUtils.escapeJava(s),
+							// StringEscapeUtils.escapeJava(leadingText.trim()),
+							// StringEscapeUtils.escapeJava((leadingText +
+							// followingText).trim())));
+
+							list.add(s);
+						}
 					}
 				}
 
@@ -291,21 +297,21 @@ public class CodeBox extends JTextArea {
 			}
 		});
 	}
-	
-	public void insertDateAction(){
-		
+
+	public void insertDateAction() {
+
 		if (currentlyShowing == null)
 			return;
-		
+
 		int caret = getCaretPosition();
 
 		String text = getText();
 
 		String before = text.substring(0, caret);
 		String after = text.substring(caret);
-		
+
 		String toInsert = new DateTime().toString("YYYY-MM-dd'T'HH:mm");
-		
+
 		setText(before + toInsert + after);
 		setCaretPosition(before.length() + toInsert.length());
 	}
