@@ -83,6 +83,12 @@ public class UndoManagement {
 	public StateChangeNotifier<Boolean> getModifiedNotifier() {
 		return notifier;
 	}
+	
+	public StateChangeNotifier<Project> saveNotifier = new StateChangeNotifier<Project>();
+	
+	public StateChangeNotifier<Project> getSaveNotifier() {
+		return saveNotifier;
+	}
 
 	boolean isModified = false;
 
@@ -119,6 +125,8 @@ public class UndoManagement {
 			throw new ReportToUserException(e);
 		}
 
+		saveNotifier.notify(currentProject);
+		
 		setIsModified(false);
 	}
 
@@ -185,6 +193,8 @@ public class UndoManagement {
 		currentProject.setSaveFile(file);
 
 		lockManager.putLock(currentProject, lock);
+		
+		saveNotifier.notify(currentProject);
 
 		setIsModified(false);
 	}

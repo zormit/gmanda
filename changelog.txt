@@ -2,6 +2,7 @@
 2008-07-31
 
    * Improved performance of Content assist for CodeBox.
+   * Create new trail on saving file.
 
 2008-07-30
 

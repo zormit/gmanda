@@ -30,6 +30,8 @@ public class TrailManager {
 	CommonService common;
 	
 	boolean noTrail;
+	
+	Project currentProject;
 
 	public TrailManager(SelectionProxy selection, ProjectProxy projectProxy,
 		UndoManagement undoMan, CommonService common, CommandLineOptions options) {
@@ -44,6 +46,7 @@ public class TrailManager {
 		
 		selection.add(new VariableProxyListener<Object>() {
 			public void setVariable(Object newValue) {
+				// Before we leave the currently selected PD, flush the changes (if any)
 				if (selectedPD != null) {
 					writeChange(selectedPD);
 				}
@@ -55,9 +58,6 @@ public class TrailManager {
 		});
 
 		projectProxy.add(new VariableProxyListener<Project>() {
-
-			Project currentProject;
-
 			public void setVariable(Project newProject) {
 
 				if (currentProject != null)
@@ -67,6 +67,18 @@ public class TrailManager {
 
 				if (currentProject != null)
 					subscribe(currentProject);
+			}
+		});
+		
+		undoMan.getSaveNotifier().add(new StateChangeListener<Project>(){
+			public void stateChangedNotification(Project t) {
+				if (currentProject != t || t == null){
+					return;
+				}
+				
+				// close and directly reopen 
+				unsubscribe(t);
+				subscribe(t);	
 			}
 		});
 	}
@@ -172,6 +184,11 @@ public class TrailManager {
 
 	protected void unsubscribe(Project project) {
 		project.getLocalChangeNotifier().remove(listener);
+		
+		// Flush changes of selectedPD (if any)
+		if (selectedPD != null) {
+			writeChange(selectedPD);
+		}
 
 		writer.close();
 	}
