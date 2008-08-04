@@ -34,7 +34,15 @@ public class CommonService {
 	 * @param r
 	 */
 	public void run(final Runnable r, final String messageToUserOnError) {
-		threadService.execute(new Runnable() {
+		threadService.execute(wrapExceptions(r, messageToUserOnError));
+	}
+	
+	public void runSync(Runnable r, String messageToUserOnError) {
+		wrapExceptions(r, messageToUserOnError).run();
+	}
+	
+	public Runnable wrapExceptions(final Runnable r, final String messageToUserOnError){
+		return new Runnable() {
 			public void run() {
 				try {
 					r.run();
@@ -48,7 +56,7 @@ public class CommonService {
 					e.printStackTrace();
 				}
 			}
-		});
+		};
 	}
 
 	public IProgress getProgressBar(String title) {

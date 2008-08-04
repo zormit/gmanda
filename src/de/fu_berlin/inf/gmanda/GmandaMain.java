@@ -69,6 +69,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.SaveAsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SearchWithLuceneAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SetCacheLocationAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ShowPreferencesAction;
+import de.fu_berlin.inf.gmanda.gui.actions.SplitTrailAction;
 import de.fu_berlin.inf.gmanda.gui.docking.DefaultPerspective;
 import de.fu_berlin.inf.gmanda.gui.docking.DockablePerspectiveMenu;
 import de.fu_berlin.inf.gmanda.gui.docking.DockableViewMenu;
@@ -234,6 +235,7 @@ public class GmandaMain {
 			.addComponent(ExecuteTrailAction.class)
 			.addComponent(FormatCodeAction.class)
 			.addComponent(InsertDateAction.class)
+			.addComponent(SplitTrailAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)

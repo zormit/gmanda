@@ -5,6 +5,9 @@ import java.io.PrintWriter;
 
 import org.apache.commons.io.output.NullOutputStream;
 
+/**
+ * Lazy file stream creating output writer, with indentation support. 
+ */
 public class CStringWriter implements CStringBuilder {
 	
 	PrintWriter writer;

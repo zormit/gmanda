@@ -1,4 +1,9 @@
 
+2008-08-04
+
+   * Added action for starting a new trail
+   * Fixed NPE in LuceneFacade
+
 2008-07-31
 
    * Improved performance of Content assist for CodeBox.

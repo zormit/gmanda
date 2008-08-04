@@ -217,7 +217,7 @@ public class TextView extends JScrollPane {
 
 	public static String toHyperLink(String html) {
 		// wrap hyperlinks http(s)
-		html = html.replaceAll("(https{0,1}://[a-zA-Z0-9._+-/?=~!@#$%&:]+[^]. )<\t])",
+		html = html.replaceAll("(https{0,1}://[a-zA-Z0-9._+-/?=~!@#$%&:]+[^]. )<\\t])",
 			"<a href=\"$1\">$1</a>");
 
 		return html;

@@ -209,7 +209,13 @@ public class LuceneFacade {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		return null;
+		
+		return emptyIterator();
+	}
+	
+	public static <T> Iterator<T> emptyIterator(){
+		List<T> result = Collections.emptyList(); 
+		return result.iterator();
 	}
 
 	public void reindex(Iterable<PrimaryDocument> documents) {

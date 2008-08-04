@@ -76,9 +76,7 @@ public class TrailManager {
 					return;
 				}
 				
-				// close and directly reopen 
-				unsubscribe(t);
-				subscribe(t);	
+				split();
 			}
 		});
 	}
@@ -222,6 +220,15 @@ public class TrailManager {
 		
 		tracking = true;
 		writeRename(renameFrom, renameTo, pds);
+	}
+
+	public void split() {
+		if (currentProject == null)
+			return;
+		
+		// close and directly reopen 
+		unsubscribe(currentProject);
+		subscribe(currentProject);	
 	}
 
 	
