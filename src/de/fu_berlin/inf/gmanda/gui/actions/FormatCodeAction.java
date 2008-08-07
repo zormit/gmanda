@@ -10,6 +10,7 @@ import javax.swing.KeyStroke;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.Codeable;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 
 public class FormatCodeAction extends AbstractAction {
@@ -43,7 +44,7 @@ public class FormatCodeAction extends AbstractAction {
 		if (code == null)
 			return;
 
-		CodedString cs = new CodedString(code);
+		CodedString cs = CodedStringFactory.parse(code);
 		
 		c.setCode(cs.format());
 	

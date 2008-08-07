@@ -7,16 +7,16 @@
       <code>project description=\&quot;Read until 13819\&quot;</code>
       <metadata>
         <property name="datafolder" value="D:\svn\sci\mail.ti\data\data"/>
-        <property name="lastseen" value="2008-07-31T23:06:35.725+02:00"/>
+        <property name="lastseen" value="2008-08-06T23:36:50.027+02:00"/>
         <property name="list" value="comp.desktop.xfce.devel.version4"/>
       </metadata>
       <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12610">
-        <code>hello world, my friend</code>
+        <code>todo=\&quot;Look at 4 more episodes regarding hosting\&quot;,\n\ntest=\&quot;quote: &apos;I&apos;\&quot;,\n\nlog=\n  \&quot;2008-08-04 09:15 - 16:15 (-2h) = 5 h rev.3314\n  15:32 - 15:59 Last 30 Minutes were used to debug the CodeDetail problem\n  related to fixing the renaming of codes. \&quot;</code>
         <metadata>
           <property name="date" value="2007-01-01T17:41:00.000+01:00"/>
           <property name="from" value="Jasper Huijsmans &lt;jasper@xfce.org&gt;"/>
           <property name="id" value="12610"/>
-          <property name="lastseen" value="2008-07-31T23:06:36.308+02:00"/>
+          <property name="lastseen" value="2008-08-06T23:36:51.583+02:00"/>
           <property name="list" value="gmane.comp.desktop.xfce.devel.version4"/>
           <property name="subject" value="Re: panel multiscreen problems"/>
           <property name="title" value="12610 - Re: panel multiscreen problems"/>

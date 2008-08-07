@@ -9,6 +9,9 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
@@ -20,6 +23,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
@@ -27,10 +31,13 @@ import de.fu_berlin.inf.gmanda.gui.preferences.ScrollOnShowProperty;
 import de.fu_berlin.inf.gmanda.imports.GmaneFacade;
 import de.fu_berlin.inf.gmanda.proxies.SearchStringProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
+import de.fu_berlin.inf.gmanda.qda.Code;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
+import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
 
 public class TextView extends JScrollPane {
 
@@ -134,17 +141,30 @@ public class TextView extends JScrollPane {
 		});
 	}
 
-	public String toHTML(String html) {
-		return TextView.toHTML(html, search);
-	}
+	public static String toHTML(String html, String search, List<String> quoteList) {
 
-	public static String toHTML(String html, String search) {
-
-		// html = html.replace("&", "&amp;");
 		html = html.replace(">", "&gt;");
 		html = html.replace("<", "&lt;");
-		// html = html.replaceAll("\\n\\s*(&gt;)*\\s*(--+|__+)\\s*\\n", "<hr>");
 
+		// Highlight quotation list in Blue
+		for (String s : quoteList){
+			s = s.trim();
+			if (s.length() == 0)
+				continue;
+			
+			String searchPattern = de.fu_berlin.inf.gmanda.util.StringUtils.join(
+				Arrays.asList(s.split("\\s+")), "\\s+", new StringConverter<String>(){
+
+					public String toString(String t) {
+						return Pattern.quote(t);
+					}
+				});
+			
+			html = html.replaceAll("(?i)(" + searchPattern + ")",
+			"<span style=\"background-color:blue; color:white;\">$1</span>");
+		}
+		
+		// Highlight search term in Red
 		if (search != null && search.length() > 0) {
 			html = html.replaceAll("(?i)(" + Pattern.quote(search) + ")",
 				"<span style=\"background-color:red; color:white;\">$1</span>");
@@ -152,7 +172,6 @@ public class TextView extends JScrollPane {
 
 		html = toBoldAndItalic(html);
 
-		/* comment is for easy detection of line ends later */
 		html = html.replaceAll("\n", "<br>");
 		html = html.replaceAll("\r", "");
 		html = html.replaceAll("\f", "");
@@ -197,8 +216,7 @@ public class TextView extends JScrollPane {
 		html = html.replaceAll("<br>\\s*<br>(\\s*<br>)+", "<br><br>");
 
 		// this replaces all double spaces with space symbol. All long
-		// spaces
-		// are converted appropriately,
+		// spaces are converted appropriately,
 		// except single space which is single space in html anyway
 		html = html.replaceAll("  ", "&nbsp;&nbsp;");
 
@@ -209,8 +227,6 @@ public class TextView extends JScrollPane {
 		html = html.replaceFirst("<body>(\\s*<br>)*",
 			"<body style=\"font-family: monospace; font-size: 12pt;\">\n    ");
 		html = html.replaceFirst("(<br>\\s*)*</body>", "<br><br></body>");
-
-		// System.out.println(html);
 
 		return html;
 	}
@@ -258,7 +274,18 @@ public class TextView extends JScrollPane {
 				commonService.run(new Runnable() {
 					public void run() {
 						String text = pd.getText(gmane);
-						String html = toHTML(text);
+						
+						List<String> quoteList = new LinkedList<String>();
+						
+						for (Code c : CodedStringFactory.parse(pd.getCode()).getAllCodes()){
+							for (Code c2 : c.getProperties()){
+								if (c2.getCode().equals("quote")){
+									quoteList.add(StringUtils.strip(c2.getValue(), ". '\""));
+								}
+							}
+						}
+						
+						String html = toHTML(text, search, quoteList);
 
 						pane.setText(html);
 

@@ -43,7 +43,7 @@ public class CodeModel {
 		// Remove if existing
 		if (currentlyStoredCodes.containsKey(t)) {
 
-			for (String partialQualifiedCode : new CodedString(currentlyStoredCodes.get(t))
+			for (String partialQualifiedCode : CodedStringFactory.parse(currentlyStoredCodes.get(t))
 				.getAllVariations()) {
 				if (codeMap.containsKey(partialQualifiedCode)) {
 					boolean removed = codeMap.get(partialQualifiedCode).remove(t);
@@ -63,7 +63,7 @@ public class CodeModel {
 			String codes = t.getCode();
 			currentlyStoredCodes.put(t, codes);
 
-			for (String partialQualifiedCode : new CodedString(codes).getAllVariations()) {
+			for (String partialQualifiedCode : CodedStringFactory.parse(codes).getAllVariations()) {
 				if (!codeMap.containsKey(partialQualifiedCode)) {
 					codeMap.put(partialQualifiedCode, new LinkedList<PrimaryDocument>());
 				}

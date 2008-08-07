@@ -20,6 +20,7 @@ import org.joda.time.Period;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.util.HashMapUtils;
 import de.fu_berlin.inf.gmanda.util.Pair;
@@ -209,7 +210,7 @@ public class VisualizationCanvas extends PScrollPane {
 			if (pd.getCode() == null)
 				continue;
 
-			if (new CodedString(pd.getCode()).containsAny(searchTerm.getAllCodes()))
+			if (CodedStringFactory.parse(pd.getCode()).containsAny(searchTerm.getAllCodes()))
 				result.add(pd);
 		}
 
@@ -228,7 +229,7 @@ public class VisualizationCanvas extends PScrollPane {
 
 		if (partitionCode.trim().equals("**")) {
 			for (PrimaryDocument pd : pds) {
-				for (String code : new CodedString(pd.getCode()).getAll()) {
+				for (String code : CodedStringFactory.parse(pd.getCode()).getAll()) {
 					list.add(new Pair<String, PrimaryDocument>(code, pd));
 				}
 			}
@@ -257,7 +258,7 @@ public class VisualizationCanvas extends PScrollPane {
 				boolean containedInNone = true;
 
 				for (String code : codes) {
-					if (new CodedString(pd.getCode()).containsAny(code + ".*")) {
+					if (CodedStringFactory.parse(pd.getCode()).containsAny(code + ".*")) {
 						list.add(new Pair<String, PrimaryDocument>(
 							("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
 								+ code.substring(partitionCode.length()) : code), pd));
@@ -275,7 +276,7 @@ public class VisualizationCanvas extends PScrollPane {
 
 	public void update(String filterCode, String partitionCode, String rank, String colorField) {
 
-		CodedString colors = new CodedString(colorField);
+		CodedString colors = CodedStringFactory.parse(colorField);
 
 		root.removeAllChildren();
 		timeline.removeAllChildren();
@@ -284,7 +285,7 @@ public class VisualizationCanvas extends PScrollPane {
 		allDots = new HashMap<PrimaryDocument, List<PrimaryDocumentDot>>();
 		
 		List<PrimaryDocument> allEvents = filter(PrimaryDocument.getTreeWalker(project
-			.getVariable().getPrimaryDocuments()), new CodedString(filterCode + ".*"));
+			.getVariable().getPrimaryDocuments()), CodedStringFactory.parse(filterCode + ".*"));
 		
 		if (allEvents.size() == 0){
 			

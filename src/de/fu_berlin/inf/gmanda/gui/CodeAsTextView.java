@@ -21,10 +21,11 @@ import javax.swing.event.HyperlinkListener;
 import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
+import de.fu_berlin.inf.gmanda.qda.Code;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
-import de.fu_berlin.inf.gmanda.qda.CodedString.Code;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 
 public class CodeAsTextView extends JScrollPane {
@@ -103,7 +104,7 @@ public class CodeAsTextView extends JScrollPane {
 			return;
 		}
 
-		CodedString c = new CodedString(f);
+		CodedString c = CodedStringFactory.parse(f);
 
 		Iterator<Code> codes = c.getAllCodes().iterator();
 		if (!codes.hasNext()) {
@@ -167,7 +168,9 @@ public class CodeAsTextView extends JScrollPane {
 				docs.put(pd.getFilename(), pd);
 			}
 			
-			Collection<String> allValues = new CodedString(pd.getCode()).getAllValues(code);
+			CodedString coded = CodedStringFactory.parse(pd.getCode());
+			
+			Collection<String> allValues = coded.getAllValues(code);
 
 			if (allValues == null || allValues.size() == 0) {
 				noValueList.add(pd);

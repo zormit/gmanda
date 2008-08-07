@@ -402,7 +402,7 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 
 	public boolean renameCodes(String renameFrom, String renameTo) {
 
-		CodedString codes = new CodedString(getCode());
+		CodedString codes = CodedStringFactory.parse(getCode());
 		
 		if (codes.rename(renameFrom, renameTo)){
 			setCode(codes.toString());

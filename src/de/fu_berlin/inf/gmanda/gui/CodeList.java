@@ -21,6 +21,7 @@ import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.CodeModel;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.StringUtils;
@@ -142,7 +143,7 @@ public class CodeList extends JScrollPane {
 					if (s == null || s.trim().length() == 0)
 						s = getSelection();
 					else {
-						CodedString c = new CodedString(s);
+						CodedString c = CodedStringFactory.parse(s);
 
 						List<String> selected = selectionModel.getSelected();
 

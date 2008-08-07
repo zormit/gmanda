@@ -18,10 +18,10 @@ import org.apache.commons.lang.ObjectUtils;
 
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.search.LuceneFacade;
-import de.fu_berlin.inf.gmanda.qda.CodedString;
+import de.fu_berlin.inf.gmanda.qda.Code;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
-import de.fu_berlin.inf.gmanda.qda.CodedString.Code;
 import de.fu_berlin.inf.gmanda.util.VariableProxy;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
@@ -73,7 +73,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 
 	public Collection<PrimaryDocument> getSetFromSearchString(Code c) {
 
-		String nextSearchString = c.toString(false, false);
+		String nextSearchString = c.getCode();
 
 		char operation = '+';
 		
@@ -118,7 +118,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 					
 					List<PrimaryDocument> filteredResults = new ArrayList<PrimaryDocument>();
 					for (PrimaryDocument result : results){
-						if (new CodedString(result.getCode()).containsInAllSegments(nextSearchString))
+						if (CodedStringFactory.parse(result.getCode()).containsInAllSegments(nextSearchString))
 							filteredResults.add(result);
 					}
 					return filteredResults;
@@ -160,7 +160,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 							return;
 						}
 
-						Iterable<Code> codesIterable = new CodedString(filterString).getAllCodes();
+						Iterable<Code> codesIterable = CodedStringFactory.parse(filterString).getAllCodes();
 
 						IProgress subProgress = pBar.getSub(50);
 
@@ -176,7 +176,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 								newFilterList = Collections.emptyList();
 							} else {
 								Code c = codes.next();
-								String nextSearchString = c.toString(false, false);
+								String nextSearchString = c.getCode();
 
 								if (nextSearchString.startsWith("^")
 									|| nextSearchString.startsWith("-")) {
@@ -194,7 +194,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 								
 								while (codes.hasNext()) {
 									c = codes.next();
-									nextSearchString = c.toString(false, false);
+									nextSearchString = c.getCode();
 
 									// Remove from hits if starting with - or ^
 									if (nextSearchString.startsWith("^")

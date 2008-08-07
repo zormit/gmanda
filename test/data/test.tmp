@@ -1,0 +1,70 @@
+episode.gsoc@xfce=
+  "def: Despite xfce being no small project, the maintainer does not believe
+  that the project fits with Google's profile and does not have the time to take
+  care of it himself. No further action is taken, which might be another good
+  example of the maintainer might syndrome.
+
+  See also concept.discussion",
+
+concept.discussion=
+  "date: 2008-07-30T15:36,
+
+  memo: This is a short episode only involving very little discussion.
+
+  Ori proposes this *enthusiastically* and *sets a clear timeframe* by which it
+  would have to be executed (with GSoC this means to write up project ideas).
+
+  When after one week no response has been received, he *restarts* the
+  discussion by brainstorming himself.
+
+  To this Harold replies adding more ideas, yet not indicating any preference
+  for accepting the proposal directly. His ideas get *side tracked* into two
+  discussions with two separate project members about the ideas and their merit.
+
+  In between the maintainer states that he does not have time, thus indicating
+  that he will not execute this innovation and provides *negative past
+  experiences* with the innovation (failure to be accepted). There is no further
+  post by the innovator. I think it is reasonable to argue that while not
+  directly rejecting, the discussion was *damped* too much by this.",
+
+activity.reject,
+argumentation.I=
+  "def: Arguments made in dependence on the person of the author himself. See
+  also attached concept.discussion below.",
+
+concept.discussion=
+  "date: 2008-08-03T21:45,
+
+  quote: 'I won't have time myself',
+
+  memo: Thinking about discussions leading to decisions regarding adoption of
+  innovation, we see another possible source for arguments: The 'I'. 'I don't
+  have time', 'I am inexperienced with this', etc.
+
+  To recapture the one's we have so far: the innovation itself (capability
+  codes), experiences made by others or in the past (external codes), the
+  structure of the discussion and tactic employed.",
+
+argumentation.I.time=
+  "def: An argumentation based on the lack or availability of time.",
+argumentation.past experience,
+argumentation.external factors.project does not fit profile of sponsoring organization,
+
+argumentation.tactic.dampen=
+  "def: To damp a discussion is an effect which calms the discussion, so that no
+  further significant contributions are made before the discussion is revived or
+  restarted.",
+
+concept.discussion=
+  "date: 2008-08-03T21:55, memo: When we use 'dampen' as a metaphor then we
+  might conclude that discussion have something like a 'livelyness'. Maybe this
+  might be a measure understable to outsiders.",
+
+innovation outcome.abandoned,
+
+concept.deadend=
+  "desc: I am still wondering why this was not continued as Ori could have just
+  said: Let's just try it.",
+
+concept.maintainer might=
+  "Olivier is high enough up, that this never sees the light of day" this never sees the light of day"

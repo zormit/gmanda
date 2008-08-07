@@ -6,9 +6,10 @@ import java.awt.geom.Point2D;
 
 import org.joda.time.DateTime;
 
+import de.fu_berlin.inf.gmanda.qda.Code;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
-import de.fu_berlin.inf.gmanda.qda.CodedString.Code;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PPaintContext;
@@ -62,7 +63,7 @@ public class PrimaryDocumentDot extends PNode implements Comparable<PrimaryDocum
 		
 		boolean gotColor = false;
 		for (Code c : colors.getAllCodes()){
-			if (c.matchesAny(new CodedString(pd.getCode()).getAllCodes())){
+			if (c.matchesAny(CodedStringFactory.parse(pd.getCode()).getAllCodes())){
 				String color = c.getValue();
 				gotColor = true;
 				p.setPaint(mapper.getColor(color, Color.LIGHT_GRAY));

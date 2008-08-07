@@ -1,4 +1,9 @@
 
+2008-08-07
+
+   * Started migration to syntax similar to YAML.
+   * Coloring of quote property in TextView 
+
 2008-08-04
 
    * Added action for starting a new trail

@@ -6,6 +6,8 @@ package de.fu_berlin.inf.gmanda.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author oezbek
@@ -47,8 +49,8 @@ public class StringUtils {
 	 * Returns a concatenation of all strings given in the collection,
 	 * separating each two strings with the given separator.
 	 */
-	public static String join(Collection<String> strings, String separator) {
-		return join(strings, separator, new PlainConverter<String>());
+	public static <T> String join(Collection<T> strings, String separator) {
+		return join(strings, separator, new PlainConverter<T>());
 	}
 
 	public interface StringConverter<T> {
@@ -104,5 +106,100 @@ public class StringUtils {
 		sb.append(s);
 		return sb.toString();
 	}
+	
+	/**
+	 * Starting from position pos in text will capture all chars until c is
+	 * found (including), returning the resulting string.
+	 * 
+	 * @param c
+	 * @param text
+	 * @param pos
+	 * @return
+	 */
+	public static String skipAhead(char c, char[] text, int pos) {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(text[pos++]);
+		while (pos < text.length && text[pos] != c) {
+			sb.append(text[pos]);
+			pos++;
+		}
+		if (pos < text.length)
+			sb.append(text[pos]);
+
+		return sb.toString();
+	}
+	
+	/**
+	 * Starting from position pos in text will capture all chars until delim is
+	 * found (including), returning the resulting string.
+	 * 
+	 * If a character escape preceedes the delimiter it is not interpreted 
+	 * as finishing the capture.
+	 */
+	public static String skipAhead(char delim, char escape, char[] text, int pos){
+		
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(text[pos++]);
+		
+		while (pos < text.length && text[pos] != delim) {
+			
+			if (text[pos] == escape){
+				while (pos < text.length && text[pos] == escape){
+					sb.append(text[pos]);
+					pos++;
+				}
+			}
+		
+			if (pos < text.length){
+				sb.append(text[pos]);
+				pos++;
+			}
+		}
+		if (pos < text.length)
+			sb.append(text[pos]);
+
+		return sb.toString();
+	}
+	
+	
+
+	public static List<String> split(String s, char separator, char escapeChar) {
+		List<String> result = new LinkedList<String>();
+
+		if (s == null)
+			return result;
+
+		StringBuilder sb = new StringBuilder();
+
+		char[] text = s.toCharArray();
+
+		for (int i = 0; i < text.length; i++) {
+
+			if (text[i] == escapeChar) {
+				String skipped = skipAhead('\"', text, i);
+				i += skipped.length() - 1;
+				sb.append(skipped);
+				continue;
+			}
+			if (text[i] == separator) {
+				String segment = sb.toString();
+				if (segment.length() > 0)
+					result.add(segment);
+				sb = new StringBuilder();
+				continue;
+			}
+			sb.append(text[i]);
+		}
+		String segment = sb.toString();
+		if (segment.length() > 0)
+			result.add(segment);
+
+		return result;
+	}
+
+	
 
 }

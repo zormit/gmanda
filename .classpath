@@ -23,5 +23,6 @@
 	<classpathentry kind="lib" path="lib/google-collect-snapshot-20080530.jar"/>
 	<classpathentry kind="lib" path="lib/dockingFramesCommon-1.0.6p3.jar"/>
 	<classpathentry kind="lib" path="lib/dockingFramesCore-1.0.6p3.jar"/>
+	<classpathentry kind="lib" path="lib/jvyaml-0.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
