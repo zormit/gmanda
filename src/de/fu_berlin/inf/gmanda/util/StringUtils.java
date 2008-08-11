@@ -1,20 +1,27 @@
-/*
- * Created on 09.01.2005
- *
- */
 package de.fu_berlin.inf.gmanda.util;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 
-/**
- * @author oezbek
- * 
- */
 public class StringUtils {
 
+	static String spaces = "                ";
+	
+	public synchronized static String spaces(int i){
+		
+		if (i > (1 << 20) - 1)
+			throw new IllegalArgumentException("One MB Whitespace should be enough for you!");
+		
+		while (spaces.length() < i){
+			spaces = spaces + spaces;
+		}
+	
+		return spaces.substring(0, i);
+	}
+	
 	/**
 	 * 
 	 * @param word
@@ -87,7 +94,7 @@ public class StringUtils {
 		}
 	}
 
-	public static <T> String join(Collection<T> strings, String separator,
+	public static <T> String join(Iterable<T> strings, String separator,
 		StringConverter<? super T> converter) {
 		Iterator<T> it = strings.iterator();
 
@@ -164,7 +171,70 @@ public class StringUtils {
 		return sb.toString();
 	}
 	
+	public static String wrap(String input, int startDepth, int indentDepth, int width){
+		
+		input = input.trim().replaceAll("\\n *", "\n");
+
+		List<String> lines = new LinkedList<String>();
+		for (String s : input.split("\\n\\n")) {
+			if (s.trim().length() > 0)
+				lines.add(s.replaceAll("\\s+", " "));
+		}
+		input = StringUtils.join(lines, "\n");
+
+		if (input.length() + startDepth <= width && !input.contains("\n")) {
+			return input;
+		}
+
+		// Need to wrap!
+		List<String> paragraphs = new LinkedList<String>();
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(spaces(startDepth));
+		
+		for (String s : input.split("\n")) {
+
+			boolean wordAdded = false;
+			
+			StringBuilder currentParagraph = new StringBuilder();
+
+			for (String nextWord : s.split("\\s+")) {
+				if (nextWord.length() == 0)
+					continue;
+				
+				if (sb.length() + nextWord.length() <= width || sb.length() <= indentDepth){
+					sb.append(nextWord).append(' ');
+					wordAdded = true;
+				} else {
+					String toAdd = sb.toString();
+					if (wordAdded){
+						toAdd = trimTrailing(toAdd);
+					}
+					
+					currentParagraph.append(toAdd).append('\n');
+					sb = new StringBuilder(spaces(indentDepth));
+					sb.append(nextWord).append(' ');
+				}
+			}
+			
+			String toAdd = sb.toString();
+			if (wordAdded){
+				toAdd = trimTrailing(toAdd);
+			}
+			
+			currentParagraph.append(toAdd);
+			paragraphs.add(currentParagraph.toString());
+			
+			sb = new StringBuilder(spaces(indentDepth));
+		}
+		
+		return StringUtils.join(paragraphs, "\n\n").substring(startDepth);
+	}
 	
+	public static String trimTrailing(String s){
+		return org.apache.commons.lang.StringUtils.stripEnd(s, " \n\r\t\f");
+	}
 
 	public static List<String> split(String s, char separator, char escapeChar) {
 		List<String> result = new LinkedList<String>();
@@ -200,6 +270,21 @@ public class StringUtils {
 		return result;
 	}
 
-	
+	public static int countNewLinesAtBeginning(String tag) {
+		int result = 0;
 
+		StringTokenizer st = new StringTokenizer(tag, " \t\n\r\f", true);
+		while (st.hasMoreTokens()) {
+			String token = st.nextToken();
+
+			if (!" \t\n\r\f".contains(token)) {
+				break;
+			}
+
+			if ("\r\n\f".contains(token)) {
+				result++;
+			}
+		}
+		return result;
+	}
 }

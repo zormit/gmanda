@@ -52,6 +52,8 @@ import de.fu_berlin.inf.gmanda.gui.actions.FormatCodeAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ForwardSelectionAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FullscreenTextViewAction;
 import de.fu_berlin.inf.gmanda.gui.actions.InsertDateAction;
+import de.fu_berlin.inf.gmanda.gui.actions.InsertSessionLogTemplateAction;
+import de.fu_berlin.inf.gmanda.gui.actions.InsertSubCodeTemplateAction;
 import de.fu_berlin.inf.gmanda.gui.actions.JumpToIdAction;
 import de.fu_berlin.inf.gmanda.gui.actions.LoadAction;
 import de.fu_berlin.inf.gmanda.gui.actions.LoadGmaneListAction;
@@ -236,6 +238,8 @@ public class GmandaMain {
 			.addComponent(FormatCodeAction.class)
 			.addComponent(InsertDateAction.class)
 			.addComponent(SplitTrailAction.class)
+			.addComponent(InsertSubCodeTemplateAction.class)
+			.addComponent(InsertSessionLogTemplateAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)

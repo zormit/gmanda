@@ -147,23 +147,23 @@ public class TextView extends JScrollPane {
 		html = html.replace("<", "&lt;");
 
 		// Highlight quotation list in Blue
-		for (String s : quoteList){
+		for (String s : quoteList) {
 			s = s.trim();
 			if (s.length() == 0)
 				continue;
-			
-			String searchPattern = de.fu_berlin.inf.gmanda.util.StringUtils.join(
-				Arrays.asList(s.split("\\s+")), "\\s+", new StringConverter<String>(){
 
-					public String toString(String t) {
-						return Pattern.quote(t);
-					}
-				});
-			
+			String searchPattern = de.fu_berlin.inf.gmanda.util.StringUtils.join(Arrays.asList(s
+				.split("\\s+")), "\\s+", new StringConverter<String>() {
+
+				public String toString(String t) {
+					return Pattern.quote(t);
+				}
+			});
+
 			html = html.replaceAll("(?i)(" + searchPattern + ")",
-			"<span style=\"background-color:blue; color:white;\">$1</span>");
+				"<span style=\"background-color:blue; color:white;\">$1</span>");
 		}
-		
+
 		// Highlight search term in Red
 		if (search != null && search.length() > 0) {
 			html = html.replaceAll("(?i)(" + Pattern.quote(search) + ")",
@@ -274,17 +274,22 @@ public class TextView extends JScrollPane {
 				commonService.run(new Runnable() {
 					public void run() {
 						String text = pd.getText(gmane);
-						
+
 						List<String> quoteList = new LinkedList<String>();
-						
-						for (Code c : CodedStringFactory.parse(pd.getCode()).getAllCodes()){
-							for (Code c2 : c.getProperties()){
-								if (c2.getCode().equals("quote")){
-									quoteList.add(StringUtils.strip(c2.getValue(), ". '\""));
+
+						String code = pd.getCode();
+
+						if (code != null) {
+							for (Code c : CodedStringFactory.parse(pd.getCode()).getAllCodes()) {
+								for (Code c2 : c.getProperties()) {
+									if (c2.getTag().equals("quote")) {
+										quoteList.add(StringUtils.strip(c2.getValue(),
+											". \r\n\f\t'\""));
+									}
 								}
 							}
 						}
-						
+
 						String html = toHTML(text, search, quoteList);
 
 						pane.setText(html);

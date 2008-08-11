@@ -22,8 +22,8 @@ import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.Code;
-import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
@@ -106,7 +106,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		CodedString c = CodedStringFactory.parse(f);
 
-		Iterator<Code> codes = c.getAllCodes().iterator();
+		Iterator<? extends Code> codes = c.getAllCodes().iterator();
 		if (!codes.hasNext()) {
 			return;
 		}
@@ -117,7 +117,7 @@ public class CodeAsTextView extends JScrollPane {
 		sb.append("<html>");
 		sb.append("<body style=\"font-family: monospace; font-size: 12pt;\">");
 
-		List<String> variations = new LinkedList<String>(codeToShow.getVariations());
+		List<String> variations = new LinkedList<String>(codeToShow.getTagVariations());
 		Collections.reverse(variations);
 		for (String s : variations) {
 			sb.append(codeToHTML(p, s));
@@ -142,7 +142,7 @@ public class CodeAsTextView extends JScrollPane {
 	public String toA(PrimaryDocument pd){
 		String s = pd.getFilename();
 		
-		return String.format("<a href='%s'>%s</a><br>", s, toShortId(s));
+		return String.format("<a href='%s'>%s</a>", s, toShortId(s));
 	}
 
 	public String codeToHTML(Project p, String code) {
@@ -150,18 +150,41 @@ public class CodeAsTextView extends JScrollPane {
 		List<PrimaryDocument> newFilterList = new ArrayList<PrimaryDocument>(p.getCodeModel()
 			.getPrimaryDocuments(code));
 
-		Collections.sort(newFilterList);
-
 		if (newFilterList == null)
 			return "";
 
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("<h3>").append(code).append("</h3>");
-		sb.append("<ul>");
-
+		
 		List<PrimaryDocument> noValueList = new LinkedList<PrimaryDocument>();
 
+		// First definition
+		for (PrimaryDocument pd : newFilterList) {
+			
+			for (Code c : CodedStringFactory.parse(pd.getCode()).getAll(code)){
+				
+				List<? extends Code> subs = c.getProperties();
+				
+				for (Code sub : subs){
+					if (sub.getTag().equals("def")){
+						
+						sb.append("<p>");
+							sb.append(sub.getValue());
+							sb.append(" (<i>Definition from ");
+							if (pd.getFilename() != null) {
+								sb.append(toA(pd));
+							} else {
+								sb.append("Document with no file");
+							}
+							sb.append("</i>)");
+						sb.append("</p>");
+					}
+				}
+			}
+		}
+		sb.append("<ul>");
+		
 		for (PrimaryDocument pd : newFilterList) {
 
 			if (pd.getFilename() != null){
@@ -183,7 +206,7 @@ public class CodeAsTextView extends JScrollPane {
 			} else {
 				sb.append("Document with no file");
 			}
-			sb.append("<ul>");
+			sb.append("<br><ul>");
 			for (String s : allValues) {
 				sb.append("<li>").append(s.replaceAll("\n[ \t]*\n", "<p><p>")).append("</li>");
 			}
@@ -195,7 +218,7 @@ public class CodeAsTextView extends JScrollPane {
 			sb.append("<li> Occurances with no values:<br>");
 			for (PrimaryDocument pd : noValueList) {
 				if (pd.getFilename() != null) {
-					sb.append(toA(pd));
+					sb.append(toA(pd)).append("<br>");
 				}
 			}
 			sb.append("</li>");

@@ -157,6 +157,7 @@ public enum FileVersion {
 			}
 		}
 
+		@Deprecated
 		public void save(ProjectData project, Writer out) {
 			
 			/*
@@ -220,6 +221,80 @@ public enum FileVersion {
 					throw new RuntimeException("Wrong version string found.");
 				}
 
+				return FileVersionConvert.fromV3((ProjectData) o.readObject());
+			} catch (ConversionException e){
+				if (e.getCause() instanceof UserCancelationException)
+					throw (UserCancelationException)e.getCause();
+				else
+					throw e;
+			} catch (Exception e) {
+				throw new ReportToUserException(e);
+			}
+		}
+
+		@Deprecated
+		public void save(ProjectData project, Writer out) {
+			
+			/*
+			 * This code is here only for legacy purposes, so that you can see
+			 * how it worked
+			 */
+			if (true)
+				throw new RuntimeException("Deprecated");
+			
+			XStream x = new GmpXStream();
+			x.alias("project", ProjectData.class);
+			x.alias("document", PrimaryDocumentData.class);
+
+			x.addImplicitCollection(ProjectData.class, "rootDocuments");
+			x.addImplicitCollection(PrimaryDocumentData.class, "children");
+
+			x.useAttributeFor(PrimaryDocumentData.class, "filename");
+
+			x.registerConverter(new MyPropertiesConverter());
+
+			try {
+				ObjectOutputStream o = x.createObjectOutputStream(out, "gmanda-project");
+				o.writeObject(this.toVersion());
+				o.writeObject(project);
+				o.close();
+			} catch (IOException e) {
+				// do nothing
+			}
+		}
+	}, V4 {
+
+		@Override
+		public ProjectData load(File f, IProgress p) {
+
+			ProgressInputStream in;
+			try {
+				in = new ProgressInputStream(f, p);
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+
+			XStream x = new GmpXStream();
+
+			x.alias("project", ProjectData.class);
+			x.alias("document", PrimaryDocumentData.class);
+
+			x.addImplicitCollection(ProjectData.class, "rootDocuments");
+			x.addImplicitCollection(PrimaryDocumentData.class, "children");
+
+			x.useAttributeFor(PrimaryDocumentData.class, "filename");
+
+			x.registerConverter(new MyPropertiesConverter());
+
+			try {
+				ObjectInputStream o = x.createObjectInputStream(new InputStreamReader(in));
+
+				FileVersion version = getVersionInfo(o);
+
+				if (version != this) {
+					throw new RuntimeException("Wrong version string found.");
+				}
+
 				return (ProjectData) o.readObject();
 			} catch (ConversionException e){
 				if (e.getCause() instanceof UserCancelationException)
@@ -252,6 +327,7 @@ public enum FileVersion {
 				// do nothing
 			}
 		}
+		
 	};
 
 	public VersionString toVersion() {

@@ -1,22 +1,22 @@
 <gmanda-project>
   <metadata>
-    <version>V3</version>
+    <version>V4</version>
   </metadata>
   <project>
     <document>
-      <code>project description=\&quot;Read until 13819\&quot;</code>
+      <code>concept.effort: { quote: \&quot;&apos;setup costs&apos;\&quot;, desc: \&quot;I think people mix this up in their thoughts\n  about the issue some times, equating cost with effort.\&quot; },\nconcept.hosting: \&quot;This innovation propositions regarding a wiki looks like nothing more than a\n  hosting question. This this proposition is reduced to executing a solution\n  without defining the processes of its use or the vision behind it.\n\n  Achieving hosting could thus be seen as an entry strategy for an innovation.\n\n  We could also say that each service innovation needs hosting, but not all\n  hosting make an successful introduction.\&quot;,\nconcept.hosting: \&quot;Another important interpretation of this email can be that the author assumes\n  that effort is the barrier to innovation here and thus proposes a low effort\n  variation. By saying something like &apos;you do not have to do anything&apos; he tries\n  to remove a possible counter-argument.\n\n  In one sentence: Keep setup costs low by using existing infrastructure or\n  external hosting\&quot;,\nhosting#location: { value: \&quot;affiliated project\&quot;, desc: \&quot;That a host &apos;exists&apos; and is &apos;used&apos; (public acceptance?) are used as\n  strong arguments in favor here.\&quot; },\nmemo.on introduction.effort: \&quot;keep setup costs low by using existing infrastructure or external hosting\&quot;</code>
       <metadata>
         <property name="datafolder" value="D:\svn\sci\mail.ti\data\data"/>
-        <property name="lastseen" value="2008-08-06T23:36:50.027+02:00"/>
+        <property name="lastseen" value="2008-08-07T19:35:49.451+02:00"/>
         <property name="list" value="comp.desktop.xfce.devel.version4"/>
       </metadata>
       <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12610">
-        <code>todo=\&quot;Look at 4 more episodes regarding hosting\&quot;,\n\ntest=\&quot;quote: &apos;I&apos;\&quot;,\n\nlog=\n  \&quot;2008-08-04 09:15 - 16:15 (-2h) = 5 h rev.3314\n  15:32 - 15:59 Last 30 Minutes were used to debug the CodeDetail problem\n  related to fixing the renaming of codes. \&quot;</code>
+        <code>todo: \&quot;Look at 4 more episodes regarding hosting\&quot;,\ntest: { quote: \&quot;&apos;screens causes a crash?&apos;\&quot; },\nlog: \&quot;2008-08-04 09:15 - 16:15 (-2h) = 5 h rev.3314\n  15:32 - 15:59 Last 30 Minutes were used to debug the CodeDetail problem\n  related to fixing the renaming of codes.\&quot;</code>
         <metadata>
           <property name="date" value="2007-01-01T17:41:00.000+01:00"/>
           <property name="from" value="Jasper Huijsmans &lt;jasper@xfce.org&gt;"/>
           <property name="id" value="12610"/>
-          <property name="lastseen" value="2008-08-06T23:36:51.583+02:00"/>
+          <property name="lastseen" value="2008-08-06T23:59:59.918+02:00"/>
           <property name="list" value="gmane.comp.desktop.xfce.devel.version4"/>
           <property name="subject" value="Re: panel multiscreen problems"/>
           <property name="title" value="12610 - Re: panel multiscreen problems"/>
@@ -50,6 +50,7 @@
           <property name="date" value="2007-01-01T18:42:00.000+01:00"/>
           <property name="from" value="&quot;Jean-François Wauthy&quot; &lt;pollux@xfce.org&gt;"/>
           <property name="id" value="12612"/>
+          <property name="lastseen" value="2008-08-06T23:59:59.419+02:00"/>
           <property name="list" value="gmane.comp.desktop.xfce.devel.version4"/>
           <property name="subject" value="Release: gsynaptics-mcs-plugins 1.0.0"/>
           <property name="title" value="12612 - Release: gsynaptics-mcs-plugins 1.0.0"/>
@@ -89,7 +90,7 @@
             <property name="to" value="XFCE4 development list &lt;xfce4-dev@xfce.org&gt;"/>
           </metadata>
           <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12666">
-            <code>offtopic.release process, forces.coordination.website=webmaster needs to launch new site</code>
+            <code>offtopic.release process,\nforces.coordination.website: \&quot;webmaster needs to launch new site\&quot;</code>
             <metadata>
               <property name="date" value="2007-01-10T22:19:00.000+01:00"/>
               <property name="from" value="Nick Schermer &lt;nickschermer@gmail.com&gt;"/>
@@ -130,7 +131,7 @@
                     <property name="to" value="XFCE4 development list &lt;xfce4-dev@xfce.org&gt;"/>
                   </metadata>
                   <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12682">
-                    <code>offtopic.release process, offtopic.propose, \nmemo=\&quot;the date is only fixed implicitely by his proposition\&quot;</code>
+                    <code>offtopic.release process,\nofftopic.propose,\nmemo: \&quot;the date is only fixed implicitely by his proposition\&quot;</code>
                     <metadata>
                       <property name="date" value="2007-01-11T11:07:00.000+01:00"/>
                       <property name="from" value="Nick Schermer &lt;nickschermer@gmail.com&gt;"/>
@@ -142,7 +143,7 @@
                       <property name="to" value="XFCE4 development list &lt;xfce4-dev@xfce.org&gt;"/>
                     </metadata>
                     <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12684">
-                      <code>offtopic.release process, forces.coordination.translation</code>
+                      <code>offtopic.release process,\nforces.coordination.translation</code>
                       <metadata>
                         <property name="date" value="2007-01-11T11:29:00.000+01:00"/>
                         <property name="from" value="Benedikt Meurer &lt;benedikt.meurer@unix-ag.uni-siegen.de&gt;"/>
@@ -163,7 +164,7 @@
                           <property name="to" value="XFCE4 development list &lt;xfce4-dev@xfce.org&gt;"/>
                         </metadata>
                         <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12765">
-                          <code>offtopic.release process, ref=12766 followup in separate thread</code>
+                          <code>offtopic.release process,\nref: \&quot;12766 followup in separate thread\&quot;</code>
                           <metadata>
                             <property name="date" value="2007-01-17T15:16:00.000+01:00"/>
                             <property name="from" value="Nick Schermer &lt;nickschermer@gmail.com&gt;"/>
@@ -199,6 +200,7 @@
           <property name="date" value="2007-01-03T19:34:00.000+01:00"/>
           <property name="from" value="Benedikt Meurer &lt;benedikt.meurer@unix-ag.uni-siegen.de&gt;"/>
           <property name="id" value="12615"/>
+          <property name="lastseen" value="2008-08-06T23:59:26.683+02:00"/>
           <property name="list" value="gmane.comp.desktop.xfce.devel.version4"/>
           <property name="subject" value="Re: [Xfce4-commits] r24258 - in xfce4-panel/trunk: . libxfce4panel&#x0D;  panel"/>
           <property name="title" value="12615 - Re: [Xfce4-commits] r24258 - in xfce4-panel/trunk: . libxfce4panel&#x0D;  panel"/>
@@ -371,7 +373,7 @@
         </metadata>
       </document>
       <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12625">
-        <code>offtopic.licensing=move to gplv2 only, ???=\&quot;uncoded\&quot;</code>
+        <code>offtopic.licensing: \&quot;move to gplv2 only\&quot;,\n???: \&quot;uncoded\&quot;</code>
         <metadata>
           <property name="date" value="2007-01-05T08:19:00.000+01:00"/>
           <property name="from" value="Biju Chacko &lt;botsie@xfce.org&gt;"/>
@@ -570,7 +572,7 @@
         </document>
       </document>
       <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12646">
-        <code>offtopic.build process.dependency problem=always these minor timing problems.</code>
+        <code>offtopic.build process.dependency problem: \&quot;always these minor timing problems.\&quot;</code>
         <metadata>
           <property name="date" value="2007-01-08T13:42:00.000+01:00"/>
           <property name="from" value="Timothy White &lt;xfce.users@weirdo.bur.st&gt;"/>
@@ -974,7 +976,7 @@
         <property name="list" value="comp.desktop.rox.devel"/>
       </metadata>
       <document filename="gmane://gmane.comp.desktop.rox.devel.9036">
-        <code>dasdfasdfasdfhello world   </code>
+        <code>dasdfasdfasdfhello world</code>
         <metadata>
           <property name="date" value="2007-01-03T16:08:00.000+01:00"/>
           <property name="from" value="Thomas Leonard &lt;talex5@gmail.com&gt;"/>
@@ -1552,7 +1554,7 @@
         </document>
       </document>
       <document filename="gmane://gmane.comp.desktop.rox.devel.9087">
-        <code>activity.sustain.upgrade=\&quot;Hello World\&quot;, rationale.software is no longer maintained, forces.tools create dependencies</code>
+        <code>activity.sustain.upgrade: \&quot;Hello World\&quot;,\nrationale.software is no longer maintained,\nforces.tools create dependencies</code>
         <metadata>
           <property name="date" value="2007-02-02T23:49:00.000+01:00"/>
           <property name="from" value="Thomas Leonard &lt;talex5@gmail.com&gt;"/>
@@ -1684,7 +1686,7 @@
               <property name="to" value="rox-devel@lists.sourceforge.net"/>
             </metadata>
             <document filename="gmane://gmane.comp.desktop.rox.devel.9200">
-              <code>sensemaking.requirements, sensemaking.possibilities</code>
+              <code>sensemaking.requirements,\nsensemaking.possibilities</code>
               <metadata>
                 <property name="date" value="2007-04-15T12:43:00.000+02:00"/>
                 <property name="from" value="Thomas Leonard &lt;talex5@gmail.com&gt;"/>
@@ -2191,7 +2193,7 @@
               <property name="to" value="Development of the ROX Desktop &lt;rox-devel@lists.sourceforge.net&gt;"/>
             </metadata>
             <document filename="gmane://gmane.comp.desktop.rox.devel.9121">
-              <code>offtopic.dependencies=different versions cause problems</code>
+              <code>offtopic.dependencies: \&quot;different versions cause problems\&quot;</code>
               <metadata>
                 <property name="date" value="2007-02-20T08:16:00.000+01:00"/>
                 <property name="from" value="Stephen Watson &lt;stephen@kerofin.demon.co.uk&gt;"/>
@@ -2291,7 +2293,7 @@
               <property name="to" value="rox-devel@lists.sourceforge.net"/>
             </metadata>
             <document filename="gmane://gmane.comp.desktop.rox.devel.9130">
-              <code>offtopic.dependencies=may cause delay</code>
+              <code>offtopic.dependencies: \&quot;may cause delay\&quot;</code>
               <metadata>
                 <property name="date" value="2007-02-21T08:09:00.000+01:00"/>
                 <property name="from" value="Stephen Watson &lt;stephen@kerofin.demon.co.uk&gt;"/>
@@ -3738,7 +3740,7 @@
       </document>
     </document>
     <document>
-      <code>project description=\&quot;\nBochs - x86 simulator\n  Seems to be coordinated somewhere else or mature\&quot;</code>
+      <code>project description: \&quot;Bochs - x86 simulator\n  Seems to be coordinated somewhere else or mature\&quot;</code>
       <metadata>
         <property name="lastseen" value="2008-04-16T14:54:07.626+02:00"/>
         <property name="list" value="gmane.comp.emulators.bochs.devel"/>
@@ -4802,7 +4804,7 @@
         </document>
       </document>
       <document filename="gmane://gmane.comp.emulators.bochs.devel.7343">
-        <code>innovation.communication.irc, \nactivity.propose,\ninteresting.one time mail,\nperson.zero acquaintance approach</code>
+        <code>innovation.communication.irc,\nactivity.propose,\ninteresting.one time mail,\nperson.zero acquaintance approach</code>
         <metadata>
           <property name="date" value="2007-05-27T16:36:00.000+02:00"/>
           <property name="from" value="Rado S &lt;tmp1rado@gmx.de&gt;"/>
@@ -5094,7 +5096,7 @@
         </metadata>
       </document>
       <document filename="gmane://gmane.comp.emulators.bochs.devel.7374">
-        <code>sensemaking.capability, sensemaking.effort</code>
+        <code>sensemaking.capability,\nsensemaking.effort</code>
         <metadata>
           <property name="date" value="2007-08-15T04:58:00.000+02:00"/>
           <property name="from" value="WF Konynenberg &lt;bochs@wf.konynenberg.org&gt;"/>
@@ -5829,7 +5831,7 @@
       </document>
     </document>
     <document>
-      <code>person.power users,\nproject description=\&quot;\nRT is a typical example of a project that is heavily customized by its users who are predominantly developers or admins (power users).\n\nThe project has two maintainers (Ras and Jesse) and a lot of contributors. \n\nMany of the contributions do not get accepted.\&quot;\n\n\n</code>
+      <code>person.power users,\nproject description: \&quot;RT is a typical example of a project that is heavily customized by its users who are predominantly developers or admins (power users).\n\nThe project has two maintainers (Ras and Jesse) and a lot of contributors. \n\nMany of the contributions do not get accepted.\&quot;</code>
       <metadata>
         <property name="lastseen" value="2008-04-16T14:54:05.904+02:00"/>
         <property name="list" value="gmane.comp.bug-tracking.request-tracker.devel"/>
@@ -6527,7 +6529,7 @@
         </document>
       </document>
       <document filename="gmane://gmane.comp.bug-tracking.request-tracker.devel.4089">
-        <code>offtopic.contribution=\&quot;Philip already has a nice set of local modifications and since he has\n    many different additions already, he asks whether these are wanted, since it is a lot of \n    work to create the patches.\&quot;</code>
+        <code>offtopic.contribution: \&quot;Philip already has a nice set of local modifications and since he has\n    many different additions already, he asks whether these are wanted, since it is a lot of \n    work to create the patches.\&quot;</code>
         <metadata>
           <property name="date" value="2007-02-17T03:03:00.000+01:00"/>
           <property name="from" value="Philip Kime &lt;pkime@Shopzilla.com&gt;"/>
@@ -6538,7 +6540,7 @@
           <property name="to" value="rt-devel@lists.bestpractical.com"/>
         </metadata>
         <document filename="gmane://gmane.comp.bug-tracking.request-tracker.devel.4090">
-          <code>offtopic.contribution.postpone for next release=which is still worked on 10 months later</code>
+          <code>offtopic.contribution.postpone for next release: \&quot;which is still worked on 10 months later\&quot;</code>
           <metadata>
             <property name="cc" value="rt-devel@lists.bestpractical.com"/>
             <property name="date" value="2007-02-17T03:40:00.000+01:00"/>
@@ -6611,7 +6613,7 @@
         </metadata>
       </document>
       <document filename="gmane://gmane.comp.bug-tracking.request-tracker.devel.4098">
-        <code>offtopic.contribution, ref.4117=discussion continues in separate thread,\nofftopic.contribution.outcome deadend rejection</code>
+        <code>offtopic.contribution,\nref.4117: \&quot;discussion continues in separate thread\&quot;,\nofftopic.contribution.outcome deadend rejection</code>
         <metadata>
           <property name="date" value="2007-02-21T08:20:00.000+01:00"/>
           <property name="from" value="Philip Kime &lt;pkime@Shopzilla.com&gt;"/>
@@ -6871,7 +6873,7 @@
         </document>
       </document>
       <document filename="gmane://gmane.comp.bug-tracking.request-tracker.devel.4117">
-        <code>ref.4104=continue of contribution discussion</code>
+        <code>ref.4104: \&quot;continue of contribution discussion\&quot;</code>
         <metadata>
           <property name="date" value="2007-02-22T04:49:00.000+01:00"/>
           <property name="from" value="Philip Kime &lt;pkime@Shopzilla.com&gt;"/>
@@ -7207,7 +7209,7 @@
         </metadata>
       </document>
       <document filename="gmane://gmane.comp.bug-tracking.request-tracker.devel.4149">
-        <code>offtopic.contribution=directly applied</code>
+        <code>offtopic.contribution: \&quot;directly applied\&quot;</code>
         <metadata>
           <property name="date" value="2007-03-12T20:56:00.000+01:00"/>
           <property name="from" value="Dirk Pape &lt;pape-rt@inf.fu-berlin.de&gt;"/>
@@ -7984,7 +7986,7 @@
       </document>
     </document>
     <document>
-      <code>project description=\&quot;\n  Mailing list also used for SVN commits and a lot of feature requests.\nThe maintainers are Florian Schmitz and Cristian Rodriguez\&quot;</code>
+      <code>project description: \&quot;Mailing list also used for SVN commits and a lot of feature requests.\nThe maintainers are Florian Schmitz and Cristian Rodriguez\&quot;</code>
       <metadata>
         <property name="datafolder" value="D:\svn\sci\mail.ti\data\data"/>
         <property name="lastseen" value="2008-04-16T14:54:05.212+02:00"/>
@@ -8354,7 +8356,7 @@
         </metadata>
       </document>
       <document filename="gmane://gmane.comp.bug-tracking.flyspray.devel.4396">
-        <code>offtopic.real world.representation=MySQL Conf</code>
+        <code>offtopic.real world.representation: \&quot;MySQL Conf\&quot;</code>
         <metadata>
           <property name="date" value="2007-01-09T13:39:00.000+01:00"/>
           <property name="from" value="Lenz Grimmer &lt;lenz-fAbYwIrWRvUAvxtiuMwx3w@public.gmane.org&gt;"/>

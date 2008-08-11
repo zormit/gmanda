@@ -12,5 +12,48 @@ public class StringUtilsTest extends TestCase {
 		
 		assertEquals("|hello-| world|", StringUtils.skipAhead('|', '-', "hello |hello-| world| world".toCharArray(), 6));
 	}
+	
+	public void testWrap(){
+		
+		assertEquals("hallo", StringUtils.wrap("hallo", 0, 0, 80));
+		
+		assertEquals("hallo", StringUtils.wrap("hallo", 0, 2, 80));
+		
+		// Simple wrap case
+		assertEquals("hallo\n  welt", StringUtils.wrap("hallo welt", 0, 2, 5));
+		
+		{// Test collapsing of new lines
+		
+			// Don't split single wraps
+			assertEquals("hallo welt", StringUtils.wrap("hallo\nwelt", 0, 0, 80));
+		
+			// Split on double newlines and more
+			assertEquals("hallo\n\nwelt\n\nhow", StringUtils.wrap("hallo\n\nwelt\n\n\nhow", 0, 0, 80));
+		
+			// Don't forget to indent
+			assertEquals("hallo\n\n  welt\n\n  how", StringUtils.wrap("hallo\n\nwelt\n\n\nhow", 0, 2, 80));
+		}
+		
+		{// Test starting indentation
+			assertEquals("hallo welt", StringUtils.wrap("hallo welt", 2, 4, 12));
+			
+			assertEquals("hallo\n    welt", StringUtils.wrap("hallo welt", 2, 4, 11));
+		}
+		
+		{// Failure case 
+			assertEquals(
+				"\"The moment of the official announcement of a innovation is a central an\n" +
+				"    dedicated moment in the introduction of the innovation. This email lead to\n" +
+				"\n" +
+				"    this idea because of the sentence 'Officially announce the release cycle\n" +
+				"    thingy'.\"", StringUtils.wrap("\"The moment of the official announcement of a innovation is a central an\n" +
+						"dedicated moment in the introduction of the innovation. This email lead to\n" +
+						"\n" +
+						"\n" +
+						"\n" +
+						"this idea because of the sentence 'Officially announce the release cycle\n" +
+						"thingy'.\"", 4, 4, 80));
+		}
+	}
 
 }

@@ -17,7 +17,7 @@ import de.fu_berlin.inf.gmanda.util.progress.ProgressInputStream;
 public class MyXStream {
 
 	public void toXML(ProjectData obj, Writer out) {
-		FileVersion.V3.save(obj, out);
+		FileVersion.V4.save(obj, out);
 	} 
 
 	/**

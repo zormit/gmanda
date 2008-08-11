@@ -1,4 +1,25 @@
 
+2008-08-08
+
+   * Migrated to TagxON-Notation: 
+     code ::= key | key : value | key : { (code (, code)*) }
+     
+     In other words: Codes can now have many values and not just one.
+     
+     Example code: 
+     
+     argumentation.humor : { 
+       quote: "that's what you think",
+       desc: "A good example of humor"
+     }
+     
+   * Format (F4) implemented for new Notation.
+   * Added Insert Sub Code Template Action (Shift-F6) for 
+     helping with creating sub codes. 
+   * Added Insert Session Template Action (Ctrl-F6) for with 
+     keeping a coding diary
+   * Prominently display definition of in CodeAsTextView.
+
 2008-08-07
 
    * Started migration to syntax similar to YAML.

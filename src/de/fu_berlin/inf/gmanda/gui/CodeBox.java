@@ -298,8 +298,7 @@ public class CodeBox extends JTextArea {
 		});
 	}
 
-	public void insertDateAction() {
-
+	public void insertAtCaret(String beforeCaretInsert, String afterCaretInsert) {
 		if (currentlyShowing == null)
 			return;
 
@@ -310,9 +309,22 @@ public class CodeBox extends JTextArea {
 		String before = text.substring(0, caret);
 		String after = text.substring(caret);
 
-		String toInsert = new DateTime().toString("YYYY-MM-dd'T'HH:mm");
+		setText(before + beforeCaretInsert + afterCaretInsert + after);
+		setCaretPosition(before.length() + beforeCaretInsert.length());
+	}
 
-		setText(before + toInsert + after);
-		setCaretPosition(before.length() + toInsert.length());
+	public void insertSubCodeTemplate() {
+		insertAtCaret(": {\n  date: \"" + new DateTime().toString("YYYY-MM-dd'T'HH:mm") + "\",\n  ",
+			": \"\"\n}");
+	}
+
+	public void insertDateAction() {
+		insertAtCaret(new DateTime().toString("YYYY-MM-dd'T'HH:mm"), "");
+	}
+
+	public void insertSessionLogTemplate() {
+		insertAtCaret("  session : {\n    start : \""
+			+ new DateTime().toString("YYYY-MM-dd'T'HH:mm") + "\", end : \"\", revision : \"\",\n"
+			+ "    memo : \"", "\"\n  },");
 	}
 }

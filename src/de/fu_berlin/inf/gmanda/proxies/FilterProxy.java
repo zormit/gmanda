@@ -73,7 +73,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 
 	public Collection<PrimaryDocument> getSetFromSearchString(Code c) {
 
-		String nextSearchString = c.getCode();
+		String nextSearchString = c.getTag();
 
 		char operation = '+';
 		
@@ -118,7 +118,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 					
 					List<PrimaryDocument> filteredResults = new ArrayList<PrimaryDocument>();
 					for (PrimaryDocument result : results){
-						if (CodedStringFactory.parse(result.getCode()).containsInAllSegments(nextSearchString))
+						if (CodedStringFactory.parse(result.getCode()).containsAny(nextSearchString))
 							filteredResults.add(result);
 					}
 					return filteredResults;
@@ -160,7 +160,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 							return;
 						}
 
-						Iterable<Code> codesIterable = CodedStringFactory.parse(filterString).getAllCodes();
+						Iterable<? extends Code> codesIterable = CodedStringFactory.parse(filterString).getAllCodes();
 
 						IProgress subProgress = pBar.getSub(50);
 
@@ -170,13 +170,13 @@ public class FilterProxy extends VariableProxy<Filter> {
 							subProgress.setScale(CollectionUtils.size(codesIterable.iterator()));
 							subProgress.start();
 
-							Iterator<Code> codes = codesIterable.iterator();
+							Iterator<? extends Code> codes = codesIterable.iterator();
 
 							if (!codes.hasNext()) {
 								newFilterList = Collections.emptyList();
 							} else {
 								Code c = codes.next();
-								String nextSearchString = c.getCode();
+								String nextSearchString = c.getTag();
 
 								if (nextSearchString.startsWith("^")
 									|| nextSearchString.startsWith("-")) {
@@ -194,7 +194,7 @@ public class FilterProxy extends VariableProxy<Filter> {
 								
 								while (codes.hasNext()) {
 									c = codes.next();
-									nextSearchString = c.getCode();
+									nextSearchString = c.getTag();
 
 									// Remove from hits if starting with - or ^
 									if (nextSearchString.startsWith("^")

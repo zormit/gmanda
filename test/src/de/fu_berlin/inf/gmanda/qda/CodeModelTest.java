@@ -44,7 +44,7 @@ public class CodeModelTest extends TestCase {
 			CodedString cs = CodedStringFactory.parse(pd.getCode());
 			
 			for (Code c : cs.getAllCodes()){
-				sb.append(c.getCode());
+				sb.append(c.getTag());
 			
 				if (c.hasValue()){
 					sb.append(" : { ");

@@ -5,23 +5,28 @@ import java.util.List;
 
 public interface Code {
 	
-	public String getCode();
+	public String getTag();
 
 	public boolean hasValue();
 	
 	public String getValue();
 
-	public Collection<String> getVariations();
+	public Collection<String> getTagVariations();
 
 	public String toString(boolean withValue, boolean whiteSpace);
 
-	public boolean rename(String fromRename, String toRename);
+	public boolean renameTag(String fromRename, String toRename);
 
 	public boolean matches(Code c);
 
-	public String format();
+	/**
+	 * Returns a formatted string of the code. Every line after the first should be indented with given number of spaces.
+	 * 
+	 * The formatter should break lines at the given width. 
+	 */
+	public String format(int indent, int width);
 
-	public boolean matchesAny(Iterable<Code> allCodes);
+	public boolean matchesAny(Iterable<? extends Code> allCodes);
 	
-	public List<Code> getProperties();
+	public List<? extends Code> getProperties();
 }
