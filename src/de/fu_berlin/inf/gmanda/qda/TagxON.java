@@ -301,6 +301,10 @@ public class TagxON {
 				} else {
 					parseInternal(currentTag, it, false);
 				}
+				if (currentTag != null) {
+					parent.subs.add(currentTag);
+					currentTag = null;
+				}
 				continue;
 			}
 			if (c == cb) {
@@ -311,6 +315,7 @@ public class TagxON {
 				if (!root) {
 					return;
 				}
+				continue;
 			}
 		}
 		if (currentTag != null) {

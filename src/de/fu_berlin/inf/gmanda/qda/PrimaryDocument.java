@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import javax.mail.Message;
 
+import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.lang.StringUtils;
 
 import de.fu_berlin.inf.gmanda.imports.GmaneFacade;
@@ -332,14 +333,23 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	public int compareTo(PrimaryDocument other) {
 		
 		String myList = getListGuess();
 		String otherList = other.getListGuess();
 		
-		int i;
-		if (myList != null && (i = myList.compareTo(otherList)) != 0)
-			return i;
+		// If one of the lists is null 
+		if (myList == null ^ otherList == null){
+			return ComparatorUtils.nullLowComparator(ComparatorUtils.naturalComparator()).compare(myList, otherList);
+		}
+		
+		// If both are non-null
+		if (myList != null && otherList != null){
+			int i;
+			if ((i = myList.compareTo(otherList)) != 0)
+				return i;
+		}
 		
 		String myId = getMetaData("id");
 		String otherId = other.getMetaData("id");

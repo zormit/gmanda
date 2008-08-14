@@ -22,6 +22,7 @@ import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
+import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.HashMapUtils;
 import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
@@ -202,7 +203,7 @@ public class VisualizationCanvas extends PScrollPane {
 
 	static final float trackDistance = 10.0f;
 
-	public List<PrimaryDocument> filter(Iterable<PrimaryDocument> pds, CodedString searchTerm) {
+	public static List<PrimaryDocument> filter(Iterable<PrimaryDocument> pds, CodedString searchTerm) {
 
 		List<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
 
@@ -217,8 +218,8 @@ public class VisualizationCanvas extends PScrollPane {
 		return result;
 	}
 
-	public List<Pair<String, List<PrimaryDocument>>> partition(List<PrimaryDocument> pds,
-		String partitionCode) {
+	public static List<Pair<String, List<PrimaryDocument>>> partition(List<PrimaryDocument> pds,
+		String partitionCode, Project project) {
 
 		if (partitionCode.trim().length() == 0) {
 			return new LinkedList<Pair<String, List<PrimaryDocument>>>(Collections
@@ -250,7 +251,7 @@ public class VisualizationCanvas extends PScrollPane {
 			if (partitionCode.trim().equals("*"))
 				partitionCode = "";
 			
-			List<String> codes = project.getVariable().getCodeModel().expand(partitionCode,
+			List<String> codes = project.getCodeModel().expand(partitionCode,
 				maxDepth);
 
 			for (PrimaryDocument pd : pds) {
@@ -298,7 +299,7 @@ public class VisualizationCanvas extends PScrollPane {
 			root.addChild(noMatchLabel);
 			
 		} else {
-			List<Pair<String, List<PrimaryDocument>>> tracks = partition(allEvents, partitionCode);
+			List<Pair<String, List<PrimaryDocument>>> tracks = partition(allEvents, partitionCode, project.getVariable());
 	
 			if (!rank.trim().equals(""))
 				Collections.sort(tracks, trackCompareManager.getComparator(rank));

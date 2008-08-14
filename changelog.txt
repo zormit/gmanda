@@ -1,4 +1,10 @@
 
+2008-08-14
+
+   * More robust handling of , and }
+   * Fixed NPE in Comparing of PDs
+   * Sort codes by date in Code Detail View
+
 2008-08-08
 
    * Migrated to TagxON-Notation: 

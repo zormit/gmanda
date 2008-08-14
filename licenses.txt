@@ -22,3 +22,5 @@ Google Collections (google-collect-*.jar)
 args4J (args4j-*.jar)                                        MIT
 
 Icons (resource/icons/*.png)                                 EPL 1.0
+
+Code from Santhosh Kumar's Swing Utils                       GPL

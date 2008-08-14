@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -18,6 +19,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+
 import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
@@ -26,6 +30,7 @@ import de.fu_berlin.inf.gmanda.qda.CodedString;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 
 public class CodeAsTextView extends JScrollPane {
@@ -134,14 +139,14 @@ public class CodeAsTextView extends JScrollPane {
 			}
 		});
 	}
-	
-	public String toShortId(String s){
+
+	public String toShortId(String s) {
 		return s.replaceAll("(gmane(://|\\.)|devel\\.|comp\\.)", "");
 	}
-	
-	public String toA(PrimaryDocument pd){
+
+	public String toA(PrimaryDocument pd) {
 		String s = pd.getFilename();
-		
+
 		return String.format("<a href='%s'>%s</a>", s, toShortId(s));
 	}
 
@@ -156,43 +161,93 @@ public class CodeAsTextView extends JScrollPane {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("<h3>").append(code).append("</h3>");
-		
+
 		List<PrimaryDocument> noValueList = new LinkedList<PrimaryDocument>();
 
+		List<Pair<DateTime, Pair<Code, PrimaryDocument>>> dateBased = new LinkedList<Pair<DateTime, Pair<Code, PrimaryDocument>>>();
+		List<Pair<Code, PrimaryDocument>> noDate = new LinkedList<Pair<Code, PrimaryDocument>>();
+
 		// First definition
+		sb.append("<h5>Definition</h5>");
+
 		for (PrimaryDocument pd : newFilterList) {
-			
-			for (Code c : CodedStringFactory.parse(pd.getCode()).getAll(code)){
-				
+
+			for (Code c : CodedStringFactory.parse(pd.getCode()).getAll(code)) {
+
 				List<? extends Code> subs = c.getProperties();
-				
-				for (Code sub : subs){
-					if (sub.getTag().equals("def")){
-						
+
+				for (Code sub : subs) {
+					if (sub.getTag().equals("def")) {
+
 						sb.append("<p>");
-							sb.append(sub.getValue());
-							sb.append(" (<i>Definition from ");
-							if (pd.getFilename() != null) {
-								sb.append(toA(pd));
-							} else {
-								sb.append("Document with no file");
-							}
-							sb.append("</i>)");
+						sb.append(sub.getValue());
+						sb.append(" (<i>Definition from ");
+						if (pd.getFilename() != null) {
+							sb.append(toA(pd));
+						} else {
+							sb.append("Document with no file");
+						}
+						sb.append("</i>)");
 						sb.append("</p>");
+					}
+					if (sub.getTag().equals("date")) {
+						String date = StringUtils.strip(sub.getValue(), " \"");
+						DateTime d;
+						try {
+							d = new DateTime(date);
+							dateBased.add(new Pair<DateTime, Pair<Code, PrimaryDocument>>(d,
+								new Pair<Code, PrimaryDocument>(c, pd)));
+						} catch (IllegalArgumentException e) {
+							noDate.add(new Pair<Code, PrimaryDocument>(c, pd));
+						}
 					}
 				}
 			}
 		}
+
+		// First sorted by date
+		if (dateBased.size() > 0) {
+
+			{ // First the date based codes we found
+				sb.append("<h4>Sorted by date</h4>");
+
+				@SuppressWarnings("unchecked")
+				Comparator<Pair<DateTime, Pair<Code, PrimaryDocument>>> co = Pair.pCompare();
+				Collections.sort(dateBased, co);
+
+				sb.append("<ul>");
+				for (Pair<DateTime, Pair<Code, PrimaryDocument>> next : dateBased) {
+
+					code2html(sb, next.v.p, next.v.v);
+				}
+				sb.append("</ul>");
+			}
+
+			if (noDate.size() > 0) {
+				sb.append("<h4>Codes missing a date</h4>");
+				Comparator<Pair<Code, PrimaryDocument>> co = Pair.vCompare();
+				Collections.sort(noDate, co);
+
+				sb.append("<ul>");
+				for (Pair<Code, PrimaryDocument> next : noDate) {
+					code2html(sb, next.p, next.v);
+				}
+				sb.append("</ul>");
+			}
+		}
+
+		sb.append("<h5>All</h5>");
+
 		sb.append("<ul>");
-		
+
 		for (PrimaryDocument pd : newFilterList) {
 
-			if (pd.getFilename() != null){
+			if (pd.getFilename() != null) {
 				docs.put(pd.getFilename(), pd);
 			}
-			
+
 			CodedString coded = CodedStringFactory.parse(pd.getCode());
-			
+
 			Collection<String> allValues = coded.getAllValues(code);
 
 			if (allValues == null || allValues.size() == 0) {
@@ -224,17 +279,54 @@ public class CodeAsTextView extends JScrollPane {
 			sb.append("</li>");
 		}
 
-
-		//		sb.append("<li> All occurances:<br>");
-		//		for (PrimaryDocument pd : newFilterList) {
-		//			if (pd.getFilename() != null) {
-		//				sb.append(toA(pd));
-		//				docs.put(pd.getFilename(), pd);
-		//			}
-		//		}
-		//		sb.append("</li>");
+		// sb.append("<li> All occurances:<br>");
+		// for (PrimaryDocument pd : newFilterList) {
+		// if (pd.getFilename() != null) {
+		// sb.append(toA(pd));
+		// docs.put(pd.getFilename(), pd);
+		// }
+		// }
+		// sb.append("</li>");
 
 		sb.append("</ul>");
+
+		return sb.toString();
+	}
+
+	private void code2html(StringBuilder sb, Code c, PrimaryDocument pd) {
+
+		sb.append("<li>");
+		sb.append(code2html(c));
+		sb.append(" (<i>from ");
+		if (pd.getFilename() != null) {
+			sb.append(toA(pd));
+		} else {
+			sb.append("Document with no file");
+		}
+		sb.append("</i>)");
+		sb.append("</li>");
+	}
+
+	public static String code2html(Code c) {
+
+		StringBuilder sb = new StringBuilder();
+
+		List<? extends Code> values = c.getProperties();
+
+		sb.append(c.getTag()).append(": ");
+
+		if (values.size() == 1 && values.get(0).getTag().equals("desc")) {
+			sb.append(values.get(0).getValue().replaceAll("\n[ \t]*\n", "<p><p>"));
+		} else {
+			sb.append("<ul>");
+			for (Code sub : c.getProperties()) {
+				sb.append("<li>");
+				sb.append(code2html(sub));
+				sb.append("</li>");
+			}
+			sb.append("</ul>");
+		}
+
 		return sb.toString();
 	}
 

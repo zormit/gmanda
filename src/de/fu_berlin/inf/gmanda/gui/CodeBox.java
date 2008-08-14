@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -21,6 +23,7 @@ import javax.swing.text.JTextComponent;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
+import de.fu_berlin.inf.gmanda.gui.actions.AutoIndentAction;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.CodeModel;
@@ -69,6 +72,10 @@ public class CodeBox extends JTextArea {
 			newForwardKeys);
 		this.codeBoxView.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 
+		Action action = new AutoIndentAction(":{", 2); 
+		getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "auto-indent"); 
+		getActionMap().put("auto-indent", action);
+		
 		project.add(new VariableProxyListener<Project>() {
 			public void setVariable(Project newValue) {
 				if (newValue == null) {
@@ -315,7 +322,7 @@ public class CodeBox extends JTextArea {
 
 	public void insertSubCodeTemplate() {
 		insertAtCaret(": {\n  date: \"" + new DateTime().toString("YYYY-MM-dd'T'HH:mm") + "\",\n  ",
-			": \"\"\n}");
+			": \"\"\n},");
 	}
 
 	public void insertDateAction() {
