@@ -7,16 +7,16 @@
       <code>concept.effort: { quote: \&quot;&apos;setup costs&apos;\&quot;, desc: \&quot;I think people mix this up in their thoughts\n  about the issue some times, equating cost with effort.\&quot; },\nconcept.hosting: \&quot;This innovation propositions regarding a wiki looks like nothing more than a\n  hosting question. This this proposition is reduced to executing a solution\n  without defining the processes of its use or the vision behind it.\n\n  Achieving hosting could thus be seen as an entry strategy for an innovation.\n\n  We could also say that each service innovation needs hosting, but not all\n  hosting make an successful introduction.\&quot;,\nconcept.hosting: \&quot;Another important interpretation of this email can be that the author assumes\n  that effort is the barrier to innovation here and thus proposes a low effort\n  variation. By saying something like &apos;you do not have to do anything&apos; he tries\n  to remove a possible counter-argument.\n\n  In one sentence: Keep setup costs low by using existing infrastructure or\n  external hosting\&quot;,\nhosting#location: { value: \&quot;affiliated project\&quot;, desc: \&quot;That a host &apos;exists&apos; and is &apos;used&apos; (public acceptance?) are used as\n  strong arguments in favor here.\&quot; },\nmemo.on introduction.effort: \&quot;keep setup costs low by using existing infrastructure or external hosting\&quot;</code>
       <metadata>
         <property name="datafolder" value="D:\svn\sci\mail.ti\data\data"/>
-        <property name="lastseen" value="2008-08-07T19:35:49.451+02:00"/>
+        <property name="lastseen" value="2008-08-14T16:09:37.052+02:00"/>
         <property name="list" value="comp.desktop.xfce.devel.version4"/>
       </metadata>
       <document filename="gmane://gmane.comp.desktop.xfce.devel.version4.12610">
-        <code>todo: \&quot;Look at 4 more episodes regarding hosting\&quot;,\ntest: { quote: \&quot;&apos;screens causes a crash?&apos;\&quot; },\nlog: \&quot;2008-08-04 09:15 - 16:15 (-2h) = 5 h rev.3314\n  15:32 - 15:59 Last 30 Minutes were used to debug the CodeDetail problem\n  related to fixing the renaming of codes.\&quot;</code>
+        <code>todo: \&quot;Look at 4 more episodes regarding hosting\&quot;,\ntest: {\n  quote: \&quot;&apos;screens causes a crash?&apos;\&quot;,\n  Hello world:\n  \n  \n  \n},\nlog:\n  \&quot;2008-08-04 09:15 - 16:15 (-2h) = 5 h rev.3314 15:32 - 15:59 Last 30 Minutes\n  were used to debug the CodeDetail problem related to fixing the renaming of\n  codes.\&quot;</code>
         <metadata>
           <property name="date" value="2007-01-01T17:41:00.000+01:00"/>
           <property name="from" value="Jasper Huijsmans &lt;jasper@xfce.org&gt;"/>
           <property name="id" value="12610"/>
-          <property name="lastseen" value="2008-08-06T23:59:59.918+02:00"/>
+          <property name="lastseen" value="2008-08-14T16:09:37.602+02:00"/>
           <property name="list" value="gmane.comp.desktop.xfce.devel.version4"/>
           <property name="subject" value="Re: panel multiscreen problems"/>
           <property name="title" value="12610 - Re: panel multiscreen problems"/>
@@ -1554,12 +1554,12 @@
         </document>
       </document>
       <document filename="gmane://gmane.comp.desktop.rox.devel.9087">
-        <code>activity.sustain.upgrade: \&quot;Hello World\&quot;,\nrationale.software is no longer maintained,\nforces.tools create dependencies</code>
+        <code>episode.hello,\nactivity.sustain.upgrade: \&quot;Hello World\&quot;,\nrationale.software is no longer maintained,\nforces.tools create dependencies</code>
         <metadata>
           <property name="date" value="2007-02-02T23:49:00.000+01:00"/>
           <property name="from" value="Thomas Leonard &lt;talex5@gmail.com&gt;"/>
           <property name="id" value="9087"/>
-          <property name="lastseen" value="2008-06-02T23:48:55.563+02:00"/>
+          <property name="lastseen" value="2008-08-15T00:27:07.486+02:00"/>
           <property name="list" value="gmane.comp.desktop.rox.devel"/>
           <property name="subject" value="ROX web-site now on Drupal 4.7"/>
           <property name="title" value="9087 - ROX web-site now on Drupal 4.7"/>

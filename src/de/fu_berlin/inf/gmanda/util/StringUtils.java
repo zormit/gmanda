@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+
 public class StringUtils {
 
 	static String spaces = "                ";
@@ -286,5 +287,27 @@ public class StringUtils {
 			}
 		}
 		return result;
+	}
+
+	/** 
+	 *  Returns leading white space characters in the specified string. 
+	 */ 
+	public static String getLeadingWhiteSpace(String str) { 
+	    return str.substring(0, StringUtils.getLeadingWhiteSpaceWidth(str)); 
+	}
+
+	/** 
+	 *  Returns the number of leading white space characters in the specified string. 
+	 */ 
+	public static int getLeadingWhiteSpaceWidth(String str) { 
+	    int whitespace = 0; 
+	    while(whitespace<str.length()) { 
+	        char ch = str.charAt(whitespace); 
+	        if(ch==' ' || ch=='\t') 
+	            whitespace++; 
+	        else 
+	            break; 
+	    } 
+	    return whitespace; 
 	}
 }

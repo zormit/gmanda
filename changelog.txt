@@ -1,4 +1,11 @@
 
+2008-08-15
+
+   * First implementation of cross tabulation support
+   * More robust indentation
+   * Better detection of boundary chars for content assist
+   * Fixed bug in Sorting the Code Detail View 
+
 2008-08-14
 
    * More robust handling of , and }

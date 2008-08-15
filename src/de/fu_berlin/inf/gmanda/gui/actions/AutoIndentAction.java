@@ -49,10 +49,10 @@ public class AutoIndentAction extends AbstractAction {
             int lineNumber = comp.getLineOfOffset(comp.getCaretPosition()); 
  
             int start = comp.getLineStartOffset(lineNumber); 
-            int end = comp.getLineEndOffset(lineNumber); 
-            String str = doc.getText(start, end - start - 1); 
+            int end = comp.getCaretPosition(); // Only take the text before the caret 
+            String str = doc.getText(start, end - start); 
             
-            String whiteSpace = getLeadingWhiteSpace(str); 
+            String whiteSpace = StringUtils.getLeadingWhiteSpace(str); 
             
             str = str.trim();
             if (indentChars != null && str.length() > 0){
@@ -70,27 +70,5 @@ public class AutoIndentAction extends AbstractAction {
                 // ignore 
             } 
         } 
-    } 
- 
-    /** 
-     *  Returns leading white space characters in the specified string. 
-     */ 
-    private String getLeadingWhiteSpace(String str) { 
-        return str.substring(0, getLeadingWhiteSpaceWidth(str)); 
-    } 
- 
-    /** 
-     *  Returns the number of leading white space characters in the specified string. 
-     */ 
-    private int getLeadingWhiteSpaceWidth(String str) { 
-        int whitespace = 0; 
-        while(whitespace<str.length()) { 
-            char ch = str.charAt(whitespace); 
-            if(ch==' ' || ch=='\t') 
-                whitespace++; 
-            else 
-                break; 
-        } 
-        return whitespace; 
     } 
 } 

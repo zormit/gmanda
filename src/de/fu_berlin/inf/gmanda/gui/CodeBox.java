@@ -120,6 +120,8 @@ public class CodeBox extends JTextArea {
 		 */
 		completer = new AutoCompleter<String>(new AutoCompleterControl<String>() {
 
+			String[] delimChars = new String[] { ",", ";", ":", "{", "}", "\n" };
+			
 			public void insertText(String selected) {
 				int caret = getCaretPosition();
 
@@ -129,8 +131,8 @@ public class CodeBox extends JTextArea {
 				String after = text.substring(caret);
 				String leadingText, followingText;
 
-				int last = StringUtils.lastIndexOfAny(before, new String[] { ",", ";", "\n" });
-				int first = StringUtils.indexOfAny(after, new String[] { ",", ";" });
+				int last = StringUtils.lastIndexOfAny(before, delimChars);
+				int first = StringUtils.indexOfAny(after, delimChars);
 
 				if (last < 0) {
 					leadingText = before;
@@ -207,8 +209,8 @@ public class CodeBox extends JTextArea {
 
 				String leadingText, followingText;
 
-				int last = StringUtils.lastIndexOfAny(before, new String[] { ",", ";" });
-				int first = StringUtils.indexOfAny(after, new String[] { ",", ";" });
+				int last = StringUtils.lastIndexOfAny(before, delimChars);
+				int first = StringUtils.indexOfAny(after, delimChars);
 
 				if (last < 0) {
 					leadingText = before;
@@ -315,7 +317,13 @@ public class CodeBox extends JTextArea {
 
 		String before = text.substring(0, caret);
 		String after = text.substring(caret);
+		
+		int lineStart = before.lastIndexOf('\n') + 1; 
+		String whiteSpace = de.fu_berlin.inf.gmanda.util.StringUtils.getLeadingWhiteSpace(before.substring(lineStart, caret));
 
+		beforeCaretInsert = beforeCaretInsert.replace("\n", "\n" + whiteSpace);
+		afterCaretInsert = afterCaretInsert.replace("\n", "\n" + whiteSpace);
+		
 		setText(before + beforeCaretInsert + afterCaretInsert + after);
 		setCaretPosition(before.length() + beforeCaretInsert.length());
 	}
@@ -330,8 +338,8 @@ public class CodeBox extends JTextArea {
 	}
 
 	public void insertSessionLogTemplate() {
-		insertAtCaret("  session : {\n    start : \""
+		insertAtCaret("session : {\n  start : \""
 			+ new DateTime().toString("YYYY-MM-dd'T'HH:mm") + "\", end : \"\", revision : \"\",\n"
-			+ "    memo : \"", "\"\n  },");
+			+ "  memo : \"", "\"\n},");
 	}
 }

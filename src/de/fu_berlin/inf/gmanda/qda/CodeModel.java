@@ -17,6 +17,8 @@ import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 
 public class CodeModel {
 
+	HashMap<String, PrimaryDocument> allDocs = new HashMap<String, PrimaryDocument>();
+	
 	HashMap<PrimaryDocument, String> currentlyStoredCodes = new HashMap<PrimaryDocument, String>();
 
 	Map<String, List<PrimaryDocument>> codeMap = new HashMap<String, List<PrimaryDocument>>();
@@ -37,9 +39,17 @@ public class CodeModel {
 			}
 		});
 	}
+	
+	public PrimaryDocument getByFilename(String filename){
+		return allDocs.get(filename);
+	}
 
 	public void remove(PrimaryDocument t) {
 
+		if (t.filename != null){
+			allDocs.remove(t.filename);
+		}
+		
 		// Remove if existing
 		if (currentlyStoredCodes.containsKey(t)) {
 
@@ -58,6 +68,11 @@ public class CodeModel {
 	}
 
 	public void add(PrimaryDocument t) {
+		
+		if (t.filename != null){
+			allDocs.put(t.filename, t);
+		}
+		
 		if (t.getCode() != null && t.getCode().trim().length() > 0) {
 			// Add again
 			String codes = t.getCode();
@@ -92,7 +107,7 @@ public class CodeModel {
 	}
 	
 	public int getSubCodeCount(String s) {
-		return expand(s).size() - 1;
+		return expand(s).size();
 	}
 
 	public List<PrimaryDocument> getPrimaryDocuments(String s) {
@@ -128,27 +143,31 @@ public class CodeModel {
 		return expand(s, Integer.MAX_VALUE);
 	}
 	
-	public List<String> expand(String s, int maxdepth){
+	/**
+	 * Takes the given code and returns all subcodes up to the given depth. The code itself is NOT included in the result.
+	 * @param code
+	 * @param maxdepth
+	 * @return
+	 */
+	public List<String> expand(String code, int maxdepth){
 		
 		List<String> result = new LinkedList<String>();
 		
-		int index = sortedList.indexOf(s);
-		if (index == -1 && !s.equals("")) {
+		int index = sortedList.indexOf(code);
+		if (index == -1 && !code.equals("")) {
 			return result;
 		}
 		
-		if (!s.equals(""))
-			result.add(s);
-
-		index++;
+		if (!code.equals(""))
+			index++;
 		
 		while (index < sortedList.size()) {
 			String next = sortedList.get(index);
 			
-			if (!next.startsWith(s))
+			if (!next.startsWith(code))
 				return result;
 	
-			if (StringUtils.countMatches(next.substring(s.length()), ".") <= maxdepth)
+			if (StringUtils.countMatches(next.substring(code.length()), ".") <= maxdepth)
 				result.add(next);
 			
 			index++;

@@ -3,6 +3,8 @@ package de.fu_berlin.inf.gmanda.gui;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +21,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
@@ -140,20 +143,33 @@ public class CodeAsTextView extends JScrollPane {
 		});
 	}
 
-	public String toShortId(String s) {
+	public static String toShortId(String s) {
 		return s.replaceAll("(gmane(://|\\.)|devel\\.|comp\\.)", "");
 	}
 
-	public String toA(PrimaryDocument pd) {
+	public static String toA(PrimaryDocument pd) {
 		String s = pd.getFilename();
 
+		if (s == null)
+			return pd.getName();
+		
 		return String.format("<a href='%s'>%s</a>", s, toShortId(s));
+	}
+
+	public static String toFilterA(String s) {
+		try {
+			return String.format("<a href='gmaneFilter://%s'>%s</a>", URLEncoder.encode(s, "UTF-8"), StringEscapeUtils.escapeHtml(s));
+		} catch (UnsupportedEncodingException e) {
+			return s;
+		}
 	}
 
 	public String codeToHTML(Project p, String code) {
 
 		List<PrimaryDocument> newFilterList = new ArrayList<PrimaryDocument>(p.getCodeModel()
 			.getPrimaryDocuments(code));
+		
+		Collections.sort(newFilterList);
 
 		if (newFilterList == null)
 			return "";
@@ -239,7 +255,7 @@ public class CodeAsTextView extends JScrollPane {
 		sb.append("<h5>All</h5>");
 
 		sb.append("<ul>");
-
+		
 		for (PrimaryDocument pd : newFilterList) {
 
 			if (pd.getFilename() != null) {
@@ -248,13 +264,14 @@ public class CodeAsTextView extends JScrollPane {
 
 			CodedString coded = CodedStringFactory.parse(pd.getCode());
 
-			Collection<String> allValues = coded.getAllValues(code);
+			Collection<? extends Code> allValues = coded.getAll(code);
 
 			if (allValues == null || allValues.size() == 0) {
 				noValueList.add(pd);
 				continue;
 			}
 
+			
 			sb.append("<li>");
 			if (pd.getFilename() != null) {
 				sb.append(toA(pd));
@@ -262,8 +279,11 @@ public class CodeAsTextView extends JScrollPane {
 				sb.append("Document with no file");
 			}
 			sb.append("<br><ul>");
-			for (String s : allValues) {
-				sb.append("<li>").append(s.replaceAll("\n[ \t]*\n", "<p><p>")).append("</li>");
+			
+			for (Code c : allValues){
+				sb.append("<li>");
+				sb.append(code2html(c));
+				sb.append("</li>");
 			}
 			sb.append("</ul>");
 			sb.append("</li>");
@@ -278,16 +298,6 @@ public class CodeAsTextView extends JScrollPane {
 			}
 			sb.append("</li>");
 		}
-
-		// sb.append("<li> All occurances:<br>");
-		// for (PrimaryDocument pd : newFilterList) {
-		// if (pd.getFilename() != null) {
-		// sb.append(toA(pd));
-		// docs.put(pd.getFilename(), pd);
-		// }
-		// }
-		// sb.append("</li>");
-
 		sb.append("</ul>");
 
 		return sb.toString();

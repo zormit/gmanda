@@ -1,0 +1,33 @@
+<html>
+	<head>
+		<style type="text/css">
+			table.my {
+				border-color: #808080;
+			}
+			table.my td {
+				padding: 4px;
+			}
+			table.my th {
+			    text-align: left;
+				padding: 4px;
+				background-color: #e0e0e0;
+			}
+		</style>
+	</head>
+	<body>
+	<table class="my">
+		#foreach ($row in $rows)
+			<tr>
+				#set( $rowCount = $velocityCount )
+				#foreach ($cell in $row)
+					#if ( $rowCount == 1 || $velocityCount == 1)
+						<th>$cell</th>
+					#else
+						<td>$cell</td>
+					#end
+				#end
+		    </tr>
+		#end
+    </table>
+  </body>
+<html>

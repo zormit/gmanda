@@ -24,5 +24,6 @@
 	<classpathentry kind="lib" path="lib/dockingFramesCommon-1.0.6p3.jar"/>
 	<classpathentry kind="lib" path="lib/dockingFramesCore-1.0.6p3.jar"/>
 	<classpathentry kind="lib" path="lib/jvyaml-0.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-dep-1.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

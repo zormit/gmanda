@@ -104,6 +104,9 @@ import de.fu_berlin.inf.gmanda.gui.search.LuceneFacade;
 import de.fu_berlin.inf.gmanda.gui.search.RepeatSearchAction;
 import de.fu_berlin.inf.gmanda.gui.search.SearchField;
 import de.fu_berlin.inf.gmanda.gui.search.SearchPanel;
+import de.fu_berlin.inf.gmanda.gui.tabulation.CrossTabulationView;
+import de.fu_berlin.inf.gmanda.gui.tabulation.TabulationCanvas;
+import de.fu_berlin.inf.gmanda.gui.tabulation.TabulationOptionsPanel;
 import de.fu_berlin.inf.gmanda.gui.tree.CodeableControl;
 import de.fu_berlin.inf.gmanda.gui.tree.CodeableTree;
 import de.fu_berlin.inf.gmanda.gui.tree.CodeableTreeView;
@@ -203,6 +206,9 @@ public class GmandaMain {
 			.addComponent(CodeAsTextView.class)
 			.addComponent(CodeDetailView.class)
 			.addComponent(CodeDetailBox.class)
+			.addComponent(CrossTabulationView.class)
+			.addComponent(TabulationCanvas.class)
+			.addComponent(TabulationOptionsPanel.class)
 			// Perspectives
 			.addComponent(DefaultPerspective.class)
 			.addComponent(VisualizationPerspective.class)

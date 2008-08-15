@@ -242,10 +242,10 @@ public class VisualizationCanvas extends PScrollPane {
 			} else {
 				maxDepth = StringUtils.countMatches(partitionCode, ".*");
 	
-				if (maxDepth > 0)
-					partitionCode = partitionCode.substring(0, partitionCode.indexOf(".*"));
-				else
+				if (maxDepth == 0)
 					maxDepth = Integer.MAX_VALUE;
+				else 
+					partitionCode = partitionCode.substring(0, partitionCode.indexOf(".*"));
 			}
 
 			if (partitionCode.trim().equals("*"))
@@ -254,6 +254,10 @@ public class VisualizationCanvas extends PScrollPane {
 			List<String> codes = project.getCodeModel().expand(partitionCode,
 				maxDepth);
 
+			if (codes.size() == 0){
+				codes.add(partitionCode);
+			}
+			
 			for (PrimaryDocument pd : pds) {
 
 				boolean containedInNone = true;
