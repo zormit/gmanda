@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
 
 import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
 import de.fu_berlin.inf.gmanda.gui.CodeAsTextView;
-import de.fu_berlin.inf.gmanda.gui.visualisation.VisualizationCanvas;
+import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
@@ -49,13 +49,16 @@ public class TabulationCanvas extends JScrollPane {
 
 	FilterTextProxy filter;
 
+	CommonService commonService;
+
 	public TabulationCanvas(ProjectProxy projectProxy, SelectionProxy selection,
-		FilterTextProxy filter) {
+		FilterTextProxy filter, CommonService common) {
 		super();
 
 		this.selection = selection;
 		this.project = projectProxy;
 		this.filter = filter;
+		this.commonService = common;
 
 		pane.addHyperlinkListener(new HyperlinkListener() {
 			public void hyperlinkUpdate(HyperlinkEvent arg0) {
@@ -103,42 +106,49 @@ public class TabulationCanvas extends JScrollPane {
 		return PrimaryDocument.getTreeWalker(project.getVariable().getPrimaryDocuments());
 	}
 
-	public void update(TabulationSettings settings) {
+	public void update(final TabulationSettings settings) {
 
-		Project p = project.getVariable();
-		if (p == null)
-			return;
+		pane.setText("computing tabulation...");
 
-		CodedString c = CodedStringFactory.parse(settings.xDim);
+		commonService.run(new Runnable() {
+			public void run() {
 
-		List<PrimaryDocument> x = VisualizationCanvas.filter(getDocs(), c);
+				Project p = project.getVariable();
+				if (p == null)
+					return;
 
-		LinkedHashSet<Set<String>> table = new LinkedHashSet<Set<String>>();
-		LinkedHashSet<String> headerRow = new LinkedHashSet<String>();
-		headerRow.add(CodeAsTextView.toFilterA(settings.yDim));
-		headerRow.add(CodeAsTextView.toFilterA(settings.xDim));
+				CodedString c = CodedStringFactory.parse(settings.xDim);
 
-		table.add(headerRow);
+				List<PrimaryDocument> x = p.getCodeModel().filter(getDocs(), c);
 
-		for (Pair<String, List<PrimaryDocument>> pair : VisualizationCanvas.partition(x,
-			settings.yDim, p)) {
+				LinkedHashSet<Set<String>> table = new LinkedHashSet<Set<String>>();
+				LinkedHashSet<String> headerRow = new LinkedHashSet<String>();
+				headerRow.add(CodeAsTextView.toFilterA(settings.yDim));
+				headerRow.add(CodeAsTextView.toFilterA(settings.xDim));
 
-			LinkedHashSet<String> row = new LinkedHashSet<String>();
+				table.add(headerRow);
 
-			row.add(CodeAsTextView.toFilterA(pair.p));
-			row.add(StringUtils.join(Lists.transform(pair.v,
-				new Function<PrimaryDocument, String>() {
-					public String apply(PrimaryDocument pd) {
-						return CodeAsTextView.toA(pd);
-					}
-				}), " "));
+				for (Pair<String, List<PrimaryDocument>> pair : p.getCodeModel().partition(x,
+					settings.yDim)) {
 
-			table.add(row);
-		}
+					LinkedHashSet<String> row = new LinkedHashSet<String>();
 
-		String s = runVelocity(table);
+					row.add(CodeAsTextView.toFilterA(pair.p));
+					row.add(StringUtils.join(Lists.transform(pair.v,
+						new Function<PrimaryDocument, String>() {
+							public String apply(PrimaryDocument pd) {
+								return CodeAsTextView.toA(pd);
+							}
+						}), " "));
 
-		pane.setText(s);
+					table.add(row);
+				}
+
+				String s = runVelocity(table);
+
+				pane.setText(s);
+			}
+		}, "Error calculating tabulation");
 	}
 
 	Template tableTemplate;
@@ -147,11 +157,10 @@ public class TabulationCanvas extends JScrollPane {
 
 	public void initVelocity() {
 
-		//if (context == null) {
+		if (context == null) {
 
 			Properties p = new Properties();
-			// p.setProperty("velocimacro.library",
-			// "resources/templates/macro.vm");
+
 			p.setProperty("resource.loader", "class, file");
 			p.setProperty("class.resource.loader.class",
 				"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
@@ -164,8 +173,7 @@ public class TabulationCanvas extends JScrollPane {
 			} catch (Exception e) {
 				throw new DoNotShowToUserException(e);
 			}
-		// }
-
+		}
 	}
 
 	public String runVelocity(Set<Set<String>> table) {

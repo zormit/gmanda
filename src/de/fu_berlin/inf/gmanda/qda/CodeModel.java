@@ -1,8 +1,11 @@
 package de.fu_berlin.inf.gmanda.qda;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +16,11 @@ import org.apache.commons.lang.StringUtils;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
+import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 
 public class CodeModel {
@@ -27,8 +35,12 @@ public class CodeModel {
 
 	SortedList<String> sortedList = new SortedList<String>(internalList);
 
+	Project project;
+	
 	public CodeModel(Project project) {
 
+		this.project = project;
+		
 		for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(project.getPrimaryDocuments())) {
 			add(pd);
 		}
@@ -178,4 +190,162 @@ public class CodeModel {
 	public EventList<String> getList() {
 		return sortedList;
 	}
+
+	public List<PrimaryDocument> filter(Iterable<PrimaryDocument> pds, CodedString searchTerm) {
+	
+		List<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
+	
+		for (PrimaryDocument pd : pds) {
+			if (pd.getCode() == null)
+				continue;
+	
+			if (CodedStringFactory.parse(pd.getCode()).containsAny(searchTerm.getAllCodes()))
+				result.add(pd);
+		}
+	
+		return result;
+	}
+	
+	public Collection<String> getProperties(String code){
+		
+		Set<String> result = new HashSet<String>();
+		
+		Iterator<? extends Code> it = CodedStringFactory.parse(code + ".*").getAllCodes().iterator();
+		
+		if (!it.hasNext()){
+			return result;
+		}
+		Code toFind = it.next();
+		
+		for (PrimaryDocument pd : getPrimaryDocuments(code)){
+			for (Code c: CodedStringFactory.parse(pd.getCode()).getAllCodes()){
+				if (!toFind.matches(c))
+					continue;
+				
+				for (Code sub : c.getProperties()){
+					if (sub.getTag().startsWith("#")){
+						result.add(sub.getTag());
+					}
+				}
+			}
+		}
+		return result;
+	}
+	
+	public Multimap<String, Pair<Code, PrimaryDocument>> getPropValues(String code, String property){
+		Multimap<String, Pair<Code, PrimaryDocument>> result = new HashMultimap<String, Pair<Code,PrimaryDocument>>();
+		
+		Multimap<PrimaryDocument, Code> rawValues = getValues(code, property);
+		
+		for (Map.Entry<PrimaryDocument, Code> entry : rawValues.entries()){
+			
+			List<Code> codes = new LinkedList<Code>();
+			
+			for (Code c : entry.getValue().getProperties()){
+				if (c.getTag().equals("desc"))
+					continue;
+				codes.add(c);
+			}
+			
+			for (Code c : entry.getValue().getProperties("desc")){
+				String desc = StringUtils.strip(c.getTag(), " \r\t\f\n'\"");
+				for (Code c2 : codes){
+					result.put(desc, new Pair<Code, PrimaryDocument>(c2, entry.getKey()));
+				}
+			}
+		}
+		return result;
+	}
+	
+	public Multimap<PrimaryDocument, Code> getValues(String code, String property){
+		return getValues(getPrimaryDocuments(code), code, property);
+	}
+	
+	public Multimap<PrimaryDocument, Code> getValues(List<PrimaryDocument> pds, String code, String property){
+
+		Multimap<PrimaryDocument, Code> result = new HashMultimap<PrimaryDocument, Code>();
+		
+		Iterator<? extends Code> it = CodedStringFactory.parse(code + ".*").getAllCodes().iterator();
+		
+		if (!it.hasNext()){
+			return result;
+		}
+		Code toFind = it.next();
+		
+		for (PrimaryDocument pd : getPrimaryDocuments(code)){
+			for (Code c: CodedStringFactory.parse(pd.getCode()).getAllCodes()){
+				if (!toFind.matches(c))
+					continue;
+				
+				for (Code prop : c.getProperties(property)) {
+					result.putAll(pd, prop.getProperties("value"));
+				}
+			}
+		}
+		return result;
+	}
+	
+	public List<Pair<String, List<PrimaryDocument>>> partition(List<PrimaryDocument> pds,
+		String partitionCode) {
+
+		if (partitionCode.trim().length() == 0) {
+			return new LinkedList<Pair<String, List<PrimaryDocument>>>(Collections
+				.singletonList(new Pair<String, List<PrimaryDocument>>("All codes", pds)));
+		}
+
+		List<Pair<String, PrimaryDocument>> list = new LinkedList<Pair<String, PrimaryDocument>>();
+
+		if (partitionCode.trim().equals("**")) {
+			for (PrimaryDocument pd : pds) {
+				for (String code : CodedStringFactory.parse(pd.getCode()).getAll()) {
+					list.add(new Pair<String, PrimaryDocument>(code, pd));
+				}
+			}
+		} else {
+			int maxDepth;
+			
+			if (partitionCode.trim().equals("*")){
+				maxDepth = 0;
+			} else {
+				maxDepth = StringUtils.countMatches(partitionCode, ".*");
+	
+				if (maxDepth == 0)
+					maxDepth = Integer.MAX_VALUE;
+				else 
+					partitionCode = partitionCode.substring(0, partitionCode.indexOf(".*"));
+			}
+
+			if (partitionCode.trim().equals("*"))
+				partitionCode = "";
+			
+			List<String> codes = project.getCodeModel().expand(partitionCode,
+				maxDepth);
+
+			if (codes.size() == 0){
+				codes.add(partitionCode);
+			}
+			
+			for (PrimaryDocument pd : pds) {
+
+				boolean containedInNone = true;
+
+				for (String code : codes) {
+					if (CodedStringFactory.parse(pd.getCode()).containsAny(code + ".*")) {
+						list.add(new Pair<String, PrimaryDocument>(
+							("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
+								+ code.substring(partitionCode.length()) : code), pd));
+						containedInNone = false;
+					}
+				}
+				if (containedInNone)
+					list.add(new Pair<String, PrimaryDocument>("<other>", pd));
+			}
+		}
+		return Pair.disjointPartition(list);
+	}
+	
+	public Slice getInitialFilterSlice(String code){
+		return new SliceImpl(getPrimaryDocuments(code));
+	}
+	
 }

@@ -8,10 +8,8 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Interval;
@@ -203,84 +201,14 @@ public class VisualizationCanvas extends PScrollPane {
 
 	static final float trackDistance = 10.0f;
 
-	public static List<PrimaryDocument> filter(Iterable<PrimaryDocument> pds, CodedString searchTerm) {
-
-		List<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
-
-		for (PrimaryDocument pd : pds) {
-			if (pd.getCode() == null)
-				continue;
-
-			if (CodedStringFactory.parse(pd.getCode()).containsAny(searchTerm.getAllCodes()))
-				result.add(pd);
-		}
-
-		return result;
-	}
-
-	public static List<Pair<String, List<PrimaryDocument>>> partition(List<PrimaryDocument> pds,
-		String partitionCode, Project project) {
-
-		if (partitionCode.trim().length() == 0) {
-			return new LinkedList<Pair<String, List<PrimaryDocument>>>(Collections
-				.singletonList(new Pair<String, List<PrimaryDocument>>("All codes", pds)));
-		}
-
-		List<Pair<String, PrimaryDocument>> list = new LinkedList<Pair<String, PrimaryDocument>>();
-
-		if (partitionCode.trim().equals("**")) {
-			for (PrimaryDocument pd : pds) {
-				for (String code : CodedStringFactory.parse(pd.getCode()).getAll()) {
-					list.add(new Pair<String, PrimaryDocument>(code, pd));
-				}
-			}
-		} else {
-			int maxDepth;
-			
-			if (partitionCode.trim().equals("*")){
-				maxDepth = 0;
-			} else {
-				maxDepth = StringUtils.countMatches(partitionCode, ".*");
 	
-				if (maxDepth == 0)
-					maxDepth = Integer.MAX_VALUE;
-				else 
-					partitionCode = partitionCode.substring(0, partitionCode.indexOf(".*"));
-			}
-
-			if (partitionCode.trim().equals("*"))
-				partitionCode = "";
-			
-			List<String> codes = project.getCodeModel().expand(partitionCode,
-				maxDepth);
-
-			if (codes.size() == 0){
-				codes.add(partitionCode);
-			}
-			
-			for (PrimaryDocument pd : pds) {
-
-				boolean containedInNone = true;
-
-				for (String code : codes) {
-					if (CodedStringFactory.parse(pd.getCode()).containsAny(code + ".*")) {
-						list.add(new Pair<String, PrimaryDocument>(
-							("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
-								+ code.substring(partitionCode.length()) : code), pd));
-						containedInNone = false;
-					}
-				}
-				if (containedInNone)
-					list.add(new Pair<String, PrimaryDocument>("<other>", pd));
-			}
-		}
-		return Pair.disjointPartition(list);
-	}
 
 	public HashMap<PrimaryDocument, List<PrimaryDocumentDot>> allDots;
 
 	public void update(String filterCode, String partitionCode, String rank, String colorField) {
 
+		Project project = this.project.getVariable();
+		
 		CodedString colors = CodedStringFactory.parse(colorField);
 
 		root.removeAllChildren();
@@ -289,8 +217,7 @@ public class VisualizationCanvas extends PScrollPane {
 
 		allDots = new HashMap<PrimaryDocument, List<PrimaryDocumentDot>>();
 		
-		List<PrimaryDocument> allEvents = filter(PrimaryDocument.getTreeWalker(project
-			.getVariable().getPrimaryDocuments()), CodedStringFactory.parse(filterCode + ".*"));
+		List<PrimaryDocument> allEvents = project.getCodeModel().filter(PrimaryDocument.getTreeWalker(project.getPrimaryDocuments()), CodedStringFactory.parse(filterCode + ".*"));
 		
 		if (allEvents.size() == 0){
 			
@@ -303,7 +230,7 @@ public class VisualizationCanvas extends PScrollPane {
 			root.addChild(noMatchLabel);
 			
 		} else {
-			List<Pair<String, List<PrimaryDocument>>> tracks = partition(allEvents, partitionCode, project.getVariable());
+			List<Pair<String, List<PrimaryDocument>>> tracks = project.getCodeModel().partition(allEvents, partitionCode);
 	
 			if (!rank.trim().equals(""))
 				Collections.sort(tracks, trackCompareManager.getComparator(rank));

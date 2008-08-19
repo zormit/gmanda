@@ -231,14 +231,18 @@ public class GmaneImporter {
 
 			pds.put(message, child);
 
-			String[] mid = message.getHeader("Message-ID");
+			String[] mids = message.getHeader("Message-ID");
 
-			if (mid == null || mid.length == 0 || mid[0].trim().length() == 0) {
-				System.out.println(Arrays.toString(mid));
+			if (mids == null || mids.length == 0 || mids[0].trim().length() == 0) {
+				System.out.println(Arrays.toString(mids));
 				throw new RuntimeException();
 			}
+			
+			String mid = mids[0];
 
-			ids.put(mid[0], message);
+			mid = mid.replaceAll("__\\d+\\.\\d+\\$\\d+\\$gmane\\$org", "");
+
+			ids.put(mid, message);
 		}
 		pStore.done();
 		

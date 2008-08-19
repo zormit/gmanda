@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.Message;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.StringUtils;
@@ -166,9 +165,6 @@ public class Project {
 		if (!root.hasMetaData("list"))
 			throw new IllegalArgumentException("Root PD needs 'list' metadata to be set");
 
-		if (!root.hasMetaData("datafolder"))
-			throw new IllegalArgumentException("Root PD needs 'datafolder' metadata to be set");
-
 		progress.setScale(100);
 		progress.start();
 
@@ -217,12 +213,12 @@ public class Project {
 
 			if (min != Integer.MAX_VALUE) {
 
-				List<Message> messages = gmaneMboxFetcher.getMails(progress.getSub(50), list, min,
-					max + 1);
+				// Fetch from Gmane to temporary mbox file
+				File target = gmaneMboxFetcher.fetchToTemp(progress.getSub(45), list, min, max + 1);
 
-				// TODO datafolder is bullshit!
-				List<PrimaryDocumentData> newPDDs = importer.messagesToPDs(progress.getSub(30),
-					list, min, root.getMetaData("datafolder"), messages, false);
+				// Read mbox file
+				List<PrimaryDocumentData> newPDDs = importer.importPrimaryDocuments(list, 1,
+					target, progress.getSub(45), false);
 
 				List<PrimaryDocument> newPDs = PrimaryDocumentData.toPrimaryDocuments(newPDDs);
 

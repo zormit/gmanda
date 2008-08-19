@@ -1,4 +1,13 @@
 
+2008-08-19
+
+   * First implementation of improved query support for properties
+   * Put tabulation calculation in background thread
+   * Improved GmaneImporter to deal with errors in Gmane output
+   * Fixed Refetch List action
+   * Fixed bug in CodeBox with regards to Code Completion
+   * Introduced Slices as an abstraction for working with the CodeModel. 
+
 2008-08-15
 
    * First implementation of cross tabulation support

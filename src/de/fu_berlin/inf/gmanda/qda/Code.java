@@ -27,6 +27,14 @@ public interface Code {
 	public String format(int indent, int width);
 
 	public boolean matchesAny(Iterable<? extends Code> allCodes);
-	
+
+	/**
+	 * Returns all sub codes of this code
+	 */
 	public List<? extends Code> getProperties();
+	
+	/**
+	 * Returns a collection of all those codes from getProperties that have the given name (tag).
+	 */
+	public Collection<? extends Code> getProperties(String propName);
 }

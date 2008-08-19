@@ -6,7 +6,6 @@ package de.fu_berlin.inf.gmanda.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -90,25 +89,6 @@ public class RefetchListAction extends AbstractAction {
 
 					pd.getMetaData().put("list", list);
 				}
-				
-				// TODO untangle this!
-				if (true)
-					throw new RuntimeException("Currently not in a functional state");
-				
-				File storageDir = null;
-				if (pd.hasMetaData("datafolder")
-					&& (new File(pd.getMetaData("datafolder")).exists())) {
-					storageDir = new File(pd.getMetaData("datafolder"));
-				}
-
-				if (storageDir == null) {
-					storageDir = storage.getOpenFile();
-				}
-
-				if (storageDir == null)
-					return;
-				
-				pd.setMetaData("datafolder", storageDir.getAbsolutePath());
 				
 				projectProxy.getVariable().refetch(pd, commonService.getProgressBar("Refetching list"), fetcher, importer);
 			}

@@ -22,5 +22,7 @@ public interface CodedString extends CodedStringCore {
 	Collection<? extends Code> getAll(String code);
 
 	Collection<String> getAllValues(String code);
+	
+	Collection<? extends Code> getProperties(String code, String propName);
 
 }

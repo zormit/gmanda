@@ -120,7 +120,8 @@ public class CodeBox extends JTextArea {
 		 */
 		completer = new AutoCompleter<String>(new AutoCompleterControl<String>() {
 
-			String[] delimChars = new String[] { ",", ";", ":", "{", "}", "\n" };
+			String[] delimCharsBefore = new String[] { ",", ";", ":", "{", "}", "\n" };
+			String[] delimCharsAfter = new String[] { ",", ";", ":", "{", "}"};
 			
 			public void insertText(String selected) {
 				int caret = getCaretPosition();
@@ -131,8 +132,8 @@ public class CodeBox extends JTextArea {
 				String after = text.substring(caret);
 				String leadingText, followingText;
 
-				int last = StringUtils.lastIndexOfAny(before, delimChars);
-				int first = StringUtils.indexOfAny(after, delimChars);
+				int last = StringUtils.lastIndexOfAny(before, delimCharsBefore);
+				int first = StringUtils.indexOfAny(after, delimCharsAfter);
 
 				if (last < 0) {
 					leadingText = before;
@@ -209,8 +210,8 @@ public class CodeBox extends JTextArea {
 
 				String leadingText, followingText;
 
-				int last = StringUtils.lastIndexOfAny(before, delimChars);
-				int first = StringUtils.indexOfAny(after, delimChars);
+				int last = StringUtils.lastIndexOfAny(before, delimCharsBefore);
+				int first = StringUtils.indexOfAny(after, delimCharsAfter);
 
 				if (last < 0) {
 					leadingText = before;

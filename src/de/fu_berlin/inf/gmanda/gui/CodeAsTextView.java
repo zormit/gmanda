@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -33,6 +35,8 @@ import de.fu_berlin.inf.gmanda.qda.CodedString;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.qda.Slice;
+import de.fu_berlin.inf.gmanda.util.DeferredVariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 
@@ -73,11 +77,12 @@ public class CodeAsTextView extends JScrollPane {
 			}
 		});
 
-		filterTextProxy.add(new VariableProxyListener<String>() {
-			public void setVariable(String newValue) {
-				update();
-			}
-		});
+		filterTextProxy.add(new DeferredVariableProxyListener<String>(
+			new VariableProxyListener<String>() {
+				public void setVariable(String newValue) {
+					update();
+				}
+			}, 400, TimeUnit.MILLISECONDS));
 
 		setBorder(BorderFactory.createEmptyBorder());
 
@@ -123,7 +128,8 @@ public class CodeAsTextView extends JScrollPane {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html>");
-		sb.append("<body style=\"font-family: monospace; font-size: 12pt;\">");
+		sb
+			.append("<body style=\"font-family: monospace; font-size: 12pt; padding: 2px; margin: 2px;\">");
 
 		List<String> variations = new LinkedList<String>(codeToShow.getTagVariations());
 		Collections.reverse(variations);
@@ -152,13 +158,14 @@ public class CodeAsTextView extends JScrollPane {
 
 		if (s == null)
 			return pd.getName();
-		
+
 		return String.format("<a href='%s'>%s</a>", s, toShortId(s));
 	}
 
 	public static String toFilterA(String s) {
 		try {
-			return String.format("<a href='gmaneFilter://%s'>%s</a>", URLEncoder.encode(s, "UTF-8"), StringEscapeUtils.escapeHtml(s));
+			return String.format("<a href='gmaneFilter://%s'>%s</a>",
+				URLEncoder.encode(s, "UTF-8"), StringEscapeUtils.escapeHtml(s));
 		} catch (UnsupportedEncodingException e) {
 			return s;
 		}
@@ -166,9 +173,19 @@ public class CodeAsTextView extends JScrollPane {
 
 	public String codeToHTML(Project p, String code) {
 
+		// String prop = null;
+		//		
+		// int iHash = code.indexOf("#");
+		// if (iHash != -1){
+		// if (iHash + 1 <= code.length()){
+		// prop = code.substring(iHash + 1);
+		// }
+		// code = code.substring(0, iHash);
+		// }
+
 		List<PrimaryDocument> newFilterList = new ArrayList<PrimaryDocument>(p.getCodeModel()
 			.getPrimaryDocuments(code));
-		
+
 		Collections.sort(newFilterList);
 
 		if (newFilterList == null)
@@ -181,10 +198,11 @@ public class CodeAsTextView extends JScrollPane {
 		List<PrimaryDocument> noValueList = new LinkedList<PrimaryDocument>();
 
 		List<Pair<DateTime, Pair<Code, PrimaryDocument>>> dateBased = new LinkedList<Pair<DateTime, Pair<Code, PrimaryDocument>>>();
+
 		List<Pair<Code, PrimaryDocument>> noDate = new LinkedList<Pair<Code, PrimaryDocument>>();
 
 		// First definition
-		sb.append("<h5>Definition</h5>");
+		sb.append("<h4>Definition</h4>");
 
 		for (PrimaryDocument pd : newFilterList) {
 
@@ -221,7 +239,9 @@ public class CodeAsTextView extends JScrollPane {
 			}
 		}
 
-		// First sorted by date
+		properties2html(p, code, sb);
+
+		// Then sorted by date
 		if (dateBased.size() > 0) {
 
 			{ // First the date based codes we found
@@ -233,7 +253,6 @@ public class CodeAsTextView extends JScrollPane {
 
 				sb.append("<ul>");
 				for (Pair<DateTime, Pair<Code, PrimaryDocument>> next : dateBased) {
-
 					code2html(sb, next.v.p, next.v.v);
 				}
 				sb.append("</ul>");
@@ -252,10 +271,10 @@ public class CodeAsTextView extends JScrollPane {
 			}
 		}
 
-		sb.append("<h5>All</h5>");
+		sb.append("<h4>All</h4>");
 
 		sb.append("<ul>");
-		
+
 		for (PrimaryDocument pd : newFilterList) {
 
 			if (pd.getFilename() != null) {
@@ -264,14 +283,27 @@ public class CodeAsTextView extends JScrollPane {
 
 			CodedString coded = CodedStringFactory.parse(pd.getCode());
 
-			Collection<? extends Code> allValues = coded.getAll(code);
+			Collection<? extends Code> allCodes = coded.getAll(code);
 
-			if (allValues == null || allValues.size() == 0) {
+			if (allCodes == null || allCodes.size() == 0) {
 				noValueList.add(pd);
 				continue;
+			} else {
+				boolean found = false;
+
+				for (Code c : allCodes) {
+					String value = c.getValue();
+					if (value != null && value.trim().length() > 0) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					noValueList.add(pd);
+					continue;
+				}
 			}
 
-			
 			sb.append("<li>");
 			if (pd.getFilename() != null) {
 				sb.append(toA(pd));
@@ -279,8 +311,8 @@ public class CodeAsTextView extends JScrollPane {
 				sb.append("Document with no file");
 			}
 			sb.append("<br><ul>");
-			
-			for (Code c : allValues){
+
+			for (Code c : allCodes) {
 				sb.append("<li>");
 				sb.append(code2html(c));
 				sb.append("</li>");
@@ -303,6 +335,73 @@ public class CodeAsTextView extends JScrollPane {
 		return sb.toString();
 	}
 
+	private void properties2html(Project p, String code, StringBuilder sb) {
+
+		boolean hasProperty = false;
+
+		Slice s = p.getCodeModel().getInitialFilterSlice(code).select(
+			CodedStringFactory.parseOne(code));
+
+		for (Entry<String, Slice> entry : s.slice().entrySet()) {
+
+			String aProp = entry.getKey();
+			Slice sub = entry.getValue();
+
+			if (!aProp.startsWith("#"))
+				continue;
+
+			if (!hasProperty) {
+				sb.append("<h4>Properties</h4>");
+				sb.append("<ul>");
+				hasProperty = true;
+			}
+
+			sb.append("<li>").append(aProp).append(":<ul>");
+
+			slice2html(sb, sub, "def");
+
+			for (Entry<String, Slice> entry2 : sub.select(CodedStringFactory.parseOne("value")).select(CodedStringFactory.parseOne("desc")).slice().entrySet()) {
+
+				String aProp2 = entry2.getKey();
+				Slice sub2 = entry2.getValue();
+
+				sb.append("<li>").append(aProp2).append(":<br>");
+				for (PrimaryDocument pd : sub2.getDocuments().keys()){
+					if (pd.getFilename() != null) {
+						sb.append(toA(pd)).append("<br>");
+					}
+				}
+				sb.append("</li>");
+			}
+			sb.append("</ul></li>");
+		}
+
+		if (hasProperty) {
+			sb.append("</ul>");
+		}
+	}
+
+	private void slice2html(StringBuilder sb, Slice sub, String string) {
+
+		boolean hasStuff = false;
+		
+		for (Entry<PrimaryDocument, Code> entry3 : sub.select(CodedStringFactory.parseOne(string))
+			.getDocuments().entries()) {
+
+			if (!hasStuff){
+				sb.append(string).append(":<ul>");
+				hasStuff = true;
+			}
+			
+			PrimaryDocument pd = entry3.getKey();
+			Code c = entry3.getValue();
+
+			code2html(sb, c, pd);
+		}
+		if (hasStuff)
+			sb.append("</ul>");
+	}
+
 	private void code2html(StringBuilder sb, Code c, PrimaryDocument pd) {
 
 		sb.append("<li>");
@@ -322,6 +421,11 @@ public class CodeAsTextView extends JScrollPane {
 		StringBuilder sb = new StringBuilder();
 
 		List<? extends Code> values = c.getProperties();
+
+		if (values.size() == 1 && c.getTag().equals("desc")) {
+			sb.append(c.getValue().replaceAll("\n[ \t]*\n", "<p><p>"));
+			return sb.toString();
+		}
 
 		sb.append(c.getTag()).append(": ");
 

@@ -1,6 +1,7 @@
 package de.fu_berlin.inf.gmanda.qda;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -114,6 +115,10 @@ public abstract class AbstractCode implements Code {
 		} while (thisIterator.hasNext());
 
 		return true;
+	}
+	
+	public Collection<? extends Code> getProperties(String propName){
+		return AbstractCodedString.getProperties(Collections.singletonList(this), propName);
 	}
 
 }
