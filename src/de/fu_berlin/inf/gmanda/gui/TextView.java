@@ -37,7 +37,7 @@ import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
-import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 
 public class TextView extends JScrollPane {
 
@@ -152,7 +152,7 @@ public class TextView extends JScrollPane {
 			if (s.length() == 0)
 				continue;
 
-			String searchPattern = de.fu_berlin.inf.gmanda.util.StringUtils.join(Arrays.asList(s
+			String searchPattern = de.fu_berlin.inf.gmanda.util.CStringUtils.join(Arrays.asList(s
 				.split("\\s+")), "\\s+", new StringConverter<String>() {
 
 				public String toString(String t) {

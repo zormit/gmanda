@@ -21,7 +21,7 @@ import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import de.fu_berlin.inf.gmanda.util.StringUtils;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
  
 /** 
  * @author Santhosh Kumar T 
@@ -40,6 +40,9 @@ public class AutoIndentAction extends AbstractAction {
 	
 	
     public void actionPerformed(ActionEvent ae) { 
+    	
+    	System.out.println("HELLO");
+    	
         JTextArea comp = (JTextArea)ae.getSource(); 
         Document doc = comp.getDocument(); 
  
@@ -52,13 +55,13 @@ public class AutoIndentAction extends AbstractAction {
             int end = comp.getCaretPosition(); // Only take the text before the caret 
             String str = doc.getText(start, end - start); 
             
-            String whiteSpace = StringUtils.getLeadingWhiteSpace(str); 
+            String whiteSpace = CStringUtils.getLeadingWhiteSpace(str); 
             
             str = str.trim();
             if (indentChars != null && str.length() > 0){
             	char c = str.charAt(str.length() - 1);
             	if (indentChars.indexOf(c) != -1){
-                	whiteSpace = whiteSpace + StringUtils.spaces(indentLevel);
+                	whiteSpace = whiteSpace + CStringUtils.spaces(indentLevel);
                 }
             }
             

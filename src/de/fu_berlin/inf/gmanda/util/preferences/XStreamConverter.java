@@ -5,8 +5,8 @@ package de.fu_berlin.inf.gmanda.util.preferences;
 
 import com.thoughtworks.xstream.converters.SingleValueConverter;
 
-import de.fu_berlin.inf.gmanda.util.StringUtils.FromConverter;
-import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.FromConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 
 public class XStreamConverter<T> implements StringConverter<T>, FromConverter<T> {
 	

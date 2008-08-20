@@ -6,23 +6,26 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterators;
 
-public class StringUtils {
+public class CStringUtils {
 
 	static String spaces = "                ";
-	
-	public synchronized static String spaces(int i){
-		
+
+	public synchronized static String spaces(int i) {
+
 		if (i > (1 << 20) - 1)
 			throw new IllegalArgumentException("One MB Whitespace should be enough for you!");
-		
-		while (spaces.length() < i){
+
+		while (spaces.length() < i) {
 			spaces = spaces + spaces;
 		}
-	
+
 		return spaces.substring(0, i);
 	}
-	
+
 	/**
 	 * 
 	 * @param word
@@ -36,18 +39,18 @@ public class StringUtils {
 	public static String pluralS(int i, String s) {
 		return "" + (i != 0 ? "" + i : "no") + " " + s + (i != 1 ? "s" : "");
 	}
-	
-	public static String commonPrefix(String a, String b){
+
+	public static String commonPrefix(String a, String b) {
 		if (a == null || b == null)
 			throw new NullPointerException();
-		
+
 		char[] c = a.toCharArray();
 		char[] d = b.toCharArray();
-		
+
 		int max = Math.min(c.length, d.length);
-		
+
 		int i = 0;
-		while (i < max && c[i] == d[i]){
+		while (i < max && c[i] == d[i]) {
 			i++;
 		}
 		return a.substring(0, i);
@@ -64,7 +67,7 @@ public class StringUtils {
 	public interface StringConverter<T> {
 		public String toString(T t);
 	}
-	
+
 	public interface FromConverter<T> {
 		public T fromString(String s);
 	}
@@ -91,30 +94,38 @@ public class StringUtils {
 		}
 
 		public String toString(Collection<T> t) {
-			return StringUtils.join(t, separator, converter);
+			return CStringUtils.join(t, separator, converter);
 		}
 	}
 
 	public static <T> String join(Iterable<T> strings, String separator,
-		StringConverter<? super T> converter) {
-		Iterator<T> it = strings.iterator();
-
+		final StringConverter<? super T> converter) {
+		Iterator<String> it = Iterators.filter(Iterators.transform(strings.iterator(),
+			new Function<T, String>() {
+				public String apply(T arg0) {
+					return converter.toString(arg0);
+				}
+			}), new Predicate<String>() {
+			public boolean apply(String arg0) {
+				return arg0 != null;
+			}
+		});
 		StringBuilder sb = new StringBuilder();
 		if (it.hasNext())
-			sb.append(converter.toString(it.next()));
+			sb.append(it.next());
 		while (it.hasNext()) {
-			sb.append(separator).append(converter.toString(it.next()));
+			sb.append(separator).append(it.next());
 		}
 		return sb.toString();
 	}
-	
-	public static String indent(String s, int i){
+
+	public static String indent(String s, int i) {
 		StringIBuilder sb = new StringIBuilder();
 		sb.indent(i);
 		sb.append(s);
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Starting from position pos in text will capture all chars until c is
 	 * found (including), returning the resulting string.
@@ -138,30 +149,30 @@ public class StringUtils {
 
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Starting from position pos in text will capture all chars until delim is
 	 * found (including), returning the resulting string.
 	 * 
-	 * If a character escape preceedes the delimiter it is not interpreted 
-	 * as finishing the capture.
+	 * If a character escape preceedes the delimiter it is not interpreted as
+	 * finishing the capture.
 	 */
-	public static String skipAhead(char delim, char escape, char[] text, int pos){
-		
+	public static String skipAhead(char delim, char escape, char[] text, int pos) {
+
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(text[pos++]);
-		
+
 		while (pos < text.length && text[pos] != delim) {
-			
-			if (text[pos] == escape){
-				while (pos < text.length && text[pos] == escape){
+
+			if (text[pos] == escape) {
+				while (pos < text.length && text[pos] == escape) {
 					sb.append(text[pos]);
 					pos++;
 				}
 			}
-		
-			if (pos < text.length){
+
+			if (pos < text.length) {
 				sb.append(text[pos]);
 				pos++;
 			}
@@ -171,9 +182,9 @@ public class StringUtils {
 
 		return sb.toString();
 	}
-	
-	public static String wrap(String input, int startDepth, int indentDepth, int width){
-		
+
+	public static String wrap(String input, int startDepth, int indentDepth, int width) {
+
 		input = input.trim().replaceAll("\\n *", "\n");
 
 		List<String> lines = new LinkedList<String>();
@@ -181,7 +192,7 @@ public class StringUtils {
 			if (s.trim().length() > 0)
 				lines.add(s.replaceAll("\\s+", " "));
 		}
-		input = StringUtils.join(lines, "\n");
+		input = CStringUtils.join(lines, "\n");
 
 		if (input.length() + startDepth <= width && !input.contains("\n")) {
 			return input;
@@ -193,47 +204,47 @@ public class StringUtils {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(spaces(startDepth));
-		
+
 		for (String s : input.split("\n")) {
 
 			boolean wordAdded = false;
-			
+
 			StringBuilder currentParagraph = new StringBuilder();
 
 			for (String nextWord : s.split("\\s+")) {
 				if (nextWord.length() == 0)
 					continue;
-				
-				if (sb.length() + nextWord.length() <= width || sb.length() <= indentDepth){
+
+				if (sb.length() + nextWord.length() <= width || sb.length() <= indentDepth) {
 					sb.append(nextWord).append(' ');
 					wordAdded = true;
 				} else {
 					String toAdd = sb.toString();
-					if (wordAdded){
+					if (wordAdded) {
 						toAdd = trimTrailing(toAdd);
 					}
-					
+
 					currentParagraph.append(toAdd).append('\n');
 					sb = new StringBuilder(spaces(indentDepth));
 					sb.append(nextWord).append(' ');
 				}
 			}
-			
+
 			String toAdd = sb.toString();
-			if (wordAdded){
+			if (wordAdded) {
 				toAdd = trimTrailing(toAdd);
 			}
-			
+
 			currentParagraph.append(toAdd);
 			paragraphs.add(currentParagraph.toString());
-			
+
 			sb = new StringBuilder(spaces(indentDepth));
 		}
-		
-		return StringUtils.join(paragraphs, "\n\n").substring(startDepth);
+
+		return CStringUtils.join(paragraphs, "\n\n").substring(startDepth);
 	}
-	
-	public static String trimTrailing(String s){
+
+	public static String trimTrailing(String s) {
 		return org.apache.commons.lang.StringUtils.stripEnd(s, " \n\r\t\f");
 	}
 
@@ -289,25 +300,26 @@ public class StringUtils {
 		return result;
 	}
 
-	/** 
-	 *  Returns leading white space characters in the specified string. 
-	 */ 
-	public static String getLeadingWhiteSpace(String str) { 
-	    return str.substring(0, StringUtils.getLeadingWhiteSpaceWidth(str)); 
+	/**
+	 * Returns leading white space characters in the specified string.
+	 */
+	public static String getLeadingWhiteSpace(String str) {
+		return str.substring(0, CStringUtils.getLeadingWhiteSpaceWidth(str));
 	}
 
-	/** 
-	 *  Returns the number of leading white space characters in the specified string. 
-	 */ 
-	public static int getLeadingWhiteSpaceWidth(String str) { 
-	    int whitespace = 0; 
-	    while(whitespace<str.length()) { 
-	        char ch = str.charAt(whitespace); 
-	        if(ch==' ' || ch=='\t') 
-	            whitespace++; 
-	        else 
-	            break; 
-	    } 
-	    return whitespace; 
+	/**
+	 * Returns the number of leading white space characters in the specified
+	 * string.
+	 */
+	public static int getLeadingWhiteSpaceWidth(String str) {
+		int whitespace = 0;
+		while (whitespace < str.length()) {
+			char ch = str.charAt(whitespace);
+			if (ch == ' ' || ch == '\t')
+				whitespace++;
+			else
+				break;
+		}
+		return whitespace;
 	}
 }

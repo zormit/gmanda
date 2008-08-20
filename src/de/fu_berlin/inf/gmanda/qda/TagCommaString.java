@@ -9,9 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.fu_berlin.inf.gmanda.util.IterableUnroller;
-import de.fu_berlin.inf.gmanda.util.StringUtils;
-import de.fu_berlin.inf.gmanda.util.StringUtils.JoinConverter;
-import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.JoinConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 
 public class TagCommaString extends AbstractCodedString {
 
@@ -81,7 +81,7 @@ public class TagCommaString extends AbstractCodedString {
 
 			StringBuilder sb = new StringBuilder();
 
-			sb.append(StringUtils.join(tagLevels, "."));
+			sb.append(CStringUtils.join(tagLevels, "."));
 
 			if (hasValue()) {
 				sb.append('=');
@@ -92,7 +92,7 @@ public class TagCommaString extends AbstractCodedString {
 				for (String s : value.split("\\n\\n")) {
 					lines.add(s.replaceAll("\\s+", " "));
 				}
-				value = StringUtils.join(lines, "\n");
+				value = CStringUtils.join(lines, "\n");
 
 				if (value.length() > 80 - sb.length() || value.contains("\n")) {
 
@@ -104,13 +104,13 @@ public class TagCommaString extends AbstractCodedString {
 
 						StringBuffer total = new StringBuffer();
 						StringBuffer sb2 = new StringBuffer();
-						sb2.append(StringUtils.spaces(indent));
+						sb2.append(CStringUtils.spaces(indent));
 						for (String s2 : s.split("\\s+")) {
 							if (sb2.length() + s2.length() < 80)
 								sb2.append(" ").append(s2);
 							else {
 								total.append(sb2.toString()).append('\n');
-								sb2 = new StringBuffer(StringUtils.spaces(indent));
+								sb2 = new StringBuffer(CStringUtils.spaces(indent));
 								sb2.append(s2);
 							}
 						}
@@ -118,7 +118,7 @@ public class TagCommaString extends AbstractCodedString {
 						lines.add(total.toString());
 					}
 
-					sb.append(StringUtils.join(lines, "\n\n"));
+					sb.append(CStringUtils.join(lines, "\n\n"));
 
 				} else {
 					sb.append(value);
@@ -190,10 +190,10 @@ public class TagCommaString extends AbstractCodedString {
 
 	public TagCommaString(String stringOfcodes) {
 
-		for (String segments : StringUtils.split(stringOfcodes, ';', '\"')) {
+		for (String segments : CStringUtils.split(stringOfcodes, ';', '\"')) {
 			List<Code> segmentList = new LinkedList<Code>();
 
-			for (String code : StringUtils.split(segments, ',', '\"')) {
+			for (String code : CStringUtils.split(segments, ',', '\"')) {
 				if (code.trim().length() > 0)
 					segmentList.add(new TagCodedCode(code));
 			}
@@ -204,7 +204,7 @@ public class TagCommaString extends AbstractCodedString {
 
 	public String format() {
 
-		return StringUtils.join(codes, ";\n\n", new JoinConverter<Code>(",\n",
+		return CStringUtils.join(codes, ";\n\n", new JoinConverter<Code>(",\n",
 			new StringConverter<Code>() {
 				public String toString(Code t) {
 					return t.format(2, 80);
@@ -222,7 +222,7 @@ public class TagCommaString extends AbstractCodedString {
 	}
 
 	public String toString() {
-		return StringUtils.join(codes, ";", new JoinConverter<Code>(",",
+		return CStringUtils.join(codes, ";", new JoinConverter<Code>(",",
 			new StringConverter<Code>() {
 				public String toString(Code t) {
 					return t.toString(true, true);

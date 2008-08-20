@@ -9,14 +9,13 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import de.fu_berlin.inf.gmanda.util.CMultimap;
 
 public class SliceImpl implements Slice {
 
 	public static Code c = CodedStringFactory.parseOne("<no code>");
 	
-	HashMultimap<PrimaryDocument, Code> contents = new HashMultimap<PrimaryDocument, Code>();
+	CMultimap<PrimaryDocument, Code> contents = new CMultimap<PrimaryDocument, Code>();
 	
 	Map<Code, Slice> selected = new HashMap<Code, Slice>();
 	Map<Code, Slice> filter = new HashMap<Code, Slice>();
@@ -41,7 +40,7 @@ public class SliceImpl implements Slice {
 		SliceImpl rejected = new SliceImpl();
 
 		next: 
-		for (Entry<PrimaryDocument, Collection<Code>> entry : contents.asMap().entrySet()){
+		for (Entry<PrimaryDocument, Collection<Code>> entry : contents.entrySet()){
 
 			for (Code c : entry.getValue()){
 				if (toFilterFor.matches(c)){
@@ -65,7 +64,7 @@ public class SliceImpl implements Slice {
 	
 		SliceImpl result = new SliceImpl();
 		
-		for (Entry<PrimaryDocument, Collection<Code>> entry : contents.asMap().entrySet()){
+		for (Entry<PrimaryDocument, Collection<Code>> entry : contents.entrySet()){
 
 			PrimaryDocument pd = entry.getKey();
 
@@ -80,23 +79,24 @@ public class SliceImpl implements Slice {
 		return result;
 	}
 	
-	public Multimap<PrimaryDocument, Code> getDocuments() {
+	public CMultimap<PrimaryDocument, Code> getDocuments() {
 		return contents;
 	}
 
+	
 	public Map<String, Slice> slice() {
 		
 		Map<String, SliceImpl> result = new TreeMap<String, SliceImpl>();
 		
-		for (Entry<PrimaryDocument, Collection<Code>> entry : contents.asMap().entrySet()){
+		for (Entry<PrimaryDocument, Collection<Code>> entry : contents.entrySet()){
 
 			PrimaryDocument pd = entry.getKey();
 
 			for (Code c : entry.getValue()){
 				String tag = c.getTag();
-				if (tag.equals("desc") && c.getProperties().size() == 1){
-					tag = c.getValue();
-				} 
+//				if (tag.equals("desc") && c.getProperties().size() == 1){
+//					tag = c.getValue();
+//				} 
 				
 				tag = StringUtils.strip(tag, " \"'\n\r\t\f");
 				
@@ -109,6 +109,9 @@ public class SliceImpl implements Slice {
 			}
 		}
 		
-		return (Map)result;
+		@SuppressWarnings("unchecked")
+		Map<String, Slice> result2 = (Map)result;
+		
+		return result2;
 	}
 }

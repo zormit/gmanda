@@ -30,12 +30,10 @@ import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
-import de.fu_berlin.inf.gmanda.qda.CodedString;
-import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.Pair;
-import de.fu_berlin.inf.gmanda.util.StringUtils;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
 
 public class TabulationCanvas extends JScrollPane {
 
@@ -117,9 +115,7 @@ public class TabulationCanvas extends JScrollPane {
 				if (p == null)
 					return;
 
-				CodedString c = CodedStringFactory.parse(settings.xDim);
-
-				List<PrimaryDocument> x = p.getCodeModel().filter(getDocs(), c);
+				List<PrimaryDocument> x = p.getCodeModel().getPrimaryDocuments(settings.xDim);
 
 				LinkedHashSet<Set<String>> table = new LinkedHashSet<Set<String>>();
 				LinkedHashSet<String> headerRow = new LinkedHashSet<String>();
@@ -134,7 +130,7 @@ public class TabulationCanvas extends JScrollPane {
 					LinkedHashSet<String> row = new LinkedHashSet<String>();
 
 					row.add(CodeAsTextView.toFilterA(pair.p));
-					row.add(StringUtils.join(Lists.transform(pair.v,
+					row.add(CStringUtils.join(Lists.transform(pair.v,
 						new Function<PrimaryDocument, String>() {
 							public String apply(PrimaryDocument pd) {
 								return CodeAsTextView.toA(pd);

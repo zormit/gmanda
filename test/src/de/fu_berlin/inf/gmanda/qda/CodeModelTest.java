@@ -16,7 +16,7 @@ import org.jvyaml.YAML;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.imports.MyXStream;
 import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
-import de.fu_berlin.inf.gmanda.util.StringUtils;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
 
 public class CodeModelTest extends TestCase {
 
@@ -105,7 +105,7 @@ public class CodeModelTest extends TestCase {
 						pairs.add(lastKey + ": \"" + currentValue.toString() + "\"");
 					}
 					
-					sb.append(StringUtils.join(pairs, ", "));
+					sb.append(CStringUtils.join(pairs, ", "));
 					
 					sb.append(" } ");
 				} 

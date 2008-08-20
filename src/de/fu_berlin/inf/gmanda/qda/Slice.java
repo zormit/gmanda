@@ -2,7 +2,7 @@ package de.fu_berlin.inf.gmanda.qda;
 
 import java.util.Map;
 
-import com.google.common.collect.Multimap;
+import de.fu_berlin.inf.gmanda.util.CMultimap;
 
 /**
  * Immutable
@@ -13,7 +13,7 @@ public interface Slice {
 	 * Returns the documents currently presented by this slice
 	 * @return
 	 */
-	public Multimap<PrimaryDocument, Code> getDocuments();
+	public CMultimap<PrimaryDocument, Code> getDocuments();
 	
 	/**
 	 * Taking the current set of documents, returns a slice centerd on the given code.

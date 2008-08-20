@@ -976,12 +976,12 @@
         <property name="list" value="comp.desktop.rox.devel"/>
       </metadata>
       <document filename="gmane://gmane.comp.desktop.rox.devel.9036">
-        <code>dasdfasdfasdfhello world</code>
+        <code>episode.hello.bye:\n  {   \n    \n    \n    \n    \n    \n    \n  }</code>
         <metadata>
           <property name="date" value="2007-01-03T16:08:00.000+01:00"/>
           <property name="from" value="Thomas Leonard &lt;talex5@gmail.com&gt;"/>
           <property name="id" value="9036"/>
-          <property name="lastseen" value="2008-07-31T22:40:28.080+02:00"/>
+          <property name="lastseen" value="2008-08-20T00:23:24.280+02:00"/>
           <property name="list" value="gmane.comp.desktop.rox.devel"/>
           <property name="subject" value="Font configlet"/>
           <property name="title" value="9036 - Font configlet"/>
@@ -1554,22 +1554,24 @@
         </document>
       </document>
       <document filename="gmane://gmane.comp.desktop.rox.devel.9087">
-        <code>episode.hello,\nactivity.sustain.upgrade: \&quot;Hello World\&quot;,\nrationale.software is no longer maintained,\nforces.tools create dependencies</code>
+        <code>episode.hello: {\n  #type: {\n    def: \&quot;Type is quite useful\&quot;,\n    value: {\n      desc: defined,\n      def: is defined\n    }\n  }, \n  summary: \&quot;Why not\&quot;\n},\nactivity.sustain.upgrade: \&quot;Hello World\&quot;,\nrationale.software is no longer maintained,\n\nforces.tools create dependencies</code>
         <metadata>
           <property name="date" value="2007-02-02T23:49:00.000+01:00"/>
           <property name="from" value="Thomas Leonard &lt;talex5@gmail.com&gt;"/>
           <property name="id" value="9087"/>
-          <property name="lastseen" value="2008-08-15T00:27:07.486+02:00"/>
+          <property name="lastseen" value="2008-08-19T17:31:11.223+02:00"/>
           <property name="list" value="gmane.comp.desktop.rox.devel"/>
           <property name="subject" value="ROX web-site now on Drupal 4.7"/>
           <property name="title" value="9087 - ROX web-site now on Drupal 4.7"/>
           <property name="to" value="Development of the ROX Desktop &lt;rox-devel@lists.sourceforge.net&gt;"/>
         </metadata>
         <document filename="gmane://gmane.comp.desktop.rox.devel.9088">
+          <code>episode</code>
           <metadata>
             <property name="date" value="2007-02-03T03:38:00.000+01:00"/>
             <property name="from" value="Ken Hayber &lt;ken@hayber.us&gt;"/>
             <property name="id" value="9088"/>
+            <property name="lastseen" value="2008-08-20T00:18:37.241+02:00"/>
             <property name="list" value="gmane.comp.desktop.rox.devel"/>
             <property name="subject" value="Re: ROX web-site now on Drupal 4.7"/>
             <property name="title" value="9088 - Re: ROX web-site now on Drupal 4.7"/>
@@ -7259,6 +7261,7 @@
           <property name="date" value="2007-03-14T23:34:00.000+01:00"/>
           <property name="from" value="Kevin Falcone &lt;falcone@bestpractical.com&gt;"/>
           <property name="id" value="4152"/>
+          <property name="lastseen" value="2008-08-19T17:24:36.025+02:00"/>
           <property name="list" value="gmane.comp.bug-tracking.request-tracker.devel"/>
           <property name="subject" value="[Rt-announce] new RT2 to RT3 converter release"/>
           <property name="title" value="4152 - [Rt-announce] new RT2 to RT3 converter release"/>
@@ -7266,11 +7269,12 @@
         </metadata>
       </document>
       <document filename="gmane://gmane.comp.bug-tracking.request-tracker.devel.4153">
-        <code>episode.mandatory cf@rt,\nsensemaking.capabilities</code>
+        <code>episode.mandatory cf@rt: {\n  desc: \&quot;hello\&quot;,\n  #type: {\n    value: innovation\n  }\n  #outcome: {\n    value: success\n  }\n},\nsensemaking.capabilities</code>
         <metadata>
           <property name="date" value="2007-03-16T04:15:00.000+01:00"/>
           <property name="from" value="w z &lt;entwicklung10@gmail.com&gt;"/>
           <property name="id" value="4153"/>
+          <property name="lastseen" value="2008-08-19T17:30:16.214+02:00"/>
           <property name="list" value="gmane.comp.bug-tracking.request-tracker.devel"/>
           <property name="subject" value="Creating mandatory fields"/>
           <property name="title" value="4153 - Creating mandatory fields"/>

@@ -1,4 +1,8 @@
 
+2008-08-20
+
+   * Improved Code Detail View for better information about Properties
+
 2008-08-19
 
    * First implementation of improved query support for properties

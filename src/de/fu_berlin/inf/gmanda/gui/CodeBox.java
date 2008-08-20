@@ -73,8 +73,8 @@ public class CodeBox extends JTextArea {
 		this.codeBoxView.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 
 		Action action = new AutoIndentAction(":{", 2); 
-		getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "auto-indent"); 
-		getActionMap().put("auto-indent", action);
+		getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), action); 
+		getActionMap().put(action, action);
 		
 		project.add(new VariableProxyListener<Project>() {
 			public void setVariable(Project newValue) {
@@ -183,7 +183,7 @@ public class CodeBox extends JTextArea {
 				String prefix = it.next();
 
 				while (it.hasNext()) {
-					prefix = de.fu_berlin.inf.gmanda.util.StringUtils.commonPrefix(prefix, it
+					prefix = de.fu_berlin.inf.gmanda.util.CStringUtils.commonPrefix(prefix, it
 						.next());
 				}
 
@@ -234,15 +234,11 @@ public class CodeBox extends JTextArea {
 				} else {
 					String currentWholeText = (leadingText + followingText).trim();
 
+					String trimmedLeading = leadingText.trim();
+					
 					for (String s : currentModel.getList()) {
 
-						if (s.startsWith(leadingText.trim()) && !currentWholeText.startsWith(s)) {
-							// System.out.println(String.format("%s - %s - %s",
-							// StringEscapeUtils.escapeJava(s),
-							// StringEscapeUtils.escapeJava(leadingText.trim()),
-							// StringEscapeUtils.escapeJava((leadingText +
-							// followingText).trim())));
-
+						if (s.startsWith(trimmedLeading) && !currentWholeText.startsWith(s)) {
 							list.add(s);
 						}
 					}
@@ -320,7 +316,7 @@ public class CodeBox extends JTextArea {
 		String after = text.substring(caret);
 		
 		int lineStart = before.lastIndexOf('\n') + 1; 
-		String whiteSpace = de.fu_berlin.inf.gmanda.util.StringUtils.getLeadingWhiteSpace(before.substring(lineStart, caret));
+		String whiteSpace = de.fu_berlin.inf.gmanda.util.CStringUtils.getLeadingWhiteSpace(before.substring(lineStart, caret));
 
 		beforeCaretInsert = beforeCaretInsert.replace("\n", "\n" + whiteSpace);
 		afterCaretInsert = afterCaretInsert.replace("\n", "\n" + whiteSpace);

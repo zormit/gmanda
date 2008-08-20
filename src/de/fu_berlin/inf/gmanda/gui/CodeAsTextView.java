@@ -36,9 +36,11 @@ import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.qda.Slice;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
 import de.fu_berlin.inf.gmanda.util.DeferredVariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 
 public class CodeAsTextView extends JScrollPane {
 
@@ -239,6 +241,7 @@ public class CodeAsTextView extends JScrollPane {
 			}
 		}
 
+		// Then properties
 		properties2html(p, code, sb);
 
 		// Then sorted by date
@@ -337,72 +340,115 @@ public class CodeAsTextView extends JScrollPane {
 
 	private void properties2html(Project p, String code, StringBuilder sb) {
 
-		boolean hasProperty = false;
-
 		Slice s = p.getCodeModel().getInitialFilterSlice(code).select(
 			CodedStringFactory.parseOne(code));
+		
+		for (Entry<String, Slice> entry2 : s.slice().entrySet()) {
 
-		for (Entry<String, Slice> entry : s.slice().entrySet()) {
+			String aProp2 = entry2.getKey();
+			Slice sub2 = entry2.getValue();
 
-			String aProp = entry.getKey();
-			Slice sub = entry.getValue();
+			if (!aProp2.trim().startsWith("#"))
+				continue;
+			
+			sb.append(surround("<li>" + aProp2 + ":<ul>", slice2html(sub2), "</ul></li>"));
+		}
+	}
 
-			if (!aProp.startsWith("#"))
+	public static String surround(String start, String middle, String end) {
+		if (middle.trim().length() > 0) {
+			return start + middle + end;
+		} else {
+			return "";
+		}
+	}
+
+	public static String slice2html(Slice s) {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(slice2html(s, "def"));
+
+		for (Entry<String, Slice> entry2 : s.slice().entrySet()) {
+
+			String aProp2 = entry2.getKey();
+			Slice sub2 = entry2.getValue();
+
+			if (aProp2.equals("def"))
 				continue;
 
-			if (!hasProperty) {
-				sb.append("<h4>Properties</h4>");
-				sb.append("<ul>");
-				hasProperty = true;
+			if (aProp2.equals("desc")) {
+				sb.append(CStringUtils.join(sub2.getDocuments()
+					.entrySet(), "<br>",
+					new StringConverter<Entry<PrimaryDocument, Collection<Code>>>() {
+						public String toString(Entry<PrimaryDocument, Collection<Code>> docs) {
+							return pd2html(docs.getKey(), docs.getValue());
+						}
+					}));
+			} else {
+				sb.append(surround("<li>" + aProp2 + ":", slice2html(sub2), "</li>"));
 			}
-
-			sb.append("<li>").append(aProp).append(":<ul>");
-
-			slice2html(sb, sub, "def");
-
-			for (Entry<String, Slice> entry2 : sub.select(CodedStringFactory.parseOne("value")).select(CodedStringFactory.parseOne("desc")).slice().entrySet()) {
-
-				String aProp2 = entry2.getKey();
-				Slice sub2 = entry2.getValue();
-
-				sb.append("<li>").append(aProp2).append(":<br>");
-				for (PrimaryDocument pd : sub2.getDocuments().keys()){
-					if (pd.getFilename() != null) {
-						sb.append(toA(pd)).append("<br>");
-					}
-				}
-				sb.append("</li>");
+		}
+		
+		String noValues = CStringUtils.join(s.getDocuments().entrySet(),
+			"<br>", new StringConverter<Entry<PrimaryDocument, Collection<Code>>>() {
+			public String toString(Entry<PrimaryDocument, Collection<Code>> docs) {
+				if (docs.getValue().size() == 0)
+					return pd2html(docs.getKey(), docs.getValue());
+				else
+					return null;
 			}
-			sb.append("</ul></li>");
-		}
+		});
+		
+		sb.append(noValues);
 
-		if (hasProperty) {
-			sb.append("</ul>");
-		}
+		return surround("<ul>", sb.toString(), "</ul>");
 	}
 
-	private void slice2html(StringBuilder sb, Slice sub, String string) {
+	public static String pd2html(PrimaryDocument pd, Collection<Code> codes) {
 
-		boolean hasStuff = false;
-		
-		for (Entry<PrimaryDocument, Code> entry3 : sub.select(CodedStringFactory.parseOne(string))
-			.getDocuments().entries()) {
+		StringBuilder sb = new StringBuilder();
 
-			if (!hasStuff){
-				sb.append(string).append(":<ul>");
-				hasStuff = true;
+		if (pd.getFilename() != null) {
+			sb.append(toA(pd));
+		}
+		if (codes.size() > 0) {
+			sb.append("<ul>");
+			for (Code c : codes) {
+				sb.append("<li>").append(code2html(c)).append("</li>");
 			}
-			
-			PrimaryDocument pd = entry3.getKey();
-			Code c = entry3.getValue();
+			sb.append("</ul>");
+		}
 
+		return sb.toString();
+	}
+
+	private static String slice2html(Slice sub, String string) {
+
+		StringBuilder sb = new StringBuilder();
+
+		for (Entry<PrimaryDocument, Collection<Code>> entry : sub.select(
+			CodedStringFactory.parseOne(string)).getDocuments().entrySet()) {
+
+			String result = codes2html(entry.getValue(), entry.getKey());
+			if (result.trim().length() > 0){
+				sb.append(result);
+			}
+		}
+
+		return sb.toString();
+	}
+
+	private static String codes2html(Collection<Code> codes, PrimaryDocument pd) {
+
+		StringBuilder sb = new StringBuilder();
+		for (Code c : codes){
 			code2html(sb, c, pd);
 		}
-		if (hasStuff)
-			sb.append("</ul>");
+		return sb.toString();
 	}
-
-	private void code2html(StringBuilder sb, Code c, PrimaryDocument pd) {
+	
+	private static void code2html(StringBuilder sb, Code c, PrimaryDocument pd) {
 
 		sb.append("<li>");
 		sb.append(code2html(c));

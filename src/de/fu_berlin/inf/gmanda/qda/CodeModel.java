@@ -165,13 +165,19 @@ public class CodeModel {
 		
 		List<String> result = new LinkedList<String>();
 		
-		int index = sortedList.indexOf(code);
-		if (index == -1 && !code.equals("")) {
-			return result;
-		}
+		int index;
 		
-		if (!code.equals(""))
+		if (code.equals("")){
+			// Start at first
+			index = 0;
+		} else {
+			index = sortedList.indexOf(code);
+			if (index == -1) {
+				return result;
+			}
+			// Skip match itself
 			index++;
+		}
 		
 		while (index < sortedList.size()) {
 			String next = sortedList.get(index);

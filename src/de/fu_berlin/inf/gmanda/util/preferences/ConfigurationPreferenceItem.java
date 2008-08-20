@@ -4,8 +4,8 @@ import java.util.HashSet;
 
 import de.fu_berlin.inf.gmanda.util.Configuration;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
-import de.fu_berlin.inf.gmanda.util.StringUtils.FromConverter;
-import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.FromConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 
 public class ConfigurationPreferenceItem<T> implements PreferenceItem<T> {
 

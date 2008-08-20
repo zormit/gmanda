@@ -6,8 +6,8 @@ package de.fu_berlin.inf.gmanda.util.preferences;
 import java.awt.Color;
 
 import de.fu_berlin.inf.gmanda.util.Configuration;
-import de.fu_berlin.inf.gmanda.util.StringUtils.FromConverter;
-import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.FromConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 
 public class ColorPreferenceItem extends ConfigurationPreferenceItem<Color> {
 	public ColorPreferenceItem(Configuration conf, String key, Color defaultValue) {

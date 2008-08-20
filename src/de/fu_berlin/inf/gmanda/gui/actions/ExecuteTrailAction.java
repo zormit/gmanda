@@ -24,7 +24,7 @@ import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
-import de.fu_berlin.inf.gmanda.util.StringUtils;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 import de.fu_berlin.inf.gmanda.util.progress.ProgressInputStream;
@@ -199,10 +199,10 @@ public class ExecuteTrailAction extends AbstractAction {
 									switch (JOptionPane.showOptionDialog(common
 										.getForegroundWindowOrNull(),
 										"Code in trail file does not match existing code in project file.\n"
-											+ "Code from trail:\n" + StringUtils.indent(oldCode, 2)
+											+ "Code from trail:\n" + CStringUtils.indent(oldCode, 2)
 											+ "\n" + "Code in project:\n"
-											+ StringUtils.indent(pdoldcode, 2) + "\n"
-											+ "New code:\n" + StringUtils.indent(newcode, 2) + "\n"
+											+ CStringUtils.indent(pdoldcode, 2) + "\n"
+											+ "New code:\n" + CStringUtils.indent(newcode, 2) + "\n"
 											+ "Apply change nevertheless?", "Executing Trail...",
 										JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
 										null, new Object[] { "Yes", "Yes to all", "No",
@@ -230,9 +230,9 @@ public class ExecuteTrailAction extends AbstractAction {
 								} else {
 									System.out.println("Unapplied change to PD: "
 										+ pd.getFilename() + "\n" + "Code from trail:\n"
-										+ StringUtils.indent(oldCode, 2) + "\n"
-										+ "Code in project:\n" + StringUtils.indent(pdoldcode, 2)
-										+ "\n" + "New code:\n" + StringUtils.indent(newcode, 2));
+										+ CStringUtils.indent(oldCode, 2) + "\n"
+										+ "Code in project:\n" + CStringUtils.indent(pdoldcode, 2)
+										+ "\n" + "New code:\n" + CStringUtils.indent(newcode, 2));
 								}
 							} else {
 								pd.setCode(newcode);

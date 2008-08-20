@@ -12,8 +12,8 @@ import de.fu_berlin.inf.gmanda.qda.ProjectDataV1;
 import de.fu_berlin.inf.gmanda.qda.ProjectDataV2;
 import de.fu_berlin.inf.gmanda.qda.TagCommaString;
 import de.fu_berlin.inf.gmanda.qda.TagxON;
-import de.fu_berlin.inf.gmanda.util.StringUtils;
-import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 import de.fu_berlin.inf.gmanda.util.tree.ChildrenableTreeWalker;
 
 public class FileVersionConvert {
@@ -49,7 +49,7 @@ public class FileVersionConvert {
 			
 			TagCommaString s = new TagCommaString(codeString);
 			
-			String newCode = StringUtils.join(s.getAllCodes(), ",\n", new StringConverter<Code>(){
+			String newCode = CStringUtils.join(s.getAllCodes(), ",\n", new StringConverter<Code>(){
 
 				public String toString(Code code) {
  
@@ -66,7 +66,7 @@ public class FileVersionConvert {
 							sb.append(props.get(0).getValue());
 						} else {
 							sb.append("{ ");
-							sb.append(StringUtils.join(props, ", ", new StringConverter<Code>(){
+							sb.append(CStringUtils.join(props, ", ", new StringConverter<Code>(){
 
 								public String toString(Code t) {
 									StringBuilder sb = new StringBuilder();

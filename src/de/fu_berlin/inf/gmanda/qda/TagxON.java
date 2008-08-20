@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-import de.fu_berlin.inf.gmanda.util.StringUtils;
-import de.fu_berlin.inf.gmanda.util.StringUtils.StringConverter;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
+import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 
 /**
  * Parser and Emitter for Tag and Taxonomy Object Notation TagxON
@@ -27,7 +27,7 @@ public class TagxON {
 		}
 
 		public String format() {
-			return StringUtils.join(tags, ",\n", new StringConverter<Code>() {
+			return CStringUtils.join(tags, ",\n", new StringConverter<Code>() {
 
 				public String toString(Code t) {
 					return t.format(0, 80);
@@ -99,7 +99,7 @@ public class TagxON {
 
 			// If there is more than one newline at the beginning, we want to
 			// keep one of it.
-			int hasNewLinesAtBeginning = StringUtils.countNewLinesAtBeginning(tag);
+			int hasNewLinesAtBeginning = CStringUtils.countNewLinesAtBeginning(tag);
 
 			// Easy Case: No Value!
 			if (!hasValue()) {
@@ -116,7 +116,7 @@ public class TagxON {
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(getTag()).append(": ");
-			sb.append(StringUtils.wrap(value, sb.length(), indent, width));
+			sb.append(CStringUtils.wrap(value, sb.length(), indent, width));
 
 			assert sb.toString().replaceAll("\\s", "").equals(oldValue.replaceAll("\\s", "")) : "\nNew Value:\n"
 				+ sb.toString() + " \n\nOld Value:\n" + oldValue;
@@ -146,12 +146,12 @@ public class TagxON {
 
 			// If there is more than one newline at the beginning, we want to
 			// keep one of it.
-			int hasNewLinesAtBeginning = StringUtils.countNewLinesAtBeginning(tag);
+			int hasNewLinesAtBeginning = CStringUtils.countNewLinesAtBeginning(tag);
 
 			// Easy Case: No Value!
 			if (!hasValue()) {
 				if (hasNewLinesAtBeginning > 1) {
-					return '\n' + StringUtils.spaces(indent) + getTag();
+					return '\n' + CStringUtils.spaces(indent) + getTag();
 				} else {
 					return getTag();
 				}
@@ -168,33 +168,33 @@ public class TagxON {
 			StringBuilder sb = new StringBuilder();
 
 			if (hasNewLinesAtBeginning > 1) {
-				sb.append('\n').append(StringUtils.spaces(indent));
+				sb.append('\n').append(CStringUtils.spaces(indent));
 			}
 
 			sb.append(getTag()).append(":");
 
 			if (subs.size() == 1 && subs.get(0).getTag().equals("desc")) {
 
-				String value = StringUtils.wrap(subs.get(0).getValue(), indent + 2, indent + 2,
+				String value = CStringUtils.wrap(subs.get(0).getValue(), indent + 2, indent + 2,
 					width);
 
 				if (sb.length() + value.length() < width && !value.contains("\n")){
 					sb.append(" ").append(value);
 				} else {
-					sb.append("\n").append(StringUtils.spaces(indent + 2)).append(value);
+					sb.append("\n").append(CStringUtils.spaces(indent + 2)).append(value);
 				}
 			} else {
 				sb.append(" {\n");
 
-				sb.append(StringUtils.join(subs, ",\n", new StringConverter<RTag>() {
+				sb.append(CStringUtils.join(subs, ",\n", new StringConverter<RTag>() {
 
 					public String toString(RTag t) {
-						return StringUtils.spaces(indent + 2) + t.format(indent + 2, width);
+						return CStringUtils.spaces(indent + 2) + t.format(indent + 2, width);
 					}
 
 				}));
 
-				sb.append("\n").append(StringUtils.spaces(indent)).append("}");
+				sb.append("\n").append(CStringUtils.spaces(indent)).append("}");
 			}
 
 			return sb.toString();
@@ -212,7 +212,7 @@ public class TagxON {
 				return subs.get(0).getValue();
 			}
 
-			return "{" + StringUtils.join(subs, ", ") + "}";
+			return "{" + CStringUtils.join(subs, ", ") + "}";
 		}
 	}
 
@@ -238,7 +238,7 @@ public class TagxON {
 		for (int i = 0; i < text.length; i++) {
 
 			if (text[i] == quote) {
-				String skipped = StringUtils.skipAhead(quote, escape, text, i);
+				String skipped = CStringUtils.skipAhead(quote, escape, text, i);
 				i += skipped.length() - 1;
 				result.add(skipped);
 				continue;
