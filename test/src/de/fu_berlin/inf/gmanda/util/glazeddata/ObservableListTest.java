@@ -1,12 +1,15 @@
 package de.fu_berlin.inf.gmanda.util.glazeddata;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class ObservableListTest extends TestCase {
+public class ObservableListTest {
 
+	@Test
 	public void testAddT() {
 		ObservableList<String> l = new ObservableList<String>();
 		

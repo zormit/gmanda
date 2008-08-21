@@ -1,15 +1,19 @@
 package de.fu_berlin.inf.gmanda.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import java.util.Collections;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-public class TestMultimap extends TestCase{
+public class TestMultimap {
 	
+	@Test
 	public void testMultimap(){
 		
 		Multimap<String, String> test = new HashMultimap<String, String>();

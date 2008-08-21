@@ -5,13 +5,44 @@ import java.util.List;
 
 public interface Code {
 	
+	/**
+	 * Returns the whole (trimmed) tag of this code.
+	 * 
+	 * For instance for a code 
+	 * 
+	 * concept.confusion: "Hello"
+	 * 
+	 * This method returns 'concept.confusion'
+	 */
 	public String getTag();
 
+	/**
+	 * Returns true, if this Code has a value.
+	 * 
+	 * For instance for a code 
+	 * 
+	 * concept.confusion: "Hello"
+	 * 
+	 * This method returns 'true'
+	 */
 	public boolean hasValue();
 	
+	/**
+	 * Returns true, if this Code has a value.
+	 * 
+	 * For instance for a code 
+	 * 
+	 * concept.confusion: { value: "Hello", desc: "Good" }
+	 * 
+	 * This method returns 
+	 * 
+	 * { value: "Hello", desc: "Good" }
+	 */
 	public String getValue();
 
 	public Collection<String> getTagVariations();
+	
+	public Collection<String> getTagLevels();
 
 	public String toString(boolean withValue, boolean whiteSpace);
 

@@ -41,8 +41,6 @@ public class AutoIndentAction extends AbstractAction {
 	
     public void actionPerformed(ActionEvent ae) { 
     	
-    	System.out.println("HELLO");
-    	
         JTextArea comp = (JTextArea)ae.getSource(); 
         Document doc = comp.getDocument(); 
  

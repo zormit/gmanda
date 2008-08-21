@@ -1,12 +1,13 @@
 package de.fu_berlin.inf.gmanda.qda;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.lang.StringUtils;
+import org.junit.Test;
 
 import de.fu_berlin.inf.gmanda.qda.TagxON.TagxONCodedString;
 
-public class TagxOnTest extends TestCase {
+public class TagxOnTest {
 
 	public static String parseAndJoin(String s) {
 
@@ -15,6 +16,7 @@ public class TagxOnTest extends TestCase {
 		return StringUtils.join(o.parse(s).tags, ", ");
 	}
 
+	@Test
 	public void testParsing() {
 
 		assertEquals("hello: {world: how are you}", parseAndJoin("hello : { world : how are you }"));
@@ -58,6 +60,7 @@ public class TagxOnTest extends TestCase {
 		
 	}
 
+	@Test
 	public void testFormat() {
 		String s = "activity.announce: {def:\"The moment of the official announcement of a innovation is a central an\n"
 			+ "dedicated moment in the introduction of the innovation. This email lead to\n"

@@ -8,11 +8,13 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import de.fu_berlin.inf.gmanda.gui.misc.CodeCompleter;
 import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
+import de.fu_berlin.inf.gmanda.util.gui.AutoCompleter;
 import de.fu_berlin.inf.gmanda.util.gui.ProxyTextComponentBridge;
 
 public class CodeDetailBox extends JPanel {
@@ -26,6 +28,8 @@ public class CodeDetailBox extends JPanel {
 	});
 	
 	ProxyTextComponentBridge bridge;
+
+	 AutoCompleter<String> completer;
 
 	public CodeDetailBox(final CodeList codeList, ProjectProxy projectProxy, 
 		CodeDetailProxy proxy, FilterTextProxy filter) {
@@ -41,7 +45,7 @@ public class CodeDetailBox extends JPanel {
 				setEnabled(newValue != null);
 			}
 		});
-		
+		 
 		filter.add(new VariableProxyListener<String>(){
 			public void setVariable(String newValue) {
 				textField.setText(newValue);
@@ -49,5 +53,7 @@ public class CodeDetailBox extends JPanel {
 		});
 		
 		bridge = new ProxyTextComponentBridge(textField, proxy);
+		
+		completer = new AutoCompleter<String>(new CodeCompleter(textField, projectProxy));
 	}
 }

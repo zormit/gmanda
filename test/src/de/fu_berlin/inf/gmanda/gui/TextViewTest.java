@@ -1,13 +1,17 @@
 package de.fu_berlin.inf.gmanda.gui;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class TextViewTest extends TestCase {
+import org.junit.Test;
+
+
+public class TextViewTest {
 
 	public void assertURL(String url){
 		assertEquals("<a href=\"" + url + "\">" + url + "</a>", TextView.toHyperLink(url));
 	}
 	
+	@Test
 	public void testURLEscape() {
 
 		assertEquals("<a href=\"http://www.hello.com/\">http://www.hello.com/</a>", TextView
@@ -20,6 +24,7 @@ public class TextViewTest extends TestCase {
 
 	}
 
+	@Test
 	public void testBoldAndItalic() {
 
 		assertEquals(" hello ", TextView.toBoldAndItalic(" hello "));

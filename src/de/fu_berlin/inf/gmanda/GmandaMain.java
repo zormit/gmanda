@@ -19,8 +19,11 @@
 package de.fu_berlin.inf.gmanda;
 
 import org.picocontainer.Characteristics;
-import org.picocontainer.DefaultPicoContainer;
 import org.picocontainer.MutablePicoContainer;
+import org.picocontainer.PicoBuilder;
+import org.picocontainer.injectors.AnnotatedFieldInjection;
+import org.picocontainer.injectors.CompositeInjection;
+import org.picocontainer.injectors.ConstructorInjection;
 import org.picocontainer.injectors.AbstractInjector.UnsatisfiableDependenciesException;
 
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
@@ -88,6 +91,7 @@ import de.fu_berlin.inf.gmanda.gui.menu.PrimaryDocumentMenu;
 import de.fu_berlin.inf.gmanda.gui.menu.PrimaryDocumentTreePopup;
 import de.fu_berlin.inf.gmanda.gui.menu.ToolsMenu;
 import de.fu_berlin.inf.gmanda.gui.menu.WindowMenu;
+import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.gui.misc.LockManager;
 import de.fu_berlin.inf.gmanda.gui.misc.PrimaryDocumentCellRenderer;
 import de.fu_berlin.inf.gmanda.gui.misc.ProjectFileChooser;
@@ -150,7 +154,8 @@ public class GmandaMain {
 	
 	public GmandaMain(CommandLineOptions cmd) {
 		
-		container = new DefaultPicoContainer();
+		container = new PicoBuilder(new CompositeInjection(   
+		    new ConstructorInjection(), new AnnotatedFieldInjection())).withCaching().build();
 		
 		// Cache object instances (we only want every object created once as a singleton)
 		container = container.change(Characteristics.CACHE);
@@ -286,7 +291,8 @@ public class GmandaMain {
 			.addComponent(TrackCompareManager.class)
 			.addComponent(LuceneFacade.class)
 			.addComponent(SelectionViewManager.class)
-			.addComponent(TrailManager.class);
+			.addComponent(TrailManager.class)
+			.addComponent(GmandaHyperlinkListener.class);
 	}
 
 	public void startApplication() {

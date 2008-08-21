@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
@@ -133,6 +134,8 @@ public class AutoCompleter<T> {
 	 * to probe.
 	 */
 	protected boolean probeAcceptOnOpen = true;
+	
+	protected InputMap inputMap = new InputMap();
 
 	public AutoCompleter(AutoCompleterControl<T> comp) {
 		control = comp;
@@ -157,7 +160,18 @@ public class AutoCompleter<T> {
 		textComp.getActionMap().put(acceptAction, acceptAction);
 		textComp.getActionMap().put(hideAction, hideAction);
 
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), downAction);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), upAction);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0),
+			pageDownAction);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0),
+			pageUpAction);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+			acceptAction);		
+		
 		if (autoShow) {
+			inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+				hideAction);
 			comp.addDocumentListener(showPopupListener);
 		} else {
 			textComp.registerKeyboardAction(autoCompleteAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
@@ -165,34 +179,23 @@ public class AutoCompleter<T> {
 		}
 
 		popup.addPopupMenuListener(new PopupMenuListener() {
+			
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-				textComp.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), downAction);
-				textComp.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), upAction);
-				textComp.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0),
-					pageDownAction);
-				textComp.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0),
-					pageUpAction);
-				textComp.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-					acceptAction);
+				inputMap.setParent(textComp.getInputMap());
+				textComp.setInputMap(JComponent.WHEN_FOCUSED, inputMap);
 
 				list.getSelectionModel().clearSelection();
 
 				if (autoShow == false) {
-					textComp.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-						hideAction);
 					control.addDocumentListener(showPopupListener);
 				}
 			}
 
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-				textComp.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0));
-				textComp.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0));
-				textComp.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0));
-				textComp.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0));
-				textComp.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+				
+				textComp.setInputMap(JComponent.WHEN_FOCUSED, inputMap.getParent());
 
 				if (autoShow == false) {
-					textComp.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
 					control.removeDocumentListener(showPopupListener);
 				}
 			}

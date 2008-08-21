@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import de.fu_berlin.inf.gmanda.gui.misc.CodeCompleter;
 import de.fu_berlin.inf.gmanda.proxies.Filter;
 import de.fu_berlin.inf.gmanda.proxies.FilterKindProxy;
 import de.fu_berlin.inf.gmanda.proxies.FilterProxy;
@@ -21,6 +22,7 @@ import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
+import de.fu_berlin.inf.gmanda.util.gui.AutoCompleter;
 import de.fu_berlin.inf.gmanda.util.gui.ProxyTextComponentBridge;
 
 public class PrimaryDocumentTreeFilterTextField extends JPanel {
@@ -39,6 +41,8 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 	JButton nextHitButton;
 	JButton previousHitButton;
 
+	AutoCompleter<String> completer;
+	
 	public enum FilterKind {
 		SINGLE("Single all hits out", "public_co.gif"),
 		ROOT("Use hits as Root", "sub_co.gif"), 
@@ -72,6 +76,8 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 			setFocusable(false);
 		}
 	}
+	
+	
 
 	String tooltip = "<html>Only show documents that match the codes entered entered.<br>" +
 	"To find documents that contain several codes separated them by <code>,</code>.<br>" +
@@ -82,7 +88,6 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 	"  <li><code>*</code> Show all documents that have any code at all.</li>" +
 	"  <li><code>-</code> Show all documents that do not contain the given code or search.<br>Caution: This might be slow.</li>" +
 	"</ul></html>";
-	
 	public PrimaryDocumentTreeFilterTextField(
 		ProjectProxy projectProxy, 
 		FilterTextProxy filter,
@@ -169,6 +174,8 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 				.addComponent(filterDescriptor));
 					
 		bridge = new ProxyTextComponentBridge(textField, filter);
+		
+		completer = new AutoCompleter<String>(new CodeCompleter(textField, projectProxy));
 
 		// Only enable textfield and reset button if there is a project
 		projectProxy.add(new VariableProxyListener<Project>() {

@@ -36,13 +36,17 @@ import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.StateChangeListener;
+import de.fu_berlin.inf.gmanda.util.StringJoiner;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
+import de.fu_berlin.inf.gmanda.util.gui.HighlightSupport;
 
 public class TextView extends JScrollPane {
 
 	JTextPane pane = new JTextPane();
 
+	HighlightSupport highlighter = new HighlightSupport(pane);
+	
 	protected Object toShow;
 	protected String search;
 
@@ -88,6 +92,9 @@ public class TextView extends JScrollPane {
 		this.scrollOnShow = scrollOnShow;
 		this.gmane = gmane;
 		this.commonService = service;
+		
+		
+
 
 		setBorder(BorderFactory.createEmptyBorder());
 
@@ -136,39 +143,15 @@ public class TextView extends JScrollPane {
 		search.addAndNotify(new VariableProxyListener<String>() {
 			public void setVariable(String search) {
 				TextView.this.search = search;
-				update();
+				updateHighlight();
 			}
 		});
 	}
 
-	public static String toHTML(String html, String search, List<String> quoteList) {
+	public static String toHTML(String html) {
 
 		html = html.replace(">", "&gt;");
 		html = html.replace("<", "&lt;");
-
-		// Highlight quotation list in Blue
-		for (String s : quoteList) {
-			s = s.trim();
-			if (s.length() == 0)
-				continue;
-
-			String searchPattern = de.fu_berlin.inf.gmanda.util.CStringUtils.join(Arrays.asList(s
-				.split("\\s+")), "\\s+", new StringConverter<String>() {
-
-				public String toString(String t) {
-					return Pattern.quote(t);
-				}
-			});
-
-			html = html.replaceAll("(?i)(" + searchPattern + ")",
-				"<span style=\"background-color:blue; color:white;\">$1</span>");
-		}
-
-		// Highlight search term in Red
-		if (search != null && search.length() > 0) {
-			html = html.replaceAll("(?i)(" + Pattern.quote(search) + ")",
-				"<span style=\"background-color:red; color:white;\">$1</span>");
-		}
 
 		html = toBoldAndItalic(html);
 
@@ -249,6 +232,63 @@ public class TextView extends JScrollPane {
 			"$1*<b>$2</b>*");
 		return html;
 	}
+	
+	public void updateHighlight(){
+		
+		highlighter.removeHighlights();
+		
+		if (toShow == null || !(toShow instanceof PrimaryDocument || toShow instanceof Project)) {
+			return;
+		} else {
+			
+			final PrimaryDocument pd = (PrimaryDocument) toShow;
+			
+			List<String> quoteList = new LinkedList<String>();
+
+			String code = pd.getCode();
+
+			if (code != null) {
+				for (Code c : CodedStringFactory.parse(pd.getCode()).getAllCodes()) {
+					for (Code c2 : c.getProperties()) {
+						if (c2.getTag().equals("quote")) {
+							quoteList.add(StringUtils.strip(c2.getValue(),
+								". \r\n\f\t'\""));
+						}
+					}
+				}
+			}
+
+			StringJoiner sb = new StringJoiner("|");
+			quoteList.add(search);
+			
+			for (String s : quoteList){
+				
+				if (s == null)
+					continue;
+				s = s.trim();
+				if (s.length() == 0)
+					continue;
+				
+				String searchPattern = de.fu_berlin.inf.gmanda.util.CStringUtils.join(Arrays.asList(s
+					.split("\\s+")), "\\s+", new StringConverter<String>() {
+
+					public String toString(String t) {
+						return Pattern.quote(t);
+					}
+				});
+
+				sb.append("(?i)(" + searchPattern + ")");
+			}
+			
+							
+			String searchPattern = sb.toString();
+			if (searchPattern.length() > 0){
+				highlighter.findAllMatches(Pattern.compile(searchPattern));
+			}
+			
+		}
+		
+	}
 
 	public void update() {
 
@@ -274,26 +314,13 @@ public class TextView extends JScrollPane {
 				commonService.run(new Runnable() {
 					public void run() {
 						String text = pd.getText(gmane);
-
-						List<String> quoteList = new LinkedList<String>();
-
-						String code = pd.getCode();
-
-						if (code != null) {
-							for (Code c : CodedStringFactory.parse(pd.getCode()).getAllCodes()) {
-								for (Code c2 : c.getProperties()) {
-									if (c2.getTag().equals("quote")) {
-										quoteList.add(StringUtils.strip(c2.getValue(),
-											". \r\n\f\t'\""));
-									}
-								}
-							}
-						}
-
-						String html = toHTML(text, search, quoteList);
+						
+						String html = toHTML(text);
 
 						pane.setText(html);
-
+						
+						updateHighlight();
+						
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
 								invalidate();

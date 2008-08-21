@@ -347,7 +347,12 @@ public class CodeModel {
 					list.add(new Pair<String, PrimaryDocument>("<other>", pd));
 			}
 		}
-		return Pair.disjointPartition(list);
+		
+		List<Pair<String, List<PrimaryDocument>>> l = Pair.disjointPartition(list);
+		
+		Collections.reverse(l);
+		
+		return l;
 	}
 	
 	public Slice getInitialFilterSlice(String code){

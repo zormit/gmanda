@@ -1,9 +1,12 @@
 package de.fu_berlin.inf.gmanda.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class StringUtilsTest extends TestCase {
+import org.junit.Test;
+
+public class StringUtilsTest {
 	
+	@Test
 	public void testSkipAhead(){
 		
 		assertEquals("|hello world|", CStringUtils.skipAhead('|', '-', "hello |hello world| world".toCharArray(), 6));
@@ -13,6 +16,7 @@ public class StringUtilsTest extends TestCase {
 		assertEquals("|hello-| world|", CStringUtils.skipAhead('|', '-', "hello |hello-| world| world".toCharArray(), 6));
 	}
 	
+	@Test
 	public void testWrap(){
 		
 		assertEquals("hallo", CStringUtils.wrap("hallo", 0, 0, 80));

@@ -1,12 +1,17 @@
 package de.fu_berlin.inf.gmanda.util.tree;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
-public class TreeWalkerTest extends TestCase {
+public class TreeWalkerTest {
 
 	public class Node {
 		List<Node> children = new LinkedList<Node>();
@@ -27,6 +32,7 @@ public class TreeWalkerTest extends TestCase {
 	Node root;
 	
 	@SuppressWarnings("unused")
+	@Before
 	public void setUp(){
 		root = new Node(null, "1");
 		
@@ -40,6 +46,7 @@ public class TreeWalkerTest extends TestCase {
 		
 	}
 	
+	@Test
 	public void testIterator() {
 		
 		int i = 0;
@@ -66,18 +73,26 @@ public class TreeWalkerTest extends TestCase {
 		assertEquals(7, i);
 	}
 
+	@Ignore
+	@Test
 	public void testVisitCollectionOfTTreeVisitorOfTTreeMakerOfT() {
 		fail("Not yet implemented");
 	}
 
+	@Ignore
+	@Test
 	public void testVisitTTreeVisitorOfTTreeMakerOfT() {
 		fail("Not yet implemented");
 	}
-
+	
+	@Ignore
+	@Test
 	public void testFindCollectionOfTTreeAcceptorOfTTreeMakerOfT() {
 		fail("Not yet implemented");
 	}
 
+	@Ignore
+	@Test
 	public void testFindTTreeAcceptorOfTTreeMakerOfT() {
 		fail("Not yet implemented");
 	}

@@ -33,17 +33,22 @@ public abstract class AbstractCode implements Code {
 		return toString(true, false);
 	}
 	
+	public Collection<String> getTagLevels(){
+		return Collections.unmodifiableList(tagLevels);
+	}
+
 	public Collection<String> getTagVariations() {
 		Collection<String> variations = new LinkedList<String>();
 
 		StringBuilder sb = new StringBuilder();
 
 		for (String string : tagLevels) {
-			if (sb.length() > 0) {
-				sb.append('.');
-			}
 			sb.append(string);
 			variations.add(sb.toString());
+
+			// Don't worry about adding a . too many, we don't touch the sb
+			// afterwards.
+			sb.append('.');
 		}
 		return variations;
 	}
@@ -61,7 +66,6 @@ public abstract class AbstractCode implements Code {
 		}
 		return false;
 	}
-	
 
 	public boolean renameTag(String fromRename, String toRename) {
 
@@ -116,8 +120,8 @@ public abstract class AbstractCode implements Code {
 
 		return true;
 	}
-	
-	public Collection<? extends Code> getProperties(String propName){
+
+	public Collection<? extends Code> getProperties(String propName) {
 		return AbstractCodedString.getProperties(Collections.singletonList(this), propName);
 	}
 

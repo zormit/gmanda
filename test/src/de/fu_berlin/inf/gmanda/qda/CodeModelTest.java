@@ -1,5 +1,7 @@
 package de.fu_berlin.inf.gmanda.qda;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,8 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.jvyaml.YAML;
 
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
@@ -18,15 +19,16 @@ import de.fu_berlin.inf.gmanda.imports.MyXStream;
 import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
 import de.fu_berlin.inf.gmanda.util.CStringUtils;
 
-public class CodeModelTest extends TestCase {
+public class CodeModelTest {
 
+	@Test
 	public void testYAML() throws IOException {
 
 		ProjectLoader pl = new ProjectLoader(new MyXStream(), new CommonService(new ForegroundWindowProxy()));
 		
-		Project p = pl.load(new File("test/data/testing.gmp"), null);//"D:\\\\svn\\\\sci\\\\ChrisDiss\\\\qda\\\\innovation.gmp"), null);		
+		Project p = pl.load(new File("test/data/testing.gmp"), null);		
 		
-		BufferedReader bf = new BufferedReader(new FileReader("test.tmp"));
+		BufferedReader bf = new BufferedReader(new FileReader("test/data/testing.gmp"));
 		
 		String s;
 		StringBuilder sb = new StringBuilder();
@@ -115,7 +117,7 @@ public class CodeModelTest extends TestCase {
 			String result = sb.toString().replaceAll("\n{2,}", "\n\n");
 			
 			System.out.println(result);
-//			
+		
 			Object o = YAML.load(result);
 			
 			System.out.println(YAML.dump(o));
@@ -123,6 +125,7 @@ public class CodeModelTest extends TestCase {
 
 	}
 
+	@Test
 	public void testRename() {
 		{
 			CodedString c = CodedStringFactory.parse("offtest.offtest=Hello, offtest.bla=Bye");
@@ -142,6 +145,7 @@ public class CodeModelTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testWhiteSpace() {
 		{
 			CodedString c = CodedStringFactory.parse(
@@ -152,6 +156,7 @@ public class CodeModelTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEscape() {
 		CodedString c = CodedStringFactory.parse("\"hello,world\"");
 		assertEquals(1, c.getAllVariations().size());

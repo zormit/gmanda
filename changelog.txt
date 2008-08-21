@@ -1,4 +1,14 @@
 
+2008-08-21
+
+   * [FEATURE] Added HyperLinks for in Code Detail View
+   * [FEATURE] Added CodeCompleters to all TextFields (CTRL-SPACE)
+   * [MINOR] Improved Code Detail View with regards to subcodes display
+   * [MINOR] Robust highlighting support in Document View
+   * [DEP] Moved to JUnit 4 using Annotations
+   * [INTERNAL] Introduced the use of Annotation based dependency injection
+   * [DEP] Moved to PicoContainer 2.5.1 to get some CompositeInjection goodness
+
 2008-08-20
 
    * Improved Code Detail View for better information about Properties

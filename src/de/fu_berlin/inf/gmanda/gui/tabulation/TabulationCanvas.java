@@ -3,8 +3,6 @@ package de.fu_berlin.inf.gmanda.gui.tabulation;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
@@ -13,12 +11,11 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.picocontainer.annotations.Inject;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -26,64 +23,27 @@ import com.google.common.collect.Lists;
 import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
 import de.fu_berlin.inf.gmanda.gui.CodeAsTextView;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
-import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
-import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
+import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
-import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
-import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.CStringUtils;
+import de.fu_berlin.inf.gmanda.util.Pair;
 
 public class TabulationCanvas extends JScrollPane {
 
-	JTextPane pane = new JTextPane();
-
+	@Inject
 	ProjectProxy project;
 
-	CodeDetailProxy codeDetailProxy;
-
-	SelectionProxy selection;
-
-	FilterTextProxy filter;
-
+	@Inject
 	CommonService commonService;
 
-	public TabulationCanvas(ProjectProxy projectProxy, SelectionProxy selection,
-		FilterTextProxy filter, CommonService common) {
+	JTextPane pane = new JTextPane();
+	
+	public TabulationCanvas(GmandaHyperlinkListener linkListener) {
 		super();
 
-		this.selection = selection;
-		this.project = projectProxy;
-		this.filter = filter;
-		this.commonService = common;
-
-		pane.addHyperlinkListener(new HyperlinkListener() {
-			public void hyperlinkUpdate(HyperlinkEvent arg0) {
-				if (arg0.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-					String filename = arg0.getDescription();
-					if (filename.startsWith("gmane://")) {
-
-						PrimaryDocument pd = project.getVariable().getCodeModel().getByFilename(
-							filename);
-
-						if (pd != null)
-							TabulationCanvas.this.selection.setVariable(pd);
-					}
-					if (filename.startsWith("gmaneFilter://")) {
-						try {
-							TabulationCanvas.this.filter.setVariable(URLDecoder.decode(filename
-								.substring("gmaneFilter://".length()), "UTF-8"));
-						} catch (UnsupportedEncodingException e) {
-							e.printStackTrace();
-							TabulationCanvas.this.filter.setVariable(filename
-								.substring("gmaneFilter://".length()));
-						}
-					}
-
-				}
-			}
-		});
+		pane.addHyperlinkListener(linkListener);
 
 		setBorder(BorderFactory.createEmptyBorder());
 
