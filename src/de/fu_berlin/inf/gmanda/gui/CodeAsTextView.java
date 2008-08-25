@@ -171,7 +171,7 @@ public class CodeAsTextView extends JScrollPane {
 	}
 
 	public String codeToHTML(Project p, Code code) {
-
+		
 		String tag = code.getTag();
 
 		List<PrimaryDocument> newFilterList = new ArrayList<PrimaryDocument>(p.getCodeModel()
@@ -303,7 +303,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		return sb.toString();
 	}
-
+	
 	public String definition2html(String tag, List<PrimaryDocument> newFilterList) {
 
 		boolean definitionFound = false;
@@ -370,9 +370,6 @@ public class CodeAsTextView extends JScrollPane {
 			if (property.startsWith("#"))
 				sb.append(surround("<li>" + toFilterA(property) + ":<ul>", property2html(property,
 					childSlice), "</ul></li>"));
-			else
-				sb.append(surround("<li>" + toFilterA(property) + ":<ul>", slice2html(property,
-					childSlice), "</ul></li>"));
 		}
 		
 		if (sb.length() > 0){
@@ -408,7 +405,7 @@ public class CodeAsTextView extends JScrollPane {
 		return surround("<ul>", sb.toString(), "</ul>");
 	}
 
-	public static String property2html(String code, Slice s) {
+	public static String property2html(String tag, Slice s) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -416,36 +413,39 @@ public class CodeAsTextView extends JScrollPane {
 
 		for (Entry<String, Slice> entry2 : s.slice().entrySet()) {
 
-			String aProp2 = entry2.getKey();
-			Slice sub2 = entry2.getValue();
+			String valueTag = entry2.getKey();
+			Slice valueSlice = entry2.getValue();
 
-			if (aProp2.equals("def"))
+			if (valueTag.equals("def") || valueTag.equals("desc") || valueTag.equals("quote"))
 				continue;
 
-			if (aProp2.equals("desc")) {
-				sb.append(CStringUtils.join(sub2.getDocuments().entrySet(), "<br>",
+			Collection<Entry<PrimaryDocument, Collection<Code>>> docs = valueSlice.getDocuments()
+				.entrySet();
+
+			sb.append(surround("<li><b>" + toFilterA(valueTag) + "</b> (" + docs.size() + "):<br>",
+				CStringUtils.join(docs, "<br>",
 					new StringConverter<Entry<PrimaryDocument, Collection<Code>>>() {
 						public String toString(Entry<PrimaryDocument, Collection<Code>> docs) {
-							return pd2html(docs.getKey(), docs.getValue());
+							return pd2a(docs.getKey());
 						}
-					}));
-			} else {
-				sb.append(surround("<li>" + toFilterA(aProp2) + ":", slice2html(aProp2, sub2),
-					"</li>"));
-			}
+					}), "</li>"));
 		}
 
 		String noValues = CStringUtils.join(s.getDocuments().entrySet(), "<br>",
 			new StringConverter<Entry<PrimaryDocument, Collection<Code>>>() {
 				public String toString(Entry<PrimaryDocument, Collection<Code>> docs) {
-					if (docs.getValue().size() == 0)
-						return pd2html(docs.getKey(), docs.getValue());
-					else
-						return null;
+
+					for (Code c : docs.getValue()) {
+						String tag = c.getTag();
+						if (!(tag.equals("def") || tag.equals("desc") || tag.equals("quote")))
+							return null;
+					}
+
+					return pd2a(docs.getKey());
 				}
 			});
 
-		sb.append(noValues);
+		sb.append(surround("<li><span style=\"color:red;\">No value</span>:<br>", noValues, "</li>"));
 
 		return surround("<ul>", sb.toString(), "</ul>");
 	}
