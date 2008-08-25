@@ -3,6 +3,9 @@ package de.fu_berlin.inf.gmanda.qda;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Immutable
+ */
 public interface Code {
 	
 	/**
@@ -46,7 +49,14 @@ public interface Code {
 
 	public String toString(boolean withValue, boolean whiteSpace);
 
-	public boolean renameTag(String fromRename, String toRename);
+	/**
+	 * Uses the given fromRename as a literal expression for calling 
+	 * 
+	 * tag.replace(fromRename, toRename)
+	 * 
+	 * If the Code changes a new instance is returned, otherwise this is returned.
+	 */
+	public Code renameTag(String fromRename, String toRename);
 
 	public boolean matches(Code c);
 

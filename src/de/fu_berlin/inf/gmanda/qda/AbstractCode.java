@@ -14,6 +14,10 @@ public abstract class AbstractCode implements Code {
 
 	protected List<String> tagLevels;
 
+	public AbstractCode(String tag) {
+		setTag(tag);
+	}
+
 	protected void setTag(String newTag) {
 		this.tag = newTag;
 		this.tagTrimmed = newTag.trim();
@@ -65,22 +69,6 @@ public abstract class AbstractCode implements Code {
 				return true;
 		}
 		return false;
-	}
-
-	public boolean renameTag(String fromRename, String toRename) {
-
-		if (!tag.contains(fromRename))
-			return false;
-
-		String newTag = tag.replace(fromRename, toRename);
-
-		if (newTag.trim().equals("") && hasValue()) {
-			setTag("???.orphaned description");
-		} else {
-			setTag(newTag);
-		}
-
-		return true;
 	}
 
 	/**

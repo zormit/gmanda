@@ -43,7 +43,7 @@ public class CodeModelTest {
 		
 			sb = new StringBuilder();
 			
-			CodedString cs = CodedStringFactory.parse(pd.getCode());
+			CodedString cs = CodedStringFactory.parse(pd.getCodeAsString());
 			
 			for (Code c : cs.getAllCodes()){
 				sb.append(c.getTag());
@@ -159,19 +159,19 @@ public class CodeModelTest {
 	@Test
 	public void testEscape() {
 		CodedString c = CodedStringFactory.parse("\"hello,world\"");
-		assertEquals(1, c.getAllVariations().size());
+		assertEquals(1, c.getAllVariationsDeep().size());
 		CodedString c2 = CodedStringFactory.parse("hello,world");
-		assertEquals(2, c2.getAllVariations().size());
+		assertEquals(2, c2.getAllVariationsDeep().size());
 		CodedString c3 = CodedStringFactory.parse("\"hello,world\",bye");
-		assertEquals(2, c3.getAllVariations().size());
+		assertEquals(2, c3.getAllVariationsDeep().size());
 		CodedString c4 = CodedStringFactory.parse(
 			"\"hello,world\",bye;\"oh my, god; could, this\" actually work \",\"");
-		assertEquals(3, c4.getAllVariations().size());
+		assertEquals(3, c4.getAllVariationsDeep().size());
 		{
 			// Error cases
 			CodedString c5 = CodedStringFactory.parse(
 				"\"hello,world\",bye;\"oh my, god; could, this\" actually work \",");
-			assertEquals(3, c5.getAllVariations().size());
+			assertEquals(3, c5.getAllVariationsDeep().size());
 		}
 
 	}

@@ -14,7 +14,9 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.picocontainer.annotations.Inject;
 
+import de.fu_berlin.inf.gmanda.gui.search.SearchService;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
@@ -37,6 +39,9 @@ import edu.umd.cs.piccolox.swing.PScrollPane;
 
 public class VisualizationCanvas extends PScrollPane {
 
+	@Inject
+	SearchService searchService;
+	
 	ProjectProxy project;
 
 	ColorMapper mapper;
@@ -217,7 +222,7 @@ public class VisualizationCanvas extends PScrollPane {
 
 		allDots = new HashMap<PrimaryDocument, List<PrimaryDocumentDot>>();
 		
-		List<PrimaryDocument> allEvents = project.getCodeModel().filter(PrimaryDocument.getTreeWalker(project.getPrimaryDocuments()), CodedStringFactory.parse(filterCode + ".*"));
+		List<PrimaryDocument> allEvents = searchService.filter(filterCode, null, project);
 		
 		if (allEvents.size() == 0){
 			

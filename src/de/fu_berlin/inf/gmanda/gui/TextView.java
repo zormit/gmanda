@@ -245,10 +245,10 @@ public class TextView extends JScrollPane {
 			
 			List<String> quoteList = new LinkedList<String>();
 
-			String code = pd.getCode();
+			String code = pd.getCodeAsString();
 
 			if (code != null) {
-				for (Code c : CodedStringFactory.parse(pd.getCode()).getAllCodes()) {
+				for (Code c : CodedStringFactory.parse(pd.getCodeAsString()).getAllCodesDeep()) {
 					for (Code c2 : c.getProperties()) {
 						if (c2.getTag().equals("quote")) {
 							quoteList.add(StringUtils.strip(c2.getValue(),

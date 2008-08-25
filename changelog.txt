@@ -1,4 +1,14 @@
 
+2008-08-25
+
+   * [FEATURE] The Codes-Box now tracks the caret position 
+   * [FEATURE] Rewind action (CTRL-ALT-LEFT) moves back in view history until
+               filter is different
+   * [MINOR]   Include codes into all relevant parts even if nested
+   * [MINOR]   Use search engine backend in all search dialogs (notably Visualization)
+   * [INTERNAL] Deprecate TagCommaSyntax
+   * [INTERNAL] Improve generics for TreeWalker 
+
 2008-08-21
 
    * [FEATURE] Added HyperLinks for in Code Detail View

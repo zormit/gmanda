@@ -4,7 +4,7 @@ import de.fu_berlin.inf.gmanda.util.StateChangeNotifier;
 
 public interface Codeable {
 	
-	public String getCode();
+	public String getCodeAsString();
 	
 	public void setCode(String newCode);
 	

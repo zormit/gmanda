@@ -6,6 +6,7 @@ package de.fu_berlin.inf.gmanda.gui;
 import java.awt.AWTKeyStroke;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,6 +40,8 @@ public class CodeBox extends JTextArea {
 	boolean sendChanges = false;
 
 	boolean receiveChanges = false;
+	
+	HashMap<Codeable, Integer> caretPositions = new HashMap<Codeable, Integer>();
 
 	public AutoCompleter<String> completer;
 
@@ -127,7 +130,7 @@ public class CodeBox extends JTextArea {
 						return;
 
 					sendChanges = false;
-					setText(currentlyShowing.getCode());
+					setText(currentlyShowing.getCodeAsString());
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							CodeBox.this.codeBoxView.getVerticalScrollBar().setValue(0);
@@ -138,9 +141,9 @@ public class CodeBox extends JTextArea {
 			};
 
 			public void setVariable(Object newSelected) {
-
 				if (currentlyShowing != null) {
 					currentlyShowing.getCodeChangeNotifier().remove(listener);
+					caretPositions.put(currentlyShowing, getCaretPosition());
 				}
 
 				if (newSelected instanceof Codeable) {
@@ -148,6 +151,13 @@ public class CodeBox extends JTextArea {
 					receiveChanges = true;
 					currentlyShowing.getCodeChangeNotifier().addAndNotify(listener,
 						currentlyShowing);
+					
+					Integer i = caretPositions.get(currentlyShowing);
+					
+					if (i != null){
+						setCaretPosition(Math.max(0, Math.min(i, getText().length())));
+					}
+					
 					CodeBox.this.codeBoxView.setEnabled(true);
 				} else {
 					currentlyShowing = null;
@@ -158,7 +168,7 @@ public class CodeBox extends JTextArea {
 			}
 		});
 	}
-
+	
 	public void insertAtCaret(String beforeCaretInsert, String afterCaretInsert) {
 		if (currentlyShowing == null)
 			return;

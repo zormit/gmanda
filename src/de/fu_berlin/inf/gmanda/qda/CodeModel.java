@@ -66,7 +66,7 @@ public class CodeModel {
 		if (currentlyStoredCodes.containsKey(t)) {
 
 			for (String partialQualifiedCode : CodedStringFactory.parse(currentlyStoredCodes.get(t))
-				.getAllVariations()) {
+				.getAllVariationsDeep()) {
 				if (codeMap.containsKey(partialQualifiedCode)) {
 					boolean removed = codeMap.get(partialQualifiedCode).remove(t);
 					if (removed && codeMap.get(partialQualifiedCode).size() == 0) {
@@ -85,12 +85,12 @@ public class CodeModel {
 			allDocs.put(t.filename, t);
 		}
 		
-		if (t.getCode() != null && t.getCode().trim().length() > 0) {
+		if (t.getCodeAsString() != null && t.getCodeAsString().trim().length() > 0) {
 			// Add again
-			String codes = t.getCode();
+			String codes = t.getCodeAsString();
 			currentlyStoredCodes.put(t, codes);
 
-			for (String partialQualifiedCode : CodedStringFactory.parse(codes).getAllVariations()) {
+			for (String partialQualifiedCode : CodedStringFactory.parse(codes).getAllVariationsDeep()) {
 				if (!codeMap.containsKey(partialQualifiedCode)) {
 					codeMap.put(partialQualifiedCode, new LinkedList<PrimaryDocument>());
 				}
@@ -202,10 +202,10 @@ public class CodeModel {
 		List<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
 	
 		for (PrimaryDocument pd : pds) {
-			if (pd.getCode() == null)
+			if (pd.getCodeAsString() == null)
 				continue;
 	
-			if (CodedStringFactory.parse(pd.getCode()).containsAny(searchTerm.getAllCodes()))
+			if (CodedStringFactory.parse(pd.getCodeAsString()).containsAny(searchTerm.getAllCodes()))
 				result.add(pd);
 		}
 	
@@ -224,7 +224,7 @@ public class CodeModel {
 		Code toFind = it.next();
 		
 		for (PrimaryDocument pd : getPrimaryDocuments(code)){
-			for (Code c: CodedStringFactory.parse(pd.getCode()).getAllCodes()){
+			for (Code c: CodedStringFactory.parse(pd.getCodeAsString()).getAllCodes()){
 				if (!toFind.matches(c))
 					continue;
 				
@@ -279,7 +279,7 @@ public class CodeModel {
 		Code toFind = it.next();
 		
 		for (PrimaryDocument pd : getPrimaryDocuments(code)){
-			for (Code c: CodedStringFactory.parse(pd.getCode()).getAllCodes()){
+			for (Code c: CodedStringFactory.parse(pd.getCodeAsString()).getAllCodes()){
 				if (!toFind.matches(c))
 					continue;
 				
@@ -303,7 +303,7 @@ public class CodeModel {
 
 		if (partitionCode.trim().equals("**")) {
 			for (PrimaryDocument pd : pds) {
-				for (String code : CodedStringFactory.parse(pd.getCode()).getAll()) {
+				for (String code : CodedStringFactory.parse(pd.getCodeAsString()).getAll()) {
 					list.add(new Pair<String, PrimaryDocument>(code, pd));
 				}
 			}
@@ -336,7 +336,8 @@ public class CodeModel {
 				boolean containedInNone = true;
 
 				for (String code : codes) {
-					if (CodedStringFactory.parse(pd.getCode()).containsAny(code + ".*")) {
+					CodedString c = CodedStringFactory.parse(pd.getCodeAsString());
+					if (c != null && c.containsAny(code + ".*")) {
 						list.add(new Pair<String, PrimaryDocument>(
 							("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
 								+ code.substring(partitionCode.length()) : code), pd));

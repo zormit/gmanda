@@ -1,11 +1,11 @@
-package de.fu_berlin.inf.gmanda.qda;
+package de.fu_berlin.inf.gmanda.qda.tagxon;
 
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import de.fu_berlin.inf.gmanda.qda.TagxON.TagxONCodedString;
+import de.fu_berlin.inf.gmanda.qda.tagxon.TagxON.TagxONCodedString;
 
 public class TagxOnTest {
 
@@ -13,7 +13,7 @@ public class TagxOnTest {
 
 		TagxON o = new TagxON();
 
-		return StringUtils.join(o.parse(s).tags, ", ");
+		return StringUtils.join(o.parseCodedString(s).tags, ", ");
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class TagxOnTest {
 			+ "this idea because of the sentence 'Officially announce the release cycle\n"
 			+ "thingy'.\"\n," + "quote:      \"hello\"," + "why    : \"does\"}";
 
-		TagxONCodedString c = new TagxON().parse(s);
+		TagxONCodedString c = new TagxON().parseCodedString(s);
 
 		assertEquals("activity.announce: {\n" + "  def:\n"
 			+ "    \"The moment of the official announcement of a innovation is a central an\n"

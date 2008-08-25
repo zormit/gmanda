@@ -3,18 +3,37 @@ package de.fu_berlin.inf.gmanda.qda;
 
 public interface CodedStringCore {
 
-	void add(String s);
+	/**
+	 * Add a code with the given tag to the end of this CodedString.
+	 */
+	void add(String tag);
 
-	void remove(String s);
+	/**
+	 * Remove all top-level codes with the given tag from this CodedString. 
+	 */
+	void remove(String tag);
 
-	boolean contains(String string);
+	/**
+	 * Returns true, iff there is a top-level code, with exactely the given tag. 
+	 */
+	boolean contains(String tag);
 
+	/**
+	 * Returns all top-level Codes of this CodedString
+	 */
 	Iterable<? extends Code> getAllCodes();
 
-	boolean rename(String string, String string2);
+	/**
+	 * Rename in all Codes the tags matching from to to. 
+	 * 
+	 * @return will return a new CodedStringCore representing the given 
+	 */
+	CodedString rename(String from, String to);
 
+	/**
+	 * Return a pretty printed version of this CodedString
+	 * @return
+	 */
 	String format();
 	
-	Code parse(String s);
-
 }

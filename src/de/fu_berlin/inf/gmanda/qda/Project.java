@@ -231,9 +231,9 @@ public class Project {
 
 					if (pdmap.containsKey(id)) {
 						PrimaryDocument source = pdmap.get(id);
-						if (pd.getCode() != null)
+						if (pd.getCodeAsString() != null)
 							throw new RuntimeException();
-						pd.setCode(source.getCode());
+						pd.setCode(source.getCodeAsString());
 
 						pdmap.remove(id);
 					}

@@ -87,10 +87,10 @@ public class PrimaryDocumentCellRenderer extends DefaultTreeCellRenderer {
 	}
 	
 	public boolean hasCode(PrimaryDocument pd, boolean recurse) {
-		if (pd.getCode() != null
-			&& pd.getCode().trim().length() > 0
-			&& !pd.getCode().trim().equals("seen")
-			&& !pd.getCode().trim().equals("spam")) {
+		if (pd.getCodeAsString() != null
+			&& pd.getCodeAsString().trim().length() > 0
+			&& !pd.getCodeAsString().trim().equals("seen")
+			&& !pd.getCodeAsString().trim().equals("spam")) {
 			return true;
 		}
 		if (!recurse)

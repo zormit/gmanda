@@ -1,4 +1,4 @@
-package de.fu_berlin.inf.gmanda.qda;
+package de.fu_berlin.inf.gmanda.qda.tagxon;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -6,6 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
+import de.fu_berlin.inf.gmanda.qda.AbstractCode;
+import de.fu_berlin.inf.gmanda.qda.AbstractCodedString;
+import de.fu_berlin.inf.gmanda.qda.Code;
+import de.fu_berlin.inf.gmanda.qda.CodedString;
 import de.fu_berlin.inf.gmanda.util.CStringUtils;
 import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
 
@@ -17,6 +22,27 @@ public class TagxON {
 	public class TagxONCodedString extends AbstractCodedString {
 
 		List<RTag> tags;
+
+		public CodedString rename(String fromRename, String toRename) {
+
+			TagxONCodedString result = new TagxONCodedString();
+			result.tags = new LinkedList<RTag>();
+
+			boolean changed = false;
+
+			for (Code c : getAllCodes()) {
+				RTag newCode = (RTag) c.renameTag(fromRename, toRename);
+				if (newCode != c)
+					changed = true;
+
+				tags.add(newCode);
+			}
+
+			if (changed)
+				return result;
+			else
+				return this;
+		}
 
 		public void add(String s) {
 			s = s.trim();
@@ -42,7 +68,7 @@ public class TagxON {
 
 		public RTag parse(String s) {
 
-			TagxONCodedString fullParse = TagxON.this.parse(s);
+			TagxONCodedString fullParse = TagxON.this.parseCodedString(s);
 
 			if (fullParse.tags.size() > 0)
 				return fullParse.tags.get(0);
@@ -62,6 +88,10 @@ public class TagxON {
 	}
 
 	public abstract class RTag extends AbstractCode {
+
+		public RTag(String tag) {
+			super(tag);
+		}
 
 		public String toString(boolean withValue, boolean whiteSpace) {
 			StringBuffer sb = new StringBuffer();
@@ -90,9 +120,37 @@ public class TagxON {
 
 		String value;
 
+		public Code renameTag(String fromRename, String toRename) {
+
+			if (!tag.contains(fromRename))
+				return this;
+
+			String newTag = tag.replace(fromRename, toRename);
+
+			if (newTag.equals(tag))
+				return this;
+
+			if (newTag.trim().equals("") && hasValue()) {
+				newTag = "???.orphaned description";
+			}
+
+			return new RTagLeaf(newTag, value);
+		}
+
+		public Object clone() {
+			RTagLeaf clone;
+			try {
+				clone = (RTagLeaf) super.clone();
+			} catch (CloneNotSupportedException e) {
+				throw new DoNotShowToUserException(e);
+			}
+			clone.value = value;
+			return clone;
+		}
+
 		public RTagLeaf(String tag, String value) {
+			super(tag);
 			this.value = value;
-			setTag(tag);
 		}
 
 		public String format(int indent, int width) {
@@ -140,6 +198,44 @@ public class TagxON {
 
 	public class RTagComposite extends RTag {
 
+		public RTagComposite(String tag) {
+			super(tag);
+		}
+
+		public Code renameTag(String fromRename, String toRename) {
+
+			boolean changed = false;
+
+			String newTag;
+			if (tag.contains(fromRename)) {
+				newTag = tag.replace(fromRename, toRename);
+
+				if (!newTag.equals(tag)) {
+					changed = true;
+					if (newTag.trim().equals("") && hasValue()) {
+						newTag = "???.orphaned description";
+					}
+				}
+			} else {
+				newTag = tag;
+			}
+
+			RTagComposite result = new RTagComposite(newTag);
+
+			for (RTag c : subs) {
+				RTag newCode = (RTag) c.renameTag(fromRename, toRename);
+				if (newCode != c)
+					changed = true;
+
+				result.subs.add(newCode);
+			}
+
+			if (changed)
+				return result;
+			else
+				return this;
+		}
+
 		public LinkedList<RTag> subs = new LinkedList<RTag>();
 
 		public String format(final int indent, final int width) {
@@ -162,7 +258,7 @@ public class TagxON {
 			//
 			// if (unformatted.length() + indent < width &&
 			// !unformatted.contains("\n")) {
-			//   return unformatted;
+			// return unformatted;
 			// }
 
 			StringBuilder sb = new StringBuilder();
@@ -178,7 +274,7 @@ public class TagxON {
 				String value = CStringUtils.wrap(subs.get(0).getValue(), indent + 2, indent + 2,
 					width);
 
-				if (sb.length() + value.length() < width && !value.contains("\n")){
+				if (sb.length() + value.length() < width && !value.contains("\n")) {
 					sb.append(" ").append(value);
 				} else {
 					sb.append("\n").append(CStringUtils.spaces(indent + 2)).append(value);
@@ -275,8 +371,7 @@ public class TagxON {
 			if (s.length() > 1 || !symbols.contains(s)) {
 				if (currentTag == null) {
 					// tag
-					currentTag = new RTagComposite();
-					currentTag.setTag(s);
+					currentTag = new RTagComposite(s);
 				} else {
 					// value
 					currentTag.subs.add(new RTagLeaf("desc", s));
@@ -325,14 +420,14 @@ public class TagxON {
 
 	}
 
-	public TagxONCodedString parse(String text) {
+	public TagxONCodedString parseCodedString(String text) {
 
 		if (text == null)
 			return null;
 
 		List<String> lex = lexer(text.toCharArray());
 
-		RTagComposite root = new RTagComposite();
+		RTagComposite root = new RTagComposite("root");
 
 		parseInternal(root, lex.listIterator(), true);
 

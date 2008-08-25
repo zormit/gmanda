@@ -58,9 +58,9 @@ public abstract class PrimaryDocumentNode extends JNode {
 		if (expanded || leaf) {
 			renderer.setText(pd.getName());
 
-			highLight = pd.getCode() != null && pd.getCode().trim().length() > 0
-				&& !pd.getCode().trim().equals("seen")
-				&& !pd.getCode().trim().equals("spam");
+			highLight = pd.getCodeAsString() != null && pd.getCodeAsString().trim().length() > 0
+				&& !pd.getCodeAsString().trim().equals("seen")
+				&& !pd.getCodeAsString().trim().equals("spam");
 		} else {
 			renderer.setText(pd.getName() + " (" + (pd.countChildrenAndSelf() - 1) + " children)");
 

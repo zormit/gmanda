@@ -150,13 +150,24 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 		return textNotifier;
 	}
 
-	public String getCode() {
+	CodedString cache;
+	
+	public CodedString getCode(){
+		if (cache == null){
+			cache = CodedStringFactory.parse(getCodeAsString());
+		}
+		return cache;
+	}
+	
+	public String getCodeAsString() {
 		return code;
 	}
 
 	public void setCode(String s) {
 		if (s != null && s.trim().length() == 0)
 			s = null;
+		
+		cache = null;
 		
 		code = s;
 		codeableNotifier.notify(this);
@@ -412,11 +423,12 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 
 	public boolean renameCodes(String renameFrom, String renameTo) {
 
-		CodedString codes = CodedStringFactory.parse(getCode());
+		CodedString codes = CodedStringFactory.parse(getCodeAsString());
 		
-		if (codes.rename(renameFrom, renameTo)){
-			setCode(codes.toString());
-			
+		CodedString newCodedString = codes.rename(renameFrom, renameTo);
+		
+		if (codes != newCodedString){
+			setCode(newCodedString.toString());
 			return true;
 		} else {
 			return false;
@@ -433,7 +445,7 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 	}
 
 	public boolean hasCode() {
-		if (getCode() != null && getCode().trim().length() > 0) {
+		if (getCodeAsString() != null && getCodeAsString().trim().length() > 0) {
 			return true;
 		}
 

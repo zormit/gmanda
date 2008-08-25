@@ -220,13 +220,13 @@ public class GmaneFacade {
 		
 		TreeAcceptor<PrimaryDocument> seen = new TreeAcceptor<PrimaryDocument>(){
 			public boolean accept(PrimaryDocument t) {
-				return t.hasMetaData("lastseen") || t.getCode() != null;
+				return t.hasMetaData("lastseen") || t.getCodeAsString() != null;
 			}
 		};
 
 		TreeAcceptor<PrimaryDocument> coded = new TreeAcceptor<PrimaryDocument>(){
 			public boolean accept(PrimaryDocument t) {
-				return t.getCode() != null	&& t.getCode().trim().length() > 0;
+				return t.getCodeAsString() != null	&& t.getCodeAsString().trim().length() > 0;
 			}
 		};
 

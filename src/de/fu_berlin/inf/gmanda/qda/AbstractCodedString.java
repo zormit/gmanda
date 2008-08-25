@@ -1,11 +1,16 @@
 package de.fu_berlin.inf.gmanda.qda;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class AbstractCodedString implements CodedString {
+import de.fu_berlin.inf.gmanda.util.tree.TreeMaker;
+import de.fu_berlin.inf.gmanda.util.tree.TreeStructure;
+import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
 
+public abstract class AbstractCodedString implements CodedString {
+ 
 	/**
 	 * Returns a list of all plain codes (without values behind the =)
 	 * 
@@ -18,6 +23,47 @@ public abstract class AbstractCodedString implements CodedString {
 			variations.add(c.getTag());
 		}
 		return variations;
+	}
+	
+	public Collection<? extends Code> getAllDeep(String code){
+		code = code.trim();
+		Collection<Code> result = new LinkedList<Code>();
+		for (Code c : getAllCodesDeep()) {
+			if (c.getTag().equals(code))
+				result.add(c);
+		}
+		return result;
+	}
+	
+	public Iterable<? extends Code> getAllCodesDeep(){
+		
+		TreeWalker<? extends Code> result = new TreeWalker<Code>(getAllCodes(), new TreeMaker<Code>(){
+ 
+			public TreeStructure<Code> toStructure(final Code t){
+				return new TreeStructure<Code>(){
+
+					public Code get(){
+						return t;
+					}
+
+					public Iterable<Code> getChildren() {
+						List<? extends Code> children = t.getProperties();
+						if (children.size() == 1 && children.get(0).getTag().equals("desc"))
+							return Collections.emptyList();
+						else {
+							// Casting here is not a problem, since Iterators are read only
+							@SuppressWarnings("unchecked")
+							Iterable<Code> result = (Iterable<Code>)children;
+							
+							return result;
+						}
+							
+					}
+				};}
+			
+		});
+
+		return result;
 	}
 	
 	public Collection<Code> getAll(String code){
@@ -60,10 +106,10 @@ public abstract class AbstractCodedString implements CodedString {
 		return result;
 	}
 
-	public Collection<String> getAllVariations() {
+	public Collection<String> getAllVariationsDeep() {
 		Collection<String> variations = new LinkedList<String>();
 
-		for (Code c : getAllCodes()) {
+		for (Code c : getAllCodesDeep()) {
 			variations.addAll(c.getTagVariations());
 		}
 		return variations;
@@ -83,7 +129,7 @@ public abstract class AbstractCodedString implements CodedString {
 	}
 
 	/**
-	 * Check for the given code by exact match
+	 * {@inheritDoc}
 	 */
 	public boolean contains(String s) {
 
@@ -92,16 +138,6 @@ public abstract class AbstractCodedString implements CodedString {
 				return true;
 		}
 		return false;
-	}
-
-	public boolean rename(String fromRename, String toRename) {
-
-		boolean result = false;
-
-		for (Code c : getAllCodes()) {
-			result |= c.renameTag(fromRename, toRename);
-		}
-		return result;
 	}
 
 	public boolean containsAll(Iterable<String> codes) {

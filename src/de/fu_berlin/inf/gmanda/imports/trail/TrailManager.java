@@ -87,7 +87,7 @@ public class TrailManager {
 
 		if (!currentCodes.containsKey(pd)) {
 			writeNewPd(pd);
-			currentCodes.put(pd, pd.getCode());
+			currentCodes.put(pd, pd.getCodeAsString());
 		}
 
 		// Code changed:
@@ -100,7 +100,7 @@ public class TrailManager {
 
 	public void writeNewPd(PrimaryDocument pd) {
 		writer.writeln(new DateTime().toString() + " new     " + pd.getFilename());
-		String code = pd.getCode();
+		String code = pd.getCodeAsString();
 		if (code != null && code.trim().length() > 0) {
 			writer.writeln("Code:", 2);
 			writer.writeln(code, 4);
@@ -111,12 +111,12 @@ public class TrailManager {
 	public void writeChange(PrimaryDocument pd) {
 
 		String oldCode = currentCodes.get(pd);
-		String newCode = pd.getCode();
+		String newCode = pd.getCodeAsString();
 
 		if (ObjectUtils.equals(oldCode, newCode))
 			return;
 
-		currentCodes.put(pd, pd.getCode());
+		currentCodes.put(pd, pd.getCodeAsString());
 
 		writer.writeln(new DateTime().toString() + " changed " + pd.getFilename());
 
@@ -174,7 +174,7 @@ public class TrailManager {
 		writer = new CStringWriter(fileName);
 
 		for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(project.getPrimaryDocuments())) {
-			currentCodes.put(pd, pd.getCode());
+			currentCodes.put(pd, pd.getCodeAsString());
 		}
 
 		project.getLocalChangeNotifier().add(listener);
@@ -200,7 +200,7 @@ public class TrailManager {
 
 		for (PrimaryDocument pd : pds) {
 			sb.writeln(pd.getFilename());
-			currentCodes.put(pd, pd.getCode());
+			currentCodes.put(pd, pd.getCodeAsString());
 		}
 		writer.flush();
 	}

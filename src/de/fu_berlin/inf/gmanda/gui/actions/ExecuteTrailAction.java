@@ -189,7 +189,7 @@ public class ExecuteTrailAction extends AbstractAction {
 								newcode = sb2.toString();
 							}
 
-							String pdoldcode = pd.getCode();
+							String pdoldcode = pd.getCodeAsString();
 
 							if (!ObjectUtils.equals(pdoldcode, oldCode)) {
 

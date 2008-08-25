@@ -27,7 +27,7 @@ public class SliceImpl implements Slice {
 	
 	public SliceImpl(List<PrimaryDocument> primaryDocuments) {
 		for (PrimaryDocument pd : primaryDocuments){
-			contents.putAll(pd, CodedStringFactory.parse(pd.getCode()).getAllCodes());
+			contents.putAll(pd, CodedStringFactory.parse(pd.getCodeAsString()).getAllCodes());
 		}
 	}
 

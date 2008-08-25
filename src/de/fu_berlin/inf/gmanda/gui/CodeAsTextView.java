@@ -91,7 +91,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		invalidate();
 	}
-
+	
 	public void update() {
 
 		if (!isVisible())
@@ -198,15 +198,15 @@ public class CodeAsTextView extends JScrollPane {
 
 		for (PrimaryDocument pd : newFilterList) {
 
-			for (Code c : CodedStringFactory.parse(pd.getCode()).getAll(code)) {
+			for (Code c : CodedStringFactory.parse(pd.getCodeAsString()).getAllDeep(code)) {
 
 				List<? extends Code> subs = c.getProperties();
 
 				for (Code sub : subs) {
 					if (sub.getTag().equals("def")) {
-						sb.append("<p>");
+						sb.append("<ul>");
 						sb.append(code2html(sub, pd, true));
-						sb.append("</p>");
+						sb.append("</ul>");
 					}
 					if (sub.getTag().equals("date")) {
 						String date = StringUtils.strip(sub.getValue(), " \"");
@@ -262,9 +262,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		for (PrimaryDocument pd : newFilterList) {
 
-			CodedString coded = CodedStringFactory.parse(pd.getCode());
-
-			Collection<? extends Code> allCodes = coded.getAll(code);
+			Collection<? extends Code> allCodes = pd.getCode().getAllDeep(code);
 
 			if (allCodes == null || allCodes.size() == 0) {
 				noValueList.add(pd);
@@ -295,7 +293,7 @@ public class CodeAsTextView extends JScrollPane {
 
 			for (Code c : allCodes) {
 				sb.append("<li>");
-				sb.append(code2html(c, true));
+				sb.append(code2html(c, true, true));
 				sb.append("</li>");
 			}
 			sb.append("</ul>");
@@ -328,7 +326,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(code2html(sub, expandSubCodes));
+		sb.append(code2html(sub, expandSubCodes, false));
 		sb.append(" (<i>Definition from ").append(pd2a(pd)).append("</i>)");
 
 		return sb.toString();
@@ -340,13 +338,15 @@ public class CodeAsTextView extends JScrollPane {
 		Slice parentSlice = p.getCodeModel().getInitialFilterSlice(code).select(
 			CodedStringFactory.parseOne(code));
 
+		sb.append("<ul>");
+		
 		for (Entry<String, Slice> slice : parentSlice.slice().entrySet()) {
 
 			String property = slice.getKey().trim();
 			Slice childSlice = slice.getValue();
 
 			if (property.startsWith("def") || property.startsWith("desc")
-				|| property.trim().startsWith("quote"))
+				|| property.trim().startsWith("quote") || property.startsWith("memo"))
 				continue;
 
 			if (property.startsWith("#"))
@@ -356,6 +356,8 @@ public class CodeAsTextView extends JScrollPane {
 				sb.append(surround("<li>" + toFilterA(property) + ":<ul>", slice2html(property,
 					childSlice), "</ul></li>"));
 		}
+		
+		sb.append("</ul>");
 	}
 
 	public static String surround(String start, String middle, String end) {
@@ -435,7 +437,7 @@ public class CodeAsTextView extends JScrollPane {
 		if (codes.size() > 0) {
 			sb.append("<ul>");
 			for (Code c : codes) {
-				sb.append("<li>").append(code2html(c, true)).append("</li>");
+				sb.append("<li>").append(code2html(c, true, true)).append("</li>");
 			}
 			sb.append("</ul>");
 		}
@@ -475,7 +477,7 @@ public class CodeAsTextView extends JScrollPane {
 		sb.append("</li>");
 	}
 
-	public static String code2html(Code c, boolean expandSubCodes) {
+	public static String code2html(Code c, boolean expandSubCodes, boolean tagName) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -486,15 +488,16 @@ public class CodeAsTextView extends JScrollPane {
 			return sb.toString();
 		}
 
-		sb.append(toFilterA(c.getTag())).append(": ");
+		if (tagName)
+			sb.append(toFilterA(c.getTag())).append(": ");
 
 		if (values.size() == 1 && values.get(0).getTag().equals("desc")) {
-			sb.append(surround("<p>", values.get(0).getValue().replaceAll("\n[ \t]*\n", "</p><p>"), "</p>"));
+			sb.append(surround("<p>", values.get(0).getValue().replaceAll("\n[ \t]*\n", "</p><p/><p>"), "</p>"));
 		} else {
 			sb.append("<ul>");
 			for (Code sub : c.getProperties()) {
 				sb.append("<li>");
-				sb.append(code2html(sub, true));
+				sb.append(code2html(sub, true, true));
 				sb.append("</li>");
 			}
 			sb.append("</ul>");

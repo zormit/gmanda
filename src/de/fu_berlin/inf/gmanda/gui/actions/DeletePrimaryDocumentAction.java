@@ -64,7 +64,7 @@ public class DeletePrimaryDocumentAction extends AbstractAction {
 				int codes = 0;
 				for (PrimaryDocument child : PrimaryDocument.getTreeWalker(pd)){
 					total++;
-					if (child.getCode() != null)
+					if (child.getCodeAsString() != null)
 						codes++;
 				}
 				

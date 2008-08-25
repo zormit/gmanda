@@ -107,6 +107,32 @@ public class SelectionViewManager {
 	
 	boolean receiving = true;
 	
+	public static String getFilterText(View view){
+		if (view == null)
+			return null;
+		if (view.filter == null)
+			return null;
+		return view.filter.filterText;
+	}
+	
+	/**
+	 * Moves backwards in the history until the next email is found that has a different filter string
+	 */
+	public void rewind(){
+
+		String filterText = getFilterText(current);
+		
+		while (previousViews.size() > 0 && ObjectUtils.equals(filterText, getFilterText(current))){
+			back();
+		}
+	}
+	
+	/**
+	 * Moves to the previous view in the history
+	 * 
+	 * For instance if the user visited A, B, C and is currently at D, then calling back() will now show C.
+	 * 
+	 */
 	public void back(){
 		
 		if (previousViews.size() == 0)

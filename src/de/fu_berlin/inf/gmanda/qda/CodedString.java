@@ -5,6 +5,8 @@ import java.util.List;
 
 public interface CodedString extends CodedStringCore {
 
+	public Code parse(String s);
+	
 	void removeAll(List<String> selected);
 
 	void addAll(List<String> selected);
@@ -15,14 +17,17 @@ public interface CodedString extends CodedStringCore {
 
 	boolean containsAny(String string);
 
-	Collection<String> getAllVariations();
+	Collection<String> getAllVariationsDeep();
 
 	Collection<String> getAll();
 	
 	Collection<? extends Code> getAll(String code);
+	
+	Collection<? extends Code> getAllDeep(String code);
 
 	Collection<String> getAllValues(String code);
 	
 	Collection<? extends Code> getProperties(String code, String propName);
 
+	Iterable<? extends Code> getAllCodesDeep();	
 }

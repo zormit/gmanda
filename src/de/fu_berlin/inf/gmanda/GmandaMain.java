@@ -69,6 +69,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.RefetchRecursiveAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ReindexWithLuceneAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RenameCodesAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ResetFilterAction;
+import de.fu_berlin.inf.gmanda.gui.actions.RewindSelectionAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SaveAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SaveAsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SearchWithLuceneAction;
@@ -108,6 +109,7 @@ import de.fu_berlin.inf.gmanda.gui.search.LuceneFacade;
 import de.fu_berlin.inf.gmanda.gui.search.RepeatSearchAction;
 import de.fu_berlin.inf.gmanda.gui.search.SearchField;
 import de.fu_berlin.inf.gmanda.gui.search.SearchPanel;
+import de.fu_berlin.inf.gmanda.gui.search.SearchService;
 import de.fu_berlin.inf.gmanda.gui.tabulation.CrossTabulationView;
 import de.fu_berlin.inf.gmanda.gui.tabulation.TabulationCanvas;
 import de.fu_berlin.inf.gmanda.gui.tabulation.TabulationOptionsPanel;
@@ -251,6 +253,7 @@ public class GmandaMain {
 			.addComponent(SplitTrailAction.class)
 			.addComponent(InsertSubCodeTemplateAction.class)
 			.addComponent(InsertSessionLogTemplateAction.class)
+			.addComponent(RewindSelectionAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)
@@ -290,6 +293,7 @@ public class GmandaMain {
 			.addComponent(ColorMapper.class)
 			.addComponent(TrackCompareManager.class)
 			.addComponent(LuceneFacade.class)
+			.addComponent(SearchService.class)
 			.addComponent(SelectionViewManager.class)
 			.addComponent(TrailManager.class)
 			.addComponent(GmandaHyperlinkListener.class);

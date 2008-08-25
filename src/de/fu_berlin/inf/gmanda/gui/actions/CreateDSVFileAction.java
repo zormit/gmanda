@@ -82,14 +82,14 @@ public class CreateDSVFileAction extends AbstractAction {
 				StringBuilder sb = new StringBuilder();
 				sb.append(p.getFilename()).append("|");
 
-				if (p.getCode() != null) {
-					if (p.getCode().contains("seen"))
+				if (p.getCodeAsString() != null) {
+					if (p.getCodeAsString().contains("seen"))
 						sb.append("notInteresting");
 					else
-						if (p.getCode().contains("spam"))
+						if (p.getCodeAsString().contains("spam"))
 							sb.append("spam");
 						else
-							if (p.getCode().contains("offtopic"))
+							if (p.getCodeAsString().contains("offtopic"))
 								sb.append("offtopic");
 							else
 								sb.append("interesting");

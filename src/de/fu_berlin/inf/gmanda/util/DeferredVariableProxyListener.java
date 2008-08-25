@@ -17,6 +17,10 @@ public class DeferredVariableProxyListener<T> implements VariableProxyListener<T
 	
 	TimeUnit timeUnit;
 	
+	public static <S> VariableProxyListener<S> defer(VariableProxyListener<S> wrap, long time, TimeUnit timeUnit){
+		return new DeferredVariableProxyListener<S>(wrap, time, timeUnit);
+	}
+	
 	public DeferredVariableProxyListener(VariableProxyListener<T> wrapped){
 		this(wrapped, 1, TimeUnit.SECONDS);
 	}

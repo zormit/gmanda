@@ -39,7 +39,7 @@ public class FormatCodeAction extends AbstractAction {
 
 		Codeable c = (Codeable) o;
 
-		String code = c.getCode();
+		String code = c.getCodeAsString();
 
 		if (code == null)
 			return;
