@@ -116,9 +116,10 @@ public class CodeAsTextView extends JScrollPane {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html>");
-		sb.append("<body style=\"font-family: monospace; font-size: 12pt; padding: 2px; margin: 2px;\">");
+		sb
+			.append("<body style=\"font-family: monospace; font-size: 12pt; padding: 2px; margin: 2px;\">");
 
-		sb.append(codeToHTML(p, codeToShow.getTag()));
+		sb.append(codeToHTML(p, codeToShow));
 
 		sb.append("</body></html>");
 
@@ -150,6 +151,7 @@ public class CodeAsTextView extends JScrollPane {
 		StringJoiner result = new StringJoiner(".");
 		StringJoiner sb = new StringJoiner(".");
 		for (String s : c.getTagLevels()) {
+			sb.append(s);
 			result.append(toFilterA(sb.toString(), s));
 		}
 		return result.toString();
@@ -165,13 +167,15 @@ public class CodeAsTextView extends JScrollPane {
 	}
 
 	public static String toFilterA(String s) {
-		return toFilterA(s, s);
+		return toFilterA(CodedStringFactory.parseOne(s));
 	}
 
-	public String codeToHTML(Project p, String code) {
+	public String codeToHTML(Project p, Code code) {
+
+		String tag = code.getTag();
 
 		List<PrimaryDocument> newFilterList = new ArrayList<PrimaryDocument>(p.getCodeModel()
-			.getPrimaryDocuments(code));
+			.getPrimaryDocuments(tag));
 
 		Collections.sort(newFilterList);
 
@@ -188,40 +192,29 @@ public class CodeAsTextView extends JScrollPane {
 
 		List<Pair<Code, PrimaryDocument>> noDate = new LinkedList<Pair<Code, PrimaryDocument>>();
 
-		// First definition
-		sb.append("<h4>Definition</h4>");
-		sb.append("<ul>");
-
 		for (PrimaryDocument pd : newFilterList) {
 
-			for (Code c : CodedStringFactory.parse(pd.getCodeAsString()).getAllDeep(code)) {
+			for (Code c : pd.getCode().getAllDeep(tag)) {
 
-				List<? extends Code> subs = c.getProperties();
-
-				for (Code sub : subs) {
-					if (sub.getTag().equals("def")) {
-						sb.append("<li>");
-						sb.append(code2html(sub, pd, true));
-						sb.append("</li>");
-					}
-					if (sub.getTag().equals("date")) {
-						String date = StringUtils.strip(sub.getValue(), " \"");
-						DateTime d;
-						try {
-							d = new DateTime(date);
-							dateBased.add(new Pair<DateTime, Pair<Code, PrimaryDocument>>(d,
-								new Pair<Code, PrimaryDocument>(c, pd)));
-						} catch (IllegalArgumentException e) {
-							noDate.add(new Pair<Code, PrimaryDocument>(c, pd));
-						}
+				for (Code sub : c.getProperties("date")) {
+					String date = StringUtils.strip(sub.getValue(), " \"");
+					DateTime d;
+					try {
+						d = new DateTime(date);
+						dateBased.add(new Pair<DateTime, Pair<Code, PrimaryDocument>>(d,
+							new Pair<Code, PrimaryDocument>(c, pd)));
+					} catch (IllegalArgumentException e) {
+						noDate.add(new Pair<Code, PrimaryDocument>(c, pd));
 					}
 				}
 			}
 		}
-		sb.append("</ul>");
+
+		// First definition
+		sb.append(definition2html(tag, newFilterList));
 
 		// Then properties
-		properties2html(p, code, sb);
+		sb.append(properties2html(tag, p));
 
 		// Then sorted by date
 		if (dateBased.size() > 0) {
@@ -259,7 +252,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		for (PrimaryDocument pd : newFilterList) {
 
-			Collection<? extends Code> allCodes = pd.getCode().getAllDeep(code);
+			Collection<? extends Code> allCodes = pd.getCode().getAllDeep(tag);
 
 			if (allCodes == null || allCodes.size() == 0) {
 				noValueList.add(pd);
@@ -311,6 +304,34 @@ public class CodeAsTextView extends JScrollPane {
 		return sb.toString();
 	}
 
+	public String definition2html(String tag, List<PrimaryDocument> newFilterList) {
+
+		boolean definitionFound = false;
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("<h4>Definition</h4>");
+		sb.append("<ul>");
+
+		for (PrimaryDocument pd : newFilterList) {
+			for (Code c : pd.getCode().getAllDeep(tag)) {
+				for (Code sub : c.getProperties("def")) {
+					definitionFound = true;
+					sb.append("<li>");
+					sb.append(code2html(sub, pd, true));
+					sb.append("</li>");
+				}
+			}
+		}
+		sb.append("</ul>");
+
+		if (definitionFound)
+			return sb.toString();
+		else
+			return "<h4>No Definition found</h4>";
+
+	}
+
 	public static String pd2a(PrimaryDocument pd) {
 		if (pd.getFilename() != null) {
 			return toA(pd);
@@ -330,12 +351,12 @@ public class CodeAsTextView extends JScrollPane {
 
 	}
 
-	private void properties2html(Project p, String code, StringBuilder sb) {
+	public String properties2html(String code, Project p) {
 
+		StringBuilder sb = new StringBuilder();
+		
 		Slice parentSlice = p.getCodeModel().getInitialFilterSlice(code).select(
 			CodedStringFactory.parseOne(code));
-
-		sb.append("<ul>");
 
 		for (Entry<String, Slice> slice : parentSlice.slice().entrySet()) {
 
@@ -353,8 +374,12 @@ public class CodeAsTextView extends JScrollPane {
 				sb.append(surround("<li>" + toFilterA(property) + ":<ul>", slice2html(property,
 					childSlice), "</ul></li>"));
 		}
-
-		sb.append("</ul>");
+		
+		if (sb.length() > 0){
+			return "<h4>Properties</h4><ul>" + sb.toString() + "</ul>";
+		} else {
+			return "<h4>No properties found</h4>";
+		}
 	}
 
 	public static String surround(String start, String middle, String end) {
@@ -487,7 +512,7 @@ public class CodeAsTextView extends JScrollPane {
 		}
 
 		if (tagName)
-			sb.append(toFilterA(c.getTag())).append(": ");
+			sb.append(toFilterA(c)).append(": ");
 
 		if (values.size() == 1 && values.get(0).getTag().equals("desc")) {
 			sb.append(surround("<p>", values.get(0).getValue().replaceAll("\n[ \t]*\n",
