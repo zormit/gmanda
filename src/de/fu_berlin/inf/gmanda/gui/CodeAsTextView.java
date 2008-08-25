@@ -91,7 +91,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		invalidate();
 	}
-	
+
 	public void update() {
 
 		if (!isVisible())
@@ -116,14 +116,9 @@ public class CodeAsTextView extends JScrollPane {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html>");
-		sb
-			.append("<body style=\"font-family: monospace; font-size: 12pt; padding: 2px; margin: 2px;\">");
+		sb.append("<body style=\"font-family: monospace; font-size: 12pt; padding: 2px; margin: 2px;\">");
 
-		List<String> variations = new LinkedList<String>(codeToShow.getTagVariations());
-		Collections.reverse(variations);
-		for (String s : variations) {
-			sb.append(codeToHTML(p, s));
-		}
+		sb.append(codeToHTML(p, codeToShow.getTag()));
 
 		sb.append("</body></html>");
 
@@ -195,6 +190,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		// First definition
 		sb.append("<h4>Definition</h4>");
+		sb.append("<ul>");
 
 		for (PrimaryDocument pd : newFilterList) {
 
@@ -204,9 +200,9 @@ public class CodeAsTextView extends JScrollPane {
 
 				for (Code sub : subs) {
 					if (sub.getTag().equals("def")) {
-						sb.append("<ul>");
+						sb.append("<li>");
 						sb.append(code2html(sub, pd, true));
-						sb.append("</ul>");
+						sb.append("</li>");
 					}
 					if (sub.getTag().equals("date")) {
 						String date = StringUtils.strip(sub.getValue(), " \"");
@@ -222,6 +218,7 @@ public class CodeAsTextView extends JScrollPane {
 				}
 			}
 		}
+		sb.append("</ul>");
 
 		// Then properties
 		properties2html(p, code, sb);
@@ -339,7 +336,7 @@ public class CodeAsTextView extends JScrollPane {
 			CodedStringFactory.parseOne(code));
 
 		sb.append("<ul>");
-		
+
 		for (Entry<String, Slice> slice : parentSlice.slice().entrySet()) {
 
 			String property = slice.getKey().trim();
@@ -356,7 +353,7 @@ public class CodeAsTextView extends JScrollPane {
 				sb.append(surround("<li>" + toFilterA(property) + ":<ul>", slice2html(property,
 					childSlice), "</ul></li>"));
 		}
-		
+
 		sb.append("</ul>");
 	}
 
@@ -408,7 +405,8 @@ public class CodeAsTextView extends JScrollPane {
 						}
 					}));
 			} else {
-				sb.append(surround("<li>" + toFilterA(aProp2) + ":", slice2html(aProp2, sub2), "</li>"));
+				sb.append(surround("<li>" + toFilterA(aProp2) + ":", slice2html(aProp2, sub2),
+					"</li>"));
 			}
 		}
 
@@ -492,7 +490,8 @@ public class CodeAsTextView extends JScrollPane {
 			sb.append(toFilterA(c.getTag())).append(": ");
 
 		if (values.size() == 1 && values.get(0).getTag().equals("desc")) {
-			sb.append(surround("<p>", values.get(0).getValue().replaceAll("\n[ \t]*\n", "</p><p/><p>"), "</p>"));
+			sb.append(surround("<p>", values.get(0).getValue().replaceAll("\n[ \t]*\n",
+				"</p><p/><p>"), "</p>"));
 		} else {
 			sb.append("<ul>");
 			for (Code sub : c.getProperties()) {
