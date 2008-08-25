@@ -10,7 +10,6 @@ import de.fu_berlin.inf.gmanda.qda.PrimaryDocumentDataV1;
 import de.fu_berlin.inf.gmanda.qda.ProjectData;
 import de.fu_berlin.inf.gmanda.qda.ProjectDataV1;
 import de.fu_berlin.inf.gmanda.qda.ProjectDataV2;
-import de.fu_berlin.inf.gmanda.qda.TagComma.TagCommaFactory;
 import de.fu_berlin.inf.gmanda.qda.TagComma.TagCommaFactory.TagCommaString;
 import de.fu_berlin.inf.gmanda.qda.tagxon.TagxON;
 import de.fu_berlin.inf.gmanda.util.CStringUtils;
@@ -43,9 +42,6 @@ public class FileVersionConvert {
 			v3.rootDocuments);
 		
 		TagxON tagxON = new TagxON();
-		
-		TagCommaFactory tagSyntax = new TagCommaFactory();
-		
 		
 		for (PrimaryDocumentData pd : allDocuments){
 			
