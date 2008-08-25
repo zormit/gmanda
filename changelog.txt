@@ -9,6 +9,7 @@
    * [MINOR]    Include codes into all relevant parts even if nested
    * [MINOR]    Use search engine backend in all search dialogs (notably Visualization)
    * [MINOR]    Fix-ups to Code Detail View
+   * [MINOR]    Improved handling of Date Sorted view in Code Detail View
    * [INTERNAL] Deprecate TagCommaSyntax
    * [INTERNAL] Improve generics for TreeWalker 
    * [INTERNAL] Removed generic warnings  

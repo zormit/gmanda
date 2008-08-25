@@ -228,7 +228,9 @@ public class CodeAsTextView extends JScrollPane {
 
 				sb.append("<ul>");
 				for (Pair<DateTime, Pair<Code, PrimaryDocument>> next : dateBased) {
-					code2html(sb, next.v.p, next.v.v);
+					sb.append("<li>");
+					sb.append(pd2html(next.v.v, next.v.p.getProperties(), true));
+					sb.append("</li>");
 				}
 				sb.append("</ul>");
 			}
@@ -318,7 +320,8 @@ public class CodeAsTextView extends JScrollPane {
 				for (Code sub : c.getProperties("def")) {
 					definitionFound = true;
 					sb.append("<li>");
-					sb.append(code2html(sub, pd, true));
+					sb.append(code2html(sub, true, false));
+					sb.append(" (<i>Definition from ").append(pd2a(pd)).append("</i>)");
 					sb.append("</li>");
 				}
 			}
@@ -396,7 +399,7 @@ public class CodeAsTextView extends JScrollPane {
 		String noValues = CStringUtils.join(s.getDocuments().entrySet(), "<br>",
 			new StringConverter<Entry<PrimaryDocument, Collection<Code>>>() {
 				public String toString(Entry<PrimaryDocument, Collection<Code>> docs) {
-					return pd2html(docs.getKey(), docs.getValue());
+					return pd2html(docs.getKey(), docs.getValue(), false);
 				}
 			});
 
@@ -450,12 +453,28 @@ public class CodeAsTextView extends JScrollPane {
 		return surround("<ul>", sb.toString(), "</ul>");
 	}
 
-	public static String pd2html(PrimaryDocument pd, Collection<Code> codes) {
+	public static String pd2html(PrimaryDocument pd, Collection<? extends Code> codes, boolean dateBased) {
 
 		StringBuilder sb = new StringBuilder();
+		
+		Code date = null;
+		if (dateBased){
+			codes = new LinkedList<Code>(codes);
+			Iterator<? extends Code> it = codes.iterator();
+			
+			while (it.hasNext()){
+				Code c = it.next();
+				if (c.getTag().equals("date")){
+					date = c;
+					it.remove();
+				}
+			}
+		}
 
 		if (pd.getFilename() != null) {
 			sb.append(toA(pd));
+			if (dateBased && date != null)
+				sb.append(" (").append(StringUtils.strip(date.getValue(), "\"'\n \r\f\t")).append(")");
 		}
 		if (codes.size() > 0) {
 			sb.append("<ul>");
