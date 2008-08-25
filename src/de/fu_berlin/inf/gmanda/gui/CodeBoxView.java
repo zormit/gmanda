@@ -7,7 +7,6 @@ package de.fu_berlin.inf.gmanda.gui;
 
 import java.awt.Dimension;
 
-import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
@@ -19,7 +18,7 @@ public class CodeBoxView extends JScrollPane {
 	public CodeBoxView(ProjectProxy project, SelectionProxy selection) {
 		setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		
-		setBorder(BorderFactory.createTitledBorder("Codes"));
+		setBorder(null);
 		setMinimumSize(new Dimension(200, 90));
 	}
 

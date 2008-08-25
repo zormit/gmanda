@@ -7,18 +7,19 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import de.fu_berlin.inf.gmanda.gui.docking.DockableView;
-import de.fu_berlin.inf.gmanda.gui.search.SearchPanel;
 
-public class PrimaryDocumentView extends JPanel implements DockableView {
+/**
+ * The coding view contains the CodeBox where the user can enter Tags about the current PrimaryDocument
+ */
+public class CodingView extends JPanel implements DockableView {
 
-	public PrimaryDocumentView(TextView textView, SearchPanel searchPanel) {
+	public CodingView(CodeBoxView codeBoxView) {
 
 		setLayout(new BorderLayout(5, 5));
 
 		setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-		add(searchPanel, BorderLayout.PAGE_START);
-		add(textView, BorderLayout.CENTER);
+		add(codeBoxView);
 	}
 
 	public Component getComponent() {
@@ -26,16 +27,16 @@ public class PrimaryDocumentView extends JPanel implements DockableView {
 	}
 
 	public String getId() {
-		return "view";
+		return "coding";
 	}
 
 	public String getTitle() {
-		return "Document View";
+		return "Coding View";
 	}
 
 	public String getTooltip() {
-		return "<html>" + "The Document View shows detail information about the currently<br>"
-			+ "selected document from the Document Tree.</html>";
+		return "<html>" + "The Coding View gives direct access<br>" +
+				"to the codes associated with an document</html>";
 	}
 
 }

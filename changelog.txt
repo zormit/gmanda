@@ -4,6 +4,8 @@
    * [FEATURE]  The Codes-Box now tracks the caret position 
    * [FEATURE]  Rewind action (CTRL-ALT-LEFT) moves back in view history until
                 filter is different
+   * [FEATURE]  Detached the CodeBox from the DocumentView, so that it's position 
+                and size can now be handeled using the docking system.
    * [MINOR]    Include codes into all relevant parts even if nested
    * [MINOR]    Use search engine backend in all search dialogs (notably Visualization)
    * [MINOR]    Fix-ups to Code Detail View

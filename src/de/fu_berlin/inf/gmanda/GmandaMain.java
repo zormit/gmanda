@@ -35,9 +35,9 @@ import de.fu_berlin.inf.gmanda.gui.CodeDetailView;
 import de.fu_berlin.inf.gmanda.gui.CodeList;
 import de.fu_berlin.inf.gmanda.gui.CodeListFilterTextBox;
 import de.fu_berlin.inf.gmanda.gui.CodeListView;
+import de.fu_berlin.inf.gmanda.gui.CodingView;
 import de.fu_berlin.inf.gmanda.gui.MainFrame;
 import de.fu_berlin.inf.gmanda.gui.MetadataList;
-import de.fu_berlin.inf.gmanda.gui.MetadataView;
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTreeFilterTextField;
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTreeView;
@@ -190,17 +190,12 @@ public class GmandaMain {
 			.addComponent(PrimaryDocumentTree.class)
 			.addComponent(CodeBoxView.class)
 			.addComponent(CodeBox.class)
-			.addComponent(MetadataView.class)
 			.addComponent(MetadataList.class)
 			.addComponent(CodeList.class)
 			.addComponent(SearchField.class)
 			.addComponent(SearchPanel.class)
-			.addComponent(PrimaryDocumentView.class)
-			.addComponent(PrimaryDocumentTreeView.class)
 			.addComponent(PrimaryDocumentTreeFilterTextField.class)
 			.addComponent(CodeListFilterTextBox.class)
-			.addComponent(CodeListView.class)
-			.addComponent(VisualizationPane.class)
 			.addComponent(VisualisationOptions.class)
 			.addComponent(VisualizationCanvas.class)
 			.addComponent(PreferenceWindow.class)
@@ -210,12 +205,18 @@ public class GmandaMain {
 			.addComponent(CodeableTree.class)
 			.addComponent(JNodeCellRenderer.class)
 			.addComponent(JNodeSelectionListener.class)
-			.addComponent(CodeAsTextView.class)
-			.addComponent(CodeDetailView.class)
 			.addComponent(CodeDetailBox.class)
-			.addComponent(CrossTabulationView.class)
 			.addComponent(TabulationCanvas.class)
 			.addComponent(TabulationOptionsPanel.class)
+			// Views
+			.addComponent(CodeAsTextView.class)
+			.addComponent(CodeDetailView.class)
+			.addComponent(CrossTabulationView.class)
+			.addComponent(PrimaryDocumentView.class)
+			.addComponent(PrimaryDocumentTreeView.class)
+			.addComponent(CodeListView.class)
+			.addComponent(CodingView.class)
+			.addComponent(VisualizationPane.class)
 			// Perspectives
 			.addComponent(DefaultPerspective.class)
 			.addComponent(VisualizationPerspective.class)
