@@ -140,7 +140,7 @@ public class CodeAsTextView extends JScrollPane {
 	public static String toA(PrimaryDocument pd) {
 		String s = pd.getFilename();
 
-		if (s == null)
+		if (s == null || s.trim().length() == 0)
 			return pd.getName();
 
 		return String.format("<a href='%s'>%s</a>", s, toShortId(s));
@@ -358,13 +358,13 @@ public class CodeAsTextView extends JScrollPane {
 
 		StringBuilder sb = new StringBuilder();
 		
-		Slice parentSlice = p.getCodeModel().getInitialFilterSlice(code).select(
+		Slice<PrimaryDocument> parentSlice = p.getCodeModel().getInitialFilterSlice(code).select(
 			CodedStringFactory.parseOne(code));
 
-		for (Entry<String, Slice> slice : parentSlice.slice().entrySet()) {
+		for (Entry<String, Slice<PrimaryDocument>> slice : parentSlice.slice().entrySet()) {
 
 			String property = slice.getKey().trim();
-			Slice childSlice = slice.getValue();
+			Slice<PrimaryDocument> childSlice = slice.getValue();
 
 			if (property.startsWith("def") || property.startsWith("desc")
 				|| property.trim().startsWith("quote") || property.startsWith("memo"))
@@ -390,7 +390,7 @@ public class CodeAsTextView extends JScrollPane {
 		}
 	}
 
-	public static String slice2html(String code, Slice s) {
+	public static String slice2html(String code, Slice<PrimaryDocument> s) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -408,16 +408,16 @@ public class CodeAsTextView extends JScrollPane {
 		return surround("<ul>", sb.toString(), "</ul>");
 	}
 
-	public static String property2html(String tag, Slice s) {
+	public static String property2html(String tag, Slice<PrimaryDocument> s) {
 
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(slice2html(s, "def"));
 
-		for (Entry<String, Slice> entry2 : s.slice().entrySet()) {
+		for (Entry<String, Slice<PrimaryDocument>> entry2 : s.slice().entrySet()) {
 
 			String valueTag = entry2.getKey();
-			Slice valueSlice = entry2.getValue();
+			Slice<PrimaryDocument> valueSlice = entry2.getValue();
 
 			if (valueTag.equals("def") || valueTag.equals("desc") || valueTag.equals("quote"))
 				continue;
@@ -487,7 +487,7 @@ public class CodeAsTextView extends JScrollPane {
 		return sb.toString();
 	}
 
-	private static String slice2html(Slice sub, String string) {
+	private static String slice2html(Slice<PrimaryDocument> sub, String string) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -526,7 +526,7 @@ public class CodeAsTextView extends JScrollPane {
 		List<? extends Code> values = c.getProperties();
 
 		if ((values.size() == 1 && c.getTag().equals("desc")) || !expandSubCodes) {
-			sb.append(surround("<p>", c.getValue().replaceAll("\n[ \t]*\n", "</p><p>"), "</p>"));
+			sb.append(surround("<p>", c.getValue().replaceAll("\n[ \t]*\n", "</p><p/><p>"), "</p>"));
 			return sb.toString();
 		}
 

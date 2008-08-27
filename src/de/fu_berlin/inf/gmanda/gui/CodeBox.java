@@ -14,7 +14,6 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -128,14 +127,20 @@ public class CodeBox extends JTextArea {
 
 					if (!receiveChanges)
 						return;
+					
+					int i = getCaretPosition();
 
 					sendChanges = false;
 					setText(currentlyShowing.getCodeAsString());
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							CodeBox.this.codeBoxView.getVerticalScrollBar().setValue(0);
-						}
-					});
+					
+					setCaretPosition(Math.max(0, Math.min(i, getText().length())));
+					
+//					SwingUtilities.invokeLater(new Runnable() {
+//						public void run() {
+//							CodeBox.this.codeBoxView.getVerticalScrollBar().setValue(0);
+//						}
+//					});
+					
 					sendChanges = true;
 				}
 			};

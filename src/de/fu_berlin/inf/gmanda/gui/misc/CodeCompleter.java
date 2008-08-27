@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.CodeModel;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.CStringUtils;
 import de.fu_berlin.inf.gmanda.util.gui.AutoCompleter.AutoCompleterControl;
 
 public class CodeCompleter implements AutoCompleterControl<String> {
@@ -44,7 +45,7 @@ public class CodeCompleter implements AutoCompleterControl<String> {
 
 	String[] delimCharsBefore = new String[] { ",", ";", ":", "{", "}", "\n" };
 	String[] delimCharsAfter = new String[] { ",", ";", ":", "{", "}"};
-
+	
 	public void insertText(String selected) {
 		int caret = this.textComponent.getCaretPosition();
 
@@ -58,13 +59,19 @@ public class CodeCompleter implements AutoCompleterControl<String> {
 		int first = StringUtils.indexOfAny(after, delimCharsAfter);
 
 		if (last < 0) {
-			leadingText = before;
 			before = "";
+			leadingText = before;
 		} else {
-			leadingText = text.substring(last + 1, caret);
 			before = text.substring(0, last + 1);
-			if (text.charAt(last) != '\n')
-				before += " ";
+			leadingText = text.substring(last + 1, caret);
+		}
+		
+		before = before + CStringUtils.getLeadingWhiteSpace(leadingText);
+
+		if (first < 0) {
+			followingText = after;
+		} else {
+			followingText = after.substring(0, first);
 		}
 
 		/*
@@ -72,16 +79,10 @@ public class CodeCompleter implements AutoCompleterControl<String> {
 		 * we do not do anything but put the caret at the end of the
 		 * code
 		 */
-		if (first < 0) {
-			followingText = after;
-		} else {
-			followingText = after.substring(0, first);
+		if ((leadingText.trim() + followingText.trim()).startsWith(selected)) {
+			after = after.substring(selected.length() - leadingText.trim().length() + CStringUtils.getLeadingWhiteSpace(followingText).length());
 		}
-
-		if ((leadingText.trim() + followingText.trim()).equals(selected)) {
-			after = after.substring(followingText.length());
-		}
-
+		
 		this.textComponent.setText(before + selected + after);
 		this.textComponent.setCaretPosition(before.length() + selected.length());
 	}

@@ -1,4 +1,11 @@
 
+2008-08-27
+
+   * [FEATURE]  Tabulation View now works as intended on properties
+   * [MINOR]    Improved CodeCompleter to handle white space better
+   * [MINOR]    Improved CodeAsTextView
+   * [INTERNAL] Started CUtils as a Class for generic helper methods.  
+
 2008-08-25
 
    * [FEATURE]  The Codes-Box now tracks the caret position 

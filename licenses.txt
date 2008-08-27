@@ -1,14 +1,15 @@
 Licenses overview
 -----------------
 
-GmanDA itself                                                GPLv3
+GmanDA itself                                                GPLv3 or later
 
-GNUMail (gnumail.jar, gnumail-providers.jar),                GPLv2 with Classpath Exception 
+GNUMail (gnumail.jar, gnumail-providers.jar),                GPLv2 or later with Classpath Exception 
 GNU InetLib (inetlib.jar),
 GNU JAF (activation.jar)
 
-DockingFrames (dockingFrames*.jar,                           LGPLv2
+DockingFrames (dockingFrames*.jar,                           LGPLv2 or later
 GlazedLists (glazedlists-*.jar),                                 
+Code from Santhosh Kumar's Swing Utils
 
 Piccolo (piccolo*.jar)                                       BSD
 PicoContainer (picocontainer-*.jar)
@@ -21,6 +22,4 @@ Google Collections (google-collect-*.jar)
 
 args4J (args4j-*.jar)                                        MIT
 
-Icons (resource/icons/*.png)                                 EPL 1.0
-
-Code from Santhosh Kumar's Swing Utils                       GPL
+Eclipse Icons (resource/icons/*.png)                         EPL 1.0

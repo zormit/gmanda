@@ -79,6 +79,7 @@ public abstract class AbstractCode implements Code {
 	 * hello.world matches hello.world
 	 * '*' matches everything
 	 * hello.* matches hello.world and hello
+	 * hello matches hello but not hello.world
 	 * </pre>
 	 * 
 	 * @param otherCode

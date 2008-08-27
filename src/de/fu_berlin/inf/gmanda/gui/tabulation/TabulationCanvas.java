@@ -3,32 +3,45 @@ package de.fu_berlin.inf.gmanda.gui.tabulation;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.io.StringWriter;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.picocontainer.annotations.Inject;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
 
 import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
 import de.fu_berlin.inf.gmanda.gui.CodeAsTextView;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
+import de.fu_berlin.inf.gmanda.qda.Code;
+import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.qda.Slice;
 import de.fu_berlin.inf.gmanda.util.CStringUtils;
-import de.fu_berlin.inf.gmanda.util.Pair;
+import de.fu_berlin.inf.gmanda.util.CUtils;
 
 public class TabulationCanvas extends JScrollPane {
 
@@ -39,7 +52,7 @@ public class TabulationCanvas extends JScrollPane {
 	CommonService commonService;
 
 	JTextPane pane = new JTextPane();
-	
+
 	public TabulationCanvas(GmandaHyperlinkListener linkListener) {
 		super();
 
@@ -64,49 +77,218 @@ public class TabulationCanvas extends JScrollPane {
 		return PrimaryDocument.getTreeWalker(project.getVariable().getPrimaryDocuments());
 	}
 
+	public <T> Map<String, Slice<T>> byValue(Iterable<? extends Code> codes, Slice<T> s) {
+
+		for (Code c : codes) {
+			s = s.select(c);
+    	}
+
+		return s.slice();
+	}
+
+	public <T> Multimap<String, T> preprocess(String dim, Slice<T> all){
+		
+		LinkedList<Code> codes = Lists.newLinkedList(CodedStringFactory
+		.parse(dim).getAllCodes());
+		
+		String lastTag = codes.getLast().getTag();
+		int depth;
+		try {
+			depth = Integer.parseInt(lastTag);
+			codes.removeLast();
+		} catch (Exception e){
+			depth = 0;
+		}
+		
+		Map<String, Slice<T>> slices = new TreeMap<String, Slice<T>>(byValue(codes, all));
+
+		Multimap<String, T> result = new TreeMultimap<String, T>();
+		
+		for (Entry<String, Slice<T>> row : slices.entrySet()) {
+			String codeString = row.getKey();
+			
+			if (codeString.equals("def") || codeString.equals("quote") || codeString.equals("date"))
+				continue;
+			
+			if (depth > 0){
+				codeString = StringUtils.join(CUtils.first(CodedStringFactory.parseOne(codeString).getTagLevels(), depth), ".");
+			}
+			
+			result.putAll(codeString, row.getValue().getDocuments().keySet());
+		}
+		return result;
+	}
+	
 	public void update(final TabulationSettings settings) {
 
 		pane.setText("computing tabulation...");
 
 		commonService.run(new Runnable() {
-			public void run() {
 
+			public void run() {
+				
+				if (settings.groupBy.trim().length() == 0){
+					tabulateByPrimaryDocuments(settings);
+					return;
+				}
+				
 				Project p = project.getVariable();
 				if (p == null)
 					return;
+				
+				Slice<PrimaryDocument> all = p.getCodeModel().getInitialFilterSlice("episode");
+				
+				Slice<String> grouped = all.sliceAndPack(settings.groupBy, 0);
+				
+				Multimap<String, String> xSlices = preprocess(settings.xDim, grouped);
+				Multimap<String, String> ySlices = preprocess(settings.yDim, grouped);
+				
+				Multimap<String, String> xCheckSlices = new TreeMultimap<String, String>(xSlices);
+				
+				List<List<String>> table = new ArrayList<List<String>>();
 
-				List<PrimaryDocument> x = p.getCodeModel().getPrimaryDocuments(settings.xDim);
-
-				LinkedHashSet<Set<String>> table = new LinkedHashSet<Set<String>>();
-				LinkedHashSet<String> headerRow = new LinkedHashSet<String>();
-				headerRow.add(CodeAsTextView.toFilterA(settings.yDim));
-				headerRow.add(CodeAsTextView.toFilterA(settings.xDim));
-
-				table.add(headerRow);
-
-				for (Pair<String, List<PrimaryDocument>> pair : p.getCodeModel().partition(x,
-					settings.yDim)) {
-
-					LinkedHashSet<String> row = new LinkedHashSet<String>();
-
-					row.add(CodeAsTextView.toFilterA(pair.p));
-					row.add(CStringUtils.join(Lists.transform(pair.v,
-						new Function<PrimaryDocument, String>() {
-							public String apply(PrimaryDocument pd) {
-								return CodeAsTextView.toA(pd);
-							}
-						}), " "));
-
-					table.add(row);
+				{ // Header row
+					List<String> headerRow = new ArrayList<String>();
+					headerRow.add(CodeAsTextView.toFilterA(settings.yDim));
+					for (String s : xSlices.keySet()) {
+						headerRow.add(CodeAsTextView.toFilterA(s));
+					}
+					headerRow.add("[no intersection]");
+					table.add(headerRow);
 				}
+
+				for (Entry<String, Collection<String>> row : ySlices.asMap().entrySet()) {
+
+					String rowTag = row.getKey();
+					Collection<String> rowPDs = row.getValue();
+					HashSet<String> checkRowPDs = new HashSet<String>(rowPDs);
+					
+					List<String> htmlRow = new ArrayList<String>();
+					
+					htmlRow.add(CodeAsTextView.toFilterA(rowTag));
+
+					for (Entry<String, Collection<String>> column : xSlices.asMap().entrySet()) {
+
+						String columnTag = column.getKey();
+						Collection<String> columnPDs = column.getValue();
+						
+						@SuppressWarnings("unchecked")
+						LinkedList<String> cell = new LinkedList<String>(
+							CollectionUtils.intersection(rowPDs, columnPDs));
+						
+						checkRowPDs.removeAll(cell);
+						xCheckSlices.get(columnTag).removeAll(cell);
+
+						htmlRow.add(join(cell));
+					}
+					
+					htmlRow.add(join(checkRowPDs));
+
+					table.add(htmlRow);
+				}
+				
+				List<String> htmlRow = new ArrayList<String>();
+				htmlRow.add("[no intersection]");
+				
+				for (Entry<String, Collection<String>> row : xCheckSlices.asMap().entrySet()) {
+					htmlRow.add(join(row.getValue()));
+				}
+				table.add(htmlRow);
+
+				String s = runVelocity(table);
+
+				pane.setText(s);
+				
+				
+				
+				
+			
+			}
+
+			private void tabulateByPrimaryDocuments(TabulationSettings settings) {
+				
+				Project p = project.getVariable();
+				if (p == null)
+					return;
+				
+				Slice<PrimaryDocument> all = p.getCodeModel().getInitialFilterSlice("episode");
+				
+				Multimap<String, PrimaryDocument> xSlices = preprocess(settings.xDim, all);
+				Multimap<String, PrimaryDocument> ySlices = preprocess(settings.yDim, all);
+				
+				Multimap<String, PrimaryDocument> xCheckSlices = new TreeMultimap<String, PrimaryDocument>(xSlices);
+				
+				List<List<String>> table = new ArrayList<List<String>>();
+
+				{ // Header row
+					List<String> headerRow = new ArrayList<String>();
+					headerRow.add(CodeAsTextView.toFilterA(settings.yDim));
+					for (String s : xSlices.keySet()) {
+						headerRow.add(CodeAsTextView.toFilterA(s));
+					}
+					headerRow.add("[no intersection]");
+					table.add(headerRow);
+				}
+
+				for (Entry<String, Collection<PrimaryDocument>> row : ySlices.asMap().entrySet()) {
+
+					String rowTag = row.getKey();
+					Collection<PrimaryDocument> rowPDs = row.getValue();
+					HashSet<PrimaryDocument> checkRowPDs = new HashSet<PrimaryDocument>(rowPDs);
+					
+					List<String> htmlRow = new ArrayList<String>();
+					
+					htmlRow.add(CodeAsTextView.toFilterA(rowTag));
+
+					for (Entry<String, Collection<PrimaryDocument>> column : xSlices.asMap().entrySet()) {
+
+						String columnTag = column.getKey();
+						Collection<PrimaryDocument> columnPDs = column.getValue();
+						
+						@SuppressWarnings("unchecked")
+						LinkedList<PrimaryDocument> cell = new LinkedList<PrimaryDocument>(
+							CollectionUtils.intersection(rowPDs, columnPDs));
+						
+						checkRowPDs.removeAll(cell);
+						xCheckSlices.get(columnTag).removeAll(cell);
+
+						htmlRow.add(join(cell));
+					}
+					
+					htmlRow.add(join(checkRowPDs));
+
+					table.add(htmlRow);
+				}
+				
+				List<String> htmlRow = new ArrayList<String>();
+				htmlRow.add("[no intersection]");
+				
+				for (Entry<String, Collection<PrimaryDocument>> row : xCheckSlices.asMap().entrySet()) {
+					htmlRow.add(join(row.getValue()));
+				}
+				table.add(htmlRow);
 
 				String s = runVelocity(table);
 
 				pane.setText(s);
 			}
+
+
 		}, "Error calculating tabulation");
 	}
 
+	private String join(Iterable<?> cell) {
+		return CStringUtils.join(Iterables.transform(cell,
+			new Function<Object, String>() {
+				public String apply(Object o) {
+					if (o instanceof PrimaryDocument)
+						return CodeAsTextView.toA((PrimaryDocument)o);
+					else 
+						return CodeAsTextView.toFilterA(o.toString());
+				}
+			}), "<br>");
+	}
+	
 	Template tableTemplate;
 
 	VelocityContext context;
@@ -132,7 +314,7 @@ public class TabulationCanvas extends JScrollPane {
 		}
 	}
 
-	public String runVelocity(Set<Set<String>> table) {
+	public String runVelocity(List<List<String>> table) {
 
 		initVelocity();
 

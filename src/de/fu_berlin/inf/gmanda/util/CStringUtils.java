@@ -60,7 +60,7 @@ public class CStringUtils {
 	 * Returns a concatenation of all strings given in the collection,
 	 * separating each two strings with the given separator.
 	 */
-	public static <T> String join(Collection<T> strings, String separator) {
+	public static <T> String join(Iterable<T> strings, String separator) {
 		return join(strings, separator, new PlainConverter<T>());
 	}
 

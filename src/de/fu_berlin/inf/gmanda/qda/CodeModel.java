@@ -356,8 +356,8 @@ public class CodeModel {
 		return l;
 	}
 	
-	public Slice getInitialFilterSlice(String code){
-		return new SliceImpl(getPrimaryDocuments(code));
+	public Slice<PrimaryDocument> getInitialFilterSlice(String code){
+		return SliceImpl.fromPDs(getPrimaryDocuments(code));
 	}
 	
 }
