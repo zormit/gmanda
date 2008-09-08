@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JList;
@@ -18,6 +19,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.BadLocationException;
@@ -68,19 +71,19 @@ public class AutoCompleter<T> {
 		public void acceptedListItem(T selected);
 
 		/**
-		 * Will be called by the autocompleter if the user has pressed CTRL-SPACE.
-		 * The control can use this to update the text component.
+		 * Will be called by the autocompleter if the user has pressed
+		 * CTRL-SPACE. The control can use this to update the text component.
 		 * 
-		 * For instance if the list currently contains three item 'hello world', 
-		 * 'hello space' and 'hello moon' the text component might be updated 
-		 * on CTRL-SPACE to contain the common prefix 'hello ' 
+		 * For instance if the list currently contains three item 'hello world',
+		 * 'hello space' and 'hello moon' the text component might be updated on
+		 * CTRL-SPACE to contain the common prefix 'hello '
 		 * 
 		 * @param currentList
 		 * 
-		 * @return Should return true iff the popup should be closed 
+		 * @return Should return true iff the popup should be closed
 		 */
 		public boolean probeAccept(List<T> currentList);
-		
+
 		/**
 		 * Should return the text component this auto completer belongs to. Is
 		 * not expected to change over time.
@@ -123,19 +126,22 @@ public class AutoCompleter<T> {
 
 	protected AutoCompleterControl<T> control;
 
+	InfoBox<T> infoBox;
+
 	/**
 	 * If autoShow is true the popup is shown without pressing CTRL-SPACE
 	 */
 	protected boolean autoShow = false;
-	
+
 	/**
-	 * If probeAcceptOnOpen is true, then opening the pop-up will already 
-	 * try to complete. If set to false, an additional CTRL-SPACE is necessary
-	 * to probe.
+	 * If probeAcceptOnOpen is true, then opening the pop-up will already try to
+	 * complete. If set to false, an additional CTRL-SPACE is necessary to
+	 * probe.
 	 */
 	protected boolean probeAcceptOnOpen = true;
-	
+
 	protected InputMap inputMap = new InputMap();
+
 
 	public AutoCompleter(AutoCompleterControl<T> comp) {
 		control = comp;
@@ -151,6 +157,9 @@ public class AutoCompleter<T> {
 		scroll.getHorizontalScrollBar().setFocusable(false);
 
 		popup.setBorder(BorderFactory.createLineBorder(Color.black));
+		BoxLayout b = new BoxLayout(popup, BoxLayout.LINE_AXIS);
+		popup.setLayout(b);
+
 		popup.add(scroll);
 
 		textComp.getActionMap().put(downAction, downAction);
@@ -162,29 +171,50 @@ public class AutoCompleter<T> {
 
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), downAction);
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), upAction);
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0),
-			pageDownAction);
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0),
-			pageUpAction);
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-			acceptAction);		
-		
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), pageDownAction);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0), pageUpAction);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), acceptAction);
+
 		if (autoShow) {
-			inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-				hideAction);
+			inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), hideAction);
 			comp.addDocumentListener(showPopupListener);
 		} else {
-			textComp.registerKeyboardAction(autoCompleteAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
-				KeyEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+			textComp.registerKeyboardAction(autoCompleteAction, KeyStroke.getKeyStroke(
+				KeyEvent.VK_SPACE, KeyEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
 		}
 
 		popup.addPopupMenuListener(new PopupMenuListener() {
-			
+
+			class InfoBoxListener implements ListSelectionListener {
+				public void valueChanged(ListSelectionEvent arg0) {
+					update();
+				}
+ 
+				public void update() {
+					select(list.getSelectedIndex());
+				}
+
+				public void select(int index) {
+
+					if (infoBox != null && index != -1 && index < listModel.size()) {
+						T selected = listModel.get(index);
+						if (selected != null) {
+							infoBox.show(selected);
+						}
+					}
+				}
+			}
+
+			InfoBoxListener infoBoxListener = new InfoBoxListener();
+
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 				inputMap.setParent(textComp.getInputMap());
 				textComp.setInputMap(JComponent.WHEN_FOCUSED, inputMap);
 
 				list.getSelectionModel().clearSelection();
+				list.addListSelectionListener(infoBoxListener);
+
+				infoBoxListener.update();
 
 				if (autoShow == false) {
 					control.addDocumentListener(showPopupListener);
@@ -192,8 +222,10 @@ public class AutoCompleter<T> {
 			}
 
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-				
+
 				textComp.setInputMap(JComponent.WHEN_FOCUSED, inputMap.getParent());
+
+				list.removeListSelectionListener(infoBoxListener);
 
 				if (autoShow == false) {
 					control.removeDocumentListener(showPopupListener);
@@ -240,16 +272,16 @@ public class AutoCompleter<T> {
 	};
 
 	private void showPopup() {
-		
+
 		boolean oldIsVisible = popup.isVisible();
 
 		if (textComp.isEnabled() && control.initializeList(listModel) && listModel.size() > 0) {
 
 			int size = list.getModel().getSize();
-			
+
 			list.setVisibleRowCount(size < 10 ? size : 10);
 
-			// If configured to probeAcceptOnOpen... 
+			// If configured to probeAcceptOnOpen...
 			if (probeAcceptOnOpen && !oldIsVisible && control.probeAccept(listModel)) {
 				// we will not show the popup, if the probe answers true
 			} else {
@@ -265,7 +297,7 @@ public class AutoCompleter<T> {
 					// this should never happen!!!
 					e.printStackTrace();
 				}
-				
+
 				popup.show(textComp, x, y + textComp.getFontMetrics(textComp.getFont()).getHeight()
 					+ 1);
 
@@ -274,7 +306,7 @@ public class AutoCompleter<T> {
 				}
 				list.ensureIndexIsVisible(list.getSelectedIndex());
 			}
-			
+
 		} else {
 			popup.setVisible(false);
 		}
@@ -290,9 +322,9 @@ public class AutoCompleter<T> {
 
 		public abstract void perform();
 	}
-	
+
 	abstract class EnablingAutoCompleterAction extends AutoCompleterAction {
-		
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (textComp.isEnabled()) {
@@ -309,13 +341,13 @@ public class AutoCompleter<T> {
 			control.probeAccept(listModel);
 		}
 	};
-	
+
 	Action downAction = new EnablingAutoCompleterAction() {
 		public void perform() {
 			select(1);
 		}
 	};
-	
+
 	Action pageDownAction = new AutoCompleterAction() {
 		public void perform() {
 			select(list.getVisibleRowCount());
@@ -376,5 +408,17 @@ public class AutoCompleter<T> {
 		list.setSelectedIndex(si);
 		list.ensureIndexIsVisible(si);
 
+	}
+
+	public void setInfoBox(InfoBox<T> infoBox) {
+		if (this.infoBox != null){
+			popup.remove(this.infoBox.getComponent());
+			popup.pack();
+		}
+		this.infoBox = infoBox;
+		if (this.infoBox != null){
+			popup.add(this.infoBox.getComponent());
+			popup.pack();
+		}
 	}
 }

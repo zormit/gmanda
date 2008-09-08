@@ -21,6 +21,7 @@ import org.joda.time.DateTime;
 
 import de.fu_berlin.inf.gmanda.gui.actions.AutoIndentAction;
 import de.fu_berlin.inf.gmanda.gui.misc.CodeCompleter;
+import de.fu_berlin.inf.gmanda.gui.misc.GmandaInfoBox;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.CodeModel;
@@ -52,7 +53,7 @@ public class CodeBox extends JTextArea {
 
 	DocumentListener completerListener;
 
-	public CodeBox(CodeBoxView codeBoxView, ProjectProxy project, SelectionProxy selection) {
+	public CodeBox(CodeBoxView codeBoxView, final ProjectProxy project, SelectionProxy selection, GmandaInfoBox gmandaInfoBox) {
 		super();
 		this.codeBoxView = codeBoxView;
 
@@ -117,6 +118,7 @@ public class CodeBox extends JTextArea {
 		 * Create Completer
 		 */
 		completer = new AutoCompleter<String>(new CodeCompleter(this, project));
+		completer.setInfoBox(gmandaInfoBox);
 
 		selection.addAndNotify(new VariableProxyListener<Object>() {
 

@@ -93,6 +93,7 @@ import de.fu_berlin.inf.gmanda.gui.menu.PrimaryDocumentTreePopup;
 import de.fu_berlin.inf.gmanda.gui.menu.ToolsMenu;
 import de.fu_berlin.inf.gmanda.gui.menu.WindowMenu;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
+import de.fu_berlin.inf.gmanda.gui.misc.GmandaInfoBox;
 import de.fu_berlin.inf.gmanda.gui.misc.LockManager;
 import de.fu_berlin.inf.gmanda.gui.misc.PrimaryDocumentCellRenderer;
 import de.fu_berlin.inf.gmanda.gui.misc.ProjectFileChooser;
@@ -208,6 +209,7 @@ public class GmandaMain {
 			.addComponent(CodeDetailBox.class)
 			.addComponent(TabulationCanvas.class)
 			.addComponent(TabulationOptionsPanel.class)
+			.addComponent(GmandaInfoBox.class)
 			// Views
 			.addComponent(CodeAsTextView.class)
 			.addComponent(CodeDetailView.class)
@@ -298,6 +300,7 @@ public class GmandaMain {
 			.addComponent(SelectionViewManager.class)
 			.addComponent(TrailManager.class)
 			.addComponent(GmandaHyperlinkListener.class);
+		
 	}
 
 	public void startApplication() {

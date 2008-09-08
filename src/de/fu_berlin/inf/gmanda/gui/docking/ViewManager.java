@@ -13,6 +13,7 @@ import bibliothek.gui.DockFrontend;
 import bibliothek.gui.DockStation;
 import bibliothek.gui.Dockable;
 import bibliothek.gui.dock.DefaultDockable;
+import bibliothek.gui.dock.ScreenDockStation;
 import bibliothek.gui.dock.SplitDockStation;
 import bibliothek.gui.dock.action.ActionGuard;
 import bibliothek.gui.dock.action.DefaultDockActionSource;
@@ -34,6 +35,8 @@ public class ViewManager {
 	PredefinedDockSituation dockSituation;
 
 	SplitDockStation rootDockStation;
+	
+	ScreenDockStation screenDockStation;
 
 	DockFrontend dockFrontend;
 
@@ -48,6 +51,7 @@ public class ViewManager {
 	public ViewManager(DockableView[] views) {
 		dockSituation = new PredefinedDockSituation();
 		rootDockStation = new SplitDockStation();
+		
 		dockSituation.put("station", rootDockStation);
 
 		closeAction = new CloseAction(null);
@@ -122,7 +126,11 @@ public class ViewManager {
 			}
 		});
 		
+		screenDockStation = new ScreenDockStation(w);
+		screenDockStation.setShowing(true);
+		
 		dockFrontend.addRoot(rootDockStation, "station");
+		dockFrontend.addRoot(screenDockStation, "screen");
 		
 		rootComponent = rootDockStation.getComponent();
 		return rootComponent;

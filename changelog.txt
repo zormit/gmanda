@@ -1,4 +1,10 @@
 
+2008-09-08
+
+   * [FEATURE]  Code Completion now shows definition of code
+   * [MINOR]    Improved Tabulation View for columns and rows showing
+                missing intersections
+
 2008-08-27
 
    * [FEATURE]  Tabulation View now works as intended on properties

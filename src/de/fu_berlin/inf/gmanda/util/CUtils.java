@@ -1,5 +1,7 @@
 package de.fu_berlin.inf.gmanda.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.LinkedList;
 
 public class CUtils {
@@ -16,6 +18,12 @@ public class CUtils {
 			i++;
 		}
 		return result;
+	}
+	
+	public static String getStackTrace(Throwable t){
+		StringWriter sw = new StringWriter();
+		t.printStackTrace(new PrintWriter(sw));
+		return sw.toString();
 	}
 
 }

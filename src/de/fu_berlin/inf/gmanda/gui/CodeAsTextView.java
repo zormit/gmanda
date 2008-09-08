@@ -1,10 +1,14 @@
 package de.fu_berlin.inf.gmanda.gui;
 
+import static de.fu_berlin.inf.gmanda.qda.ToHtmlHelper.code2html;
+import static de.fu_berlin.inf.gmanda.qda.ToHtmlHelper.pd2a;
+import static de.fu_berlin.inf.gmanda.qda.ToHtmlHelper.surround;
+import static de.fu_berlin.inf.gmanda.qda.ToHtmlHelper.toA;
+import static de.fu_berlin.inf.gmanda.qda.ToHtmlHelper.toFilterA;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +24,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
@@ -34,12 +37,13 @@ import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.qda.Slice;
+import de.fu_berlin.inf.gmanda.qda.ToHtmlHelper;
 import de.fu_berlin.inf.gmanda.util.CStringUtils;
 import de.fu_berlin.inf.gmanda.util.DeferredVariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.Pair;
-import de.fu_berlin.inf.gmanda.util.StringJoiner;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.CStringUtils.StringConverter;
+
 
 public class CodeAsTextView extends JScrollPane {
 
@@ -133,43 +137,6 @@ public class CodeAsTextView extends JScrollPane {
 		});
 	}
 
-	public static String toShortId(String s) {
-		return s.replaceAll("(gmane(://|\\.)|devel\\.|comp\\.)", "");
-	}
-
-	public static String toA(PrimaryDocument pd) {
-		String s = pd.getFilename();
-
-		if (s == null || s.trim().length() == 0)
-			return pd.getName();
-
-		return String.format("<a href='%s'>%s</a>", s, toShortId(s));
-	}
-
-	public static String toFilterA(Code c) {
-
-		StringJoiner result = new StringJoiner(".");
-		StringJoiner sb = new StringJoiner(".");
-		for (String s : c.getTagLevels()) {
-			sb.append(s);
-			result.append(toFilterA(sb.toString(), s));
-		}
-		return result.toString();
-	}
-
-	public static String toFilterA(String tag, String toDisplay) {
-		try {
-			return String.format("<a href='gmaneFilter://%s'>%s</a>", URLEncoder.encode(tag,
-				"UTF-8"), StringEscapeUtils.escapeHtml(toDisplay));
-		} catch (IOException e) {
-			return tag;
-		}
-	}
-
-	public static String toFilterA(String s) {
-		return toFilterA(CodedStringFactory.parseOne(s));
-	}
-
 	public String codeToHTML(Project p, Code code) {
 		
 		String tag = code.getTag();
@@ -184,7 +151,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("<h3>").append(toFilterA(code)).append("</h3>");
+		sb.append("<h3>").append(ToHtmlHelper.toFilterA(code)).append("</h3>");
 
 		List<PrimaryDocument> noValueList = new LinkedList<PrimaryDocument>();
 
@@ -277,7 +244,7 @@ public class CodeAsTextView extends JScrollPane {
 
 			sb.append("<li>");
 			if (pd.getFilename() != null) {
-				sb.append(toA(pd));
+				sb.append(ToHtmlHelper.toA(pd));
 			} else {
 				sb.append("Document with no file");
 			}
@@ -306,7 +273,7 @@ public class CodeAsTextView extends JScrollPane {
 		return sb.toString();
 	}
 	
-	public String definition2html(String tag, List<PrimaryDocument> newFilterList) {
+	public static  String definition2html(String tag, Iterable<PrimaryDocument> newFilterList) {
 
 		boolean definitionFound = false;
 
@@ -335,33 +302,14 @@ public class CodeAsTextView extends JScrollPane {
 
 	}
 
-	public static String pd2a(PrimaryDocument pd) {
-		if (pd.getFilename() != null) {
-			return toA(pd);
-		} else {
-			return "Document with no file";
-		}
-	}
-
-	public static String code2html(Code sub, PrimaryDocument pd, boolean expandSubCodes) {
-
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(code2html(sub, expandSubCodes, false));
-		sb.append(" (<i>Definition from ").append(pd2a(pd)).append("</i>)");
-
-		return sb.toString();
-
-	}
-
 	public String properties2html(String code, Project p) {
 
 		StringBuilder sb = new StringBuilder();
 		
 		Slice<PrimaryDocument> parentSlice = p.getCodeModel().getInitialFilterSlice(code).select(
 			CodedStringFactory.parseOne(code));
-
 		for (Entry<String, Slice<PrimaryDocument>> slice : parentSlice.slice().entrySet()) {
+			
 
 			String property = slice.getKey().trim();
 			Slice<PrimaryDocument> childSlice = slice.getValue();
@@ -379,14 +327,6 @@ public class CodeAsTextView extends JScrollPane {
 			return "<h4>Properties</h4><ul>" + sb.toString() + "</ul>";
 		} else {
 			return "<h4>No properties found</h4>";
-		}
-	}
-
-	public static String surround(String start, String middle, String end) {
-		if (middle.trim().length() > 0) {
-			return start + middle + end;
-		} else {
-			return "";
 		}
 	}
 
@@ -512,42 +452,6 @@ public class CodeAsTextView extends JScrollPane {
 		return sb.toString();
 	}
 
-	private static void code2html(StringBuilder sb, Code c, PrimaryDocument pd) {
-
-		sb.append("<li>");
-		sb.append(code2html(c, pd, true));
-		sb.append("</li>");
-	}
-
-	public static String code2html(Code c, boolean expandSubCodes, boolean tagName) {
-
-		StringBuilder sb = new StringBuilder();
-
-		List<? extends Code> values = c.getProperties();
-
-		if ((values.size() == 1 && c.getTag().equals("desc")) || !expandSubCodes) {
-			sb.append(surround("<p>", c.getValue().replaceAll("\n[ \t]*\n", "</p><p/><p>"), "</p>"));
-			return sb.toString();
-		}
-
-		if (tagName)
-			sb.append(toFilterA(c)).append(": ");
-
-		if (values.size() == 1 && values.get(0).getTag().equals("desc")) {
-			sb.append(surround("<p>", values.get(0).getValue().replaceAll("\n[ \t]*\n",
-				"</p><p/><p>"), "</p>"));
-		} else {
-			sb.append("<ul>");
-			for (Code sub : c.getProperties()) {
-				sb.append("<li>");
-				sb.append(code2html(sub, true, true));
-				sb.append("</li>");
-			}
-			sb.append("</ul>");
-		}
-
-		return sb.toString();
-	}
 
 	public String getTitle() {
 		return "Code Detail View";

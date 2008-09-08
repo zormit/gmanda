@@ -1,11 +1,8 @@
 package de.fu_berlin.inf.gmanda.qda;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +14,8 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
 
 import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.StateChangeListener;
@@ -211,53 +208,12 @@ public class CodeModel {
 	
 		return result;
 	}
-	
-	public Collection<String> getProperties(String code){
-		
-		Set<String> result = new HashSet<String>();
-		
-		Iterator<? extends Code> it = CodedStringFactory.parse(code + ".*").getAllCodes().iterator();
-		
-		if (!it.hasNext()){
-			return result;
-		}
-		Code toFind = it.next();
-		
-		for (PrimaryDocument pd : getPrimaryDocuments(code)){
-			for (Code c: CodedStringFactory.parse(pd.getCodeAsString()).getAllCodes()){
-				if (!toFind.matches(c))
-					continue;
-				
-				for (Code sub : c.getProperties()){
-					if (sub.getTag().startsWith("#")){
-						result.add(sub.getTag());
-					}
-				}
-			}
-		}
-		return result;
-	}
-	
-	public Multimap<String, Pair<Code, PrimaryDocument>> getPropValues(String code, String property){
-		Multimap<String, Pair<Code, PrimaryDocument>> result = new HashMultimap<String, Pair<Code,PrimaryDocument>>();
-		
-		Multimap<PrimaryDocument, Code> rawValues = getValues(code, property);
-		
-		for (Map.Entry<PrimaryDocument, Code> entry : rawValues.entries()){
-			
-			List<Code> codes = new LinkedList<Code>();
-			
-			for (Code c : entry.getValue().getProperties()){
-				if (c.getTag().equals("desc"))
-					continue;
-				codes.add(c);
-			}
-			
-			for (Code c : entry.getValue().getProperties("desc")){
-				String desc = StringUtils.strip(c.getTag(), " \r\t\f\n'\"");
-				for (Code c2 : codes){
-					result.put(desc, new Pair<Code, PrimaryDocument>(c2, entry.getKey()));
-				}
+
+	public Multimap<PrimaryDocument, Code> getValues(Iterable<PrimaryDocument> it, String code, String property){
+		Multimap<PrimaryDocument, Code> result = new TreeMultimap<PrimaryDocument, Code>();
+		for (PrimaryDocument pd : it) {
+			for (Code c : pd.getCode().getAllDeep(code)) {
+				result.putAll(pd, c.getProperties(property));
 			}
 		}
 		return result;
@@ -266,31 +222,7 @@ public class CodeModel {
 	public Multimap<PrimaryDocument, Code> getValues(String code, String property){
 		return getValues(getPrimaryDocuments(code), code, property);
 	}
-	
-	public Multimap<PrimaryDocument, Code> getValues(List<PrimaryDocument> pds, String code, String property){
-
-		Multimap<PrimaryDocument, Code> result = new HashMultimap<PrimaryDocument, Code>();
 		
-		Iterator<? extends Code> it = CodedStringFactory.parse(code + ".*").getAllCodes().iterator();
-		
-		if (!it.hasNext()){
-			return result;
-		}
-		Code toFind = it.next();
-		
-		for (PrimaryDocument pd : getPrimaryDocuments(code)){
-			for (Code c: CodedStringFactory.parse(pd.getCodeAsString()).getAllCodes()){
-				if (!toFind.matches(c))
-					continue;
-				
-				for (Code prop : c.getProperties(property)) {
-					result.putAll(pd, prop.getProperties("value"));
-				}
-			}
-		}
-		return result;
-	}
-	
 	public List<Pair<String, List<PrimaryDocument>>> partition(List<PrimaryDocument> pds,
 		String partitionCode) {
 
@@ -359,5 +291,8 @@ public class CodeModel {
 	public Slice<PrimaryDocument> getInitialFilterSlice(String code){
 		return SliceImpl.fromPDs(getPrimaryDocuments(code));
 	}
+	
+	
+	
 	
 }

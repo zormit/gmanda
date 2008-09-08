@@ -31,7 +31,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
-import de.fu_berlin.inf.gmanda.gui.CodeAsTextView;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
@@ -40,6 +39,8 @@ import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.qda.Slice;
+import de.fu_berlin.inf.gmanda.qda.ToHtmlHelper;
+import de.fu_berlin.inf.gmanda.util.CMultimap;
 import de.fu_berlin.inf.gmanda.util.CStringUtils;
 import de.fu_berlin.inf.gmanda.util.CUtils;
 
@@ -87,6 +88,12 @@ public class TabulationCanvas extends JScrollPane {
 	}
 
 	public <T> Multimap<String, T> preprocess(String dim, Slice<T> all){
+
+		Multimap<String, T> result = new TreeMultimap<String, T>();
+		
+		if (dim == null || dim.trim().length() == 0){
+			return result;
+		}
 		
 		LinkedList<Code> codes = Lists.newLinkedList(CodedStringFactory
 		.parse(dim).getAllCodes());
@@ -101,8 +108,6 @@ public class TabulationCanvas extends JScrollPane {
 		}
 		
 		Map<String, Slice<T>> slices = new TreeMap<String, Slice<T>>(byValue(codes, all));
-
-		Multimap<String, T> result = new TreeMultimap<String, T>();
 		
 		for (Entry<String, Slice<T>> row : slices.entrySet()) {
 			String codeString = row.getKey();
@@ -118,6 +123,8 @@ public class TabulationCanvas extends JScrollPane {
 		}
 		return result;
 	}
+
+	int joinSkipLevels = 0;
 	
 	public void update(final TabulationSettings settings) {
 
@@ -126,11 +133,18 @@ public class TabulationCanvas extends JScrollPane {
 		commonService.run(new Runnable() {
 
 			public void run() {
-				
+
+				try {
 				if (settings.groupBy.trim().length() == 0){
+					joinSkipLevels = 0;
 					tabulateByPrimaryDocuments(settings);
 					return;
 				}
+				
+				if (settings.yDim.trim().length() == 0){
+					settings.yDim = null;
+				}
+				
 				
 				Project p = project.getVariable();
 				if (p == null)
@@ -138,20 +152,26 @@ public class TabulationCanvas extends JScrollPane {
 				
 				Slice<PrimaryDocument> all = p.getCodeModel().getInitialFilterSlice("episode");
 				
+				joinSkipLevels = CodedStringFactory.parseOne(settings.groupBy).getTagLevels().size();
 				Slice<String> grouped = all.sliceAndPack(settings.groupBy, 0);
 				
 				Multimap<String, String> xSlices = preprocess(settings.xDim, grouped);
 				Multimap<String, String> ySlices = preprocess(settings.yDim, grouped);
 				
-				Multimap<String, String> xCheckSlices = new TreeMultimap<String, String>(xSlices);
+				CMultimap<String, String> xCheckSlices = new CMultimap<String, String>(xSlices);
 				
 				List<List<String>> table = new ArrayList<List<String>>();
 
 				{ // Header row
 					List<String> headerRow = new ArrayList<String>();
-					headerRow.add(CodeAsTextView.toFilterA(settings.yDim));
+					if (settings.yDim != null){
+					  headerRow.add(ToHtmlHelper.toFilterA(settings.yDim));
+					} else {
+						headerRow.add("No y-dimension");
+					}
+					
 					for (String s : xSlices.keySet()) {
-						headerRow.add(CodeAsTextView.toFilterA(s));
+						headerRow.add(ToHtmlHelper.toFilterA(s));
 					}
 					headerRow.add("[no intersection]");
 					table.add(headerRow);
@@ -165,7 +185,7 @@ public class TabulationCanvas extends JScrollPane {
 					
 					List<String> htmlRow = new ArrayList<String>();
 					
-					htmlRow.add(CodeAsTextView.toFilterA(rowTag));
+					htmlRow.add(ToHtmlHelper.toFilterA(rowTag));
 
 					for (Entry<String, Collection<String>> column : xSlices.asMap().entrySet()) {
 
@@ -186,23 +206,24 @@ public class TabulationCanvas extends JScrollPane {
 
 					table.add(htmlRow);
 				}
-				
+			
+				// Into the last row, put all items, that you could not match so far.
 				List<String> htmlRow = new ArrayList<String>();
 				htmlRow.add("[no intersection]");
 				
-				for (Entry<String, Collection<String>> row : xCheckSlices.asMap().entrySet()) {
+				for (Entry<String, Collection<String>> row : xCheckSlices.entrySet()) {
 					htmlRow.add(join(row.getValue()));
 				}
+				
 				table.add(htmlRow);
 
 				String s = runVelocity(table);
 
 				pane.setText(s);
-				
-				
-				
-				
-			
+				} catch (RuntimeException e){
+					pane.setText(CUtils.getStackTrace(e));
+					throw e;
+				}
 			}
 
 			private void tabulateByPrimaryDocuments(TabulationSettings settings) {
@@ -216,15 +237,15 @@ public class TabulationCanvas extends JScrollPane {
 				Multimap<String, PrimaryDocument> xSlices = preprocess(settings.xDim, all);
 				Multimap<String, PrimaryDocument> ySlices = preprocess(settings.yDim, all);
 				
-				Multimap<String, PrimaryDocument> xCheckSlices = new TreeMultimap<String, PrimaryDocument>(xSlices);
+				CMultimap<String, PrimaryDocument> xCheckSlices = new CMultimap<String, PrimaryDocument>(xSlices);
 				
 				List<List<String>> table = new ArrayList<List<String>>();
 
 				{ // Header row
 					List<String> headerRow = new ArrayList<String>();
-					headerRow.add(CodeAsTextView.toFilterA(settings.yDim));
+					headerRow.add(ToHtmlHelper.toFilterA(settings.yDim));
 					for (String s : xSlices.keySet()) {
-						headerRow.add(CodeAsTextView.toFilterA(s));
+						headerRow.add(ToHtmlHelper.toFilterA(s));
 					}
 					headerRow.add("[no intersection]");
 					table.add(headerRow);
@@ -238,7 +259,7 @@ public class TabulationCanvas extends JScrollPane {
 					
 					List<String> htmlRow = new ArrayList<String>();
 					
-					htmlRow.add(CodeAsTextView.toFilterA(rowTag));
+					htmlRow.add(ToHtmlHelper.toFilterA(rowTag));
 
 					for (Entry<String, Collection<PrimaryDocument>> column : xSlices.asMap().entrySet()) {
 
@@ -263,9 +284,10 @@ public class TabulationCanvas extends JScrollPane {
 				List<String> htmlRow = new ArrayList<String>();
 				htmlRow.add("[no intersection]");
 				
-				for (Entry<String, Collection<PrimaryDocument>> row : xCheckSlices.asMap().entrySet()) {
+				for (Entry<String, Collection<PrimaryDocument>> row : xCheckSlices.entrySet()) {
 					htmlRow.add(join(row.getValue()));
 				}
+				
 				table.add(htmlRow);
 
 				String s = runVelocity(table);
@@ -282,9 +304,9 @@ public class TabulationCanvas extends JScrollPane {
 			new Function<Object, String>() {
 				public String apply(Object o) {
 					if (o instanceof PrimaryDocument)
-						return CodeAsTextView.toA((PrimaryDocument)o);
+						return ToHtmlHelper.toA((PrimaryDocument)o);
 					else 
-						return CodeAsTextView.toFilterA(o.toString());
+						return ToHtmlHelper.toFilterA(joinSkipLevels, o.toString());
 				}
 			}), "<br>");
 	}
