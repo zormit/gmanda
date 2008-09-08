@@ -4,6 +4,7 @@ import java.awt.AWTKeyStroke;
 import java.awt.Color;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,7 +129,7 @@ public class PrimaryDocumentTree extends JTree {
 			if (filter == null)
 				rootFilterList = null;
 			else 
-				rootFilterList = filter.filterResult;
+				rootFilterList = new ArrayList<PrimaryDocument>(filter.filterResult);
 			
 			rootFilterPosition = -1;
 
