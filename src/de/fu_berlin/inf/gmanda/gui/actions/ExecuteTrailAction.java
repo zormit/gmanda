@@ -138,6 +138,7 @@ public class ExecuteTrailAction extends AbstractAction {
 							PrimaryDocument pd = filenames.get(filename.trim());
 							if (pd == null) {
 								System.out.println("Could not find primary document: " + nextLine);
+								nextLine = bf.readLine();
 								continue;
 							}
 
@@ -196,13 +197,20 @@ public class ExecuteTrailAction extends AbstractAction {
 								if (!applyDespiteWarningForAll) {
 									// Warn the user that trail file does not
 									// match
+									
+									System.out.println("Mismatch in " + filename + "\n"
+									+ "Code from trail:\n" + CStringUtils.indent(oldCode, 2)
+									+ "\n" + "Code in project:\n"
+									+ CStringUtils.indent(pdoldcode, 2) + "\n"
+									+ "New code:\n" + CStringUtils.indent(newcode, 2) + "\n");
+									
 									switch (JOptionPane.showOptionDialog(common
 										.getForegroundWindowOrNull(),
 										"Code in trail file does not match existing code in project file.\n"
-											+ "Code from trail:\n" + CStringUtils.indent(oldCode, 2)
+											+ "Code from trail:\n" + CStringUtils.indent(oldCode.substring(0, Math.min(100, oldCode.length())), 2)
 											+ "\n" + "Code in project:\n"
-											+ CStringUtils.indent(pdoldcode, 2) + "\n"
-											+ "New code:\n" + CStringUtils.indent(newcode, 2) + "\n"
+											+ CStringUtils.indent(pdoldcode.substring(0, Math.min(100, oldCode.length())), 2) + "\n"
+											+ "New code:\n" + CStringUtils.indent(newcode.substring(0, Math.min(100, oldCode.length())), 2) + "\n"
 											+ "Apply change nevertheless?", "Executing Trail...",
 										JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
 										null, new Object[] { "Yes", "Yes to all", "No",
@@ -237,6 +245,7 @@ public class ExecuteTrailAction extends AbstractAction {
 							} else {
 								pd.setCode(newcode);
 							}
+							continue;
 						}
 
 						// We could also execute the rename using the code model
