@@ -28,7 +28,7 @@ import de.fu_berlin.inf.gmanda.util.CStringUtils;
  */
 public class HighlightSupport {
     
-	DefaultHighlighter.DefaultHighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.RED);
+	DefaultHighlighter.DefaultHighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
 
 	JTextComponent textComponent;
 	
@@ -138,16 +138,15 @@ public class HighlightSupport {
                 
                 if (sb.length() < start)
                 	sb.append(CStringUtils.spaces(start - sb.length()));
-                
-                if (sb.length() < end)
-                	sb.setLength(end);
 		        
-                sb.insert(it.getStartOffset(), fragment);
+                sb.insert(start, fragment);
             } catch (BadLocationException ex) {
             }
         }
         
         String text = sb.toString();
+        
+        text = text.replaceAll("\\p{Punct}", " ");
         
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {
