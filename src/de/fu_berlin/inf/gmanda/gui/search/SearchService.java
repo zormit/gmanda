@@ -15,10 +15,12 @@ import org.picocontainer.annotations.Inject;
 import com.google.common.base.Nullable;
 
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
+import de.fu_berlin.inf.gmanda.proxies.SearchStringProxy;
 import de.fu_berlin.inf.gmanda.qda.Code;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.StringJoiner;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 
 /**
@@ -32,6 +34,9 @@ public class SearchService {
 	
 	@Inject
 	CommonService commonService;
+	
+	@Inject
+	SearchStringProxy searchStringProxy;
 
 	public List<PrimaryDocument> filter(final String filterString, @Nullable
 		IProgress pBar, Project project) {
@@ -117,12 +122,29 @@ public class SearchService {
 		// Search using Lucene if code is "search"
 		if ("search".equals(nextSearchString) && c.getValue() != null
 			&& c.getValue().trim().length() > 1) {
+			
+			String searchString;
+			
+			List<? extends Code> props = c.getProperties();
+			Code first = props.get(0);
 
-			String searchString = c.getValue().trim();
-			if (searchString.startsWith("\""))
-				searchString = searchString.substring(1);
-			if (searchString.endsWith("\""))
-				searchString = searchString.substring(0, searchString.length() - 1);
+			if (first.getTag().equals("desc") && props.size() == 1) {
+				searchString = c.getValue().trim();
+				
+				if (searchString.startsWith("\""))
+					searchString = searchString.substring(1);
+				if (searchString.endsWith("\""))
+					searchString = searchString.substring(0, searchString.length() - 1);
+				
+				searchStringProxy.setVariable(searchString);
+				
+			} else {
+				StringJoiner sb = new StringJoiner(" ");
+				for (Code sub : props){
+					sb.append(sub.toString());
+				}
+				searchString = sb.toString();
+			}
 
 			Iterator<PrimaryDocument> it = luceneFacade.search(project, searchString);
 			LinkedList<PrimaryDocument> result = new LinkedList<PrimaryDocument>();

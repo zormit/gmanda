@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Map.Entry;
 
 import javax.swing.JOptionPane;
 
@@ -284,7 +285,11 @@ public class LuceneFacade {
 					doc.add(new Field("path", fileName, Field.Store.YES, Field.Index.UN_TOKENIZED));
 					doc.add(new Field("lastupdate", DateTools.dateToString(new Date(),
 						DateTools.Resolution.MINUTE), Field.Store.YES, Field.Index.UN_TOKENIZED));
-					doc.add(new Field("contents", new FileReader(file))); 
+					doc.add(new Field("contents", new FileReader(file)));
+					
+					for (Entry<String, String> metadata : pd.getMetaData().entrySet()){
+						doc.add(new Field(metadata.getKey(), metadata.getValue(), Field.Store.NO, Field.Index.TOKENIZED));
+					}
 
 					iwriter.addDocument(doc);
 				}
