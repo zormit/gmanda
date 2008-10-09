@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
@@ -82,50 +83,50 @@ public class TabulationCanvas extends JScrollPane {
 
 		for (Code c : codes) {
 			s = s.select(c);
-    	}
+		}
 
 		return s.slice();
 	}
 
-	public <T> Multimap<String, T> preprocess(String dim, Slice<T> all){
+	public <T> Multimap<String, T> preprocess(String dim, Slice<T> all) {
 
 		Multimap<String, T> result = new TreeMultimap<String, T>();
-		
-		if (dim == null || dim.trim().length() == 0){
+
+		if (dim == null || dim.trim().length() == 0) {
 			return result;
 		}
-		
-		LinkedList<Code> codes = Lists.newLinkedList(CodedStringFactory
-		.parse(dim).getAllCodes());
-		
+
+		LinkedList<Code> codes = Lists.newLinkedList(CodedStringFactory.parse(dim).getAllCodes());
+
 		String lastTag = codes.getLast().getTag();
 		int depth;
 		try {
 			depth = Integer.parseInt(lastTag);
 			codes.removeLast();
-		} catch (Exception e){
+		} catch (Exception e) {
 			depth = 0;
 		}
-		
+
 		Map<String, Slice<T>> slices = new TreeMap<String, Slice<T>>(byValue(codes, all));
-		
+
 		for (Entry<String, Slice<T>> row : slices.entrySet()) {
 			String codeString = row.getKey();
-			
+
 			if (codeString.equals("def") || codeString.equals("quote") || codeString.equals("date"))
 				continue;
-			
-			if (depth > 0){
-				codeString = StringUtils.join(CUtils.first(CodedStringFactory.parseOne(codeString).getTagLevels(), depth), ".");
+
+			if (depth > 0) {
+				codeString = StringUtils.join(CUtils.first(CodedStringFactory.parseOne(codeString)
+					.getTagLevels(), depth), ".");
 			}
-			
+
 			result.putAll(codeString, row.getValue().getDocuments().keySet());
 		}
 		return result;
 	}
 
 	int joinSkipLevels = 0;
-	
+
 	public void update(final TabulationSettings settings) {
 
 		pane.setText("computing tabulation...");
@@ -135,110 +136,159 @@ public class TabulationCanvas extends JScrollPane {
 			public void run() {
 
 				try {
-				if (settings.groupBy.trim().length() == 0){
-					joinSkipLevels = 0;
-					tabulateByPrimaryDocuments(settings);
-					return;
-				}
-				
-				if (settings.yDim.trim().length() == 0){
-					settings.yDim = null;
-				}
-				
-				
-				Project p = project.getVariable();
-				if (p == null)
-					return;
-				
-				Slice<PrimaryDocument> all = p.getCodeModel().getInitialFilterSlice("episode");
-				
-				joinSkipLevels = CodedStringFactory.parseOne(settings.groupBy).getTagLevels().size();
-				Slice<String> grouped = all.sliceAndPack(settings.groupBy, 0);
-				
-				Multimap<String, String> xSlices = preprocess(settings.xDim, grouped);
-				Multimap<String, String> ySlices = preprocess(settings.yDim, grouped);
-				
-				CMultimap<String, String> xCheckSlices = new CMultimap<String, String>(xSlices);
-				
-				List<List<String>> table = new ArrayList<List<String>>();
+					if (settings.groupBy.trim().length() == 0) {
+						joinSkipLevels = 0;
+						tabulateByPrimaryDocuments(settings);
+						return;
+					}
 
-				{ // Header row
-					List<String> headerRow = new ArrayList<String>();
-					if (settings.yDim != null){
-					  headerRow.add(ToHtmlHelper.toFilterA(settings.yDim));
-					} else {
-						headerRow.add("No y-dimension");
+					if (settings.yDim.trim().length() == 0) {
+						settings.yDim = null;
 					}
 					
-					for (String s : xSlices.keySet()) {
-						headerRow.add(ToHtmlHelper.toFilterA(s));
-					}
-					headerRow.add("[no intersection]");
-					table.add(headerRow);
-				}
-
-				for (Entry<String, Collection<String>> row : ySlices.asMap().entrySet()) {
-
-					String rowTag = row.getKey();
-					Collection<String> rowPDs = row.getValue();
-					HashSet<String> checkRowPDs = new HashSet<String>(rowPDs);
-					
-					List<String> htmlRow = new ArrayList<String>();
-					
-					htmlRow.add(ToHtmlHelper.toFilterA(rowTag));
-
-					for (Entry<String, Collection<String>> column : xSlices.asMap().entrySet()) {
-
-						String columnTag = column.getKey();
-						Collection<String> columnPDs = column.getValue();
-						
-						@SuppressWarnings("unchecked")
-						LinkedList<String> cell = new LinkedList<String>(
-							CollectionUtils.intersection(rowPDs, columnPDs));
-						
-						checkRowPDs.removeAll(cell);
-						xCheckSlices.get(columnTag).removeAll(cell);
-
-						htmlRow.add(join(cell));
+					if (settings.xDim.trim().length() == 0) {
+						settings.xDim = null;
 					}
 					
-					htmlRow.add(join(checkRowPDs));
+					if (settings.xDim == null){
+						settings.noIntersectX = true;
+					}
+					
+					if (settings.yDim == null){
+						settings.noIntersectY = true;
+					}
 
-					table.add(htmlRow);
-				}
-			
-				// Into the last row, put all items, that you could not match so far.
-				List<String> htmlRow = new ArrayList<String>();
-				htmlRow.add("[no intersection]");
-				
-				for (Entry<String, Collection<String>> row : xCheckSlices.entrySet()) {
-					htmlRow.add(join(row.getValue()));
-				}
-				
-				table.add(htmlRow);
+					Project p = project.getVariable();
+					if (p == null)
+						return;
 
-				String s = runVelocity(table);
+					String filterBy = settings.filterBy.trim();
+					if (filterBy.length() == 0) {
+						filterBy = "episode";
+					}
+					Code c = CodedStringFactory.parseOne(filterBy);
+					Slice<PrimaryDocument> all = p.getCodeModel().getInitialFilterSlice(c.getTag());
 
-				pane.setText(s);
-				} catch (RuntimeException e){
+					do {
+						List<? extends Code> props = c.getProperties();
+
+						if (props.size() == 0)
+							break;
+
+						c = props.get(0);
+
+						if (c.getTag().equals("desc") && c.getProperties().size() == 1) {
+							break;
+						}
+						all = all.select(c);
+					} while (true);
+
+					joinSkipLevels = CodedStringFactory.parseOne(settings.groupBy).getTagLevels()
+						.size();
+					Slice<String> grouped = all.sliceAndPack(settings.groupBy, 0);
+
+					TreeSet<String> allGrouped = new TreeSet<String>(grouped.getDocuments()
+						.keySet());
+
+					Multimap<String, String> xSlices = preprocess(settings.xDim, grouped);
+					Multimap<String, String> ySlices = preprocess(settings.yDim, grouped);
+
+					CMultimap<String, String> xCheckSlices = new CMultimap<String, String>(xSlices);
+
+					List<List<String>> table = new ArrayList<List<String>>();
+
+					{ // Header row
+						List<String> headerRow = new ArrayList<String>();
+						if (settings.yDim != null) {
+							headerRow.add(ToHtmlHelper.toFilterA(settings.yDim));
+						} else {
+							headerRow.add("No y-dimension");
+						}
+
+						for (String s : xSlices.keySet()) {
+							headerRow.add(ToHtmlHelper.toFilterA(s));
+						}
+
+						if (settings.noIntersectX) {
+							headerRow.add("[no intersection]");
+						}
+
+						table.add(headerRow);
+					}
+
+					for (Entry<String, Collection<String>> row : ySlices.asMap().entrySet()) {
+
+						String rowTag = row.getKey();
+						Collection<String> rowPDs = row.getValue();
+						HashSet<String> checkRowPDs = new HashSet<String>(rowPDs);
+
+						List<String> htmlRow = new ArrayList<String>();
+
+						htmlRow.add(ToHtmlHelper.toFilterA(rowTag));
+
+						for (Entry<String, Collection<String>> column : xSlices.asMap().entrySet()) {
+
+							String columnTag = column.getKey();
+							Collection<String> columnPDs = column.getValue();
+
+							@SuppressWarnings("unchecked")
+							LinkedList<String> cell = new LinkedList<String>(CollectionUtils
+								.intersection(rowPDs, columnPDs));
+
+							checkRowPDs.removeAll(cell);
+							xCheckSlices.get(columnTag).removeAll(cell);
+							allGrouped.removeAll(cell);
+
+							htmlRow.add(join(cell));
+						}
+
+						if (settings.noIntersectX) {
+							htmlRow.add(join(checkRowPDs));
+						}
+
+						table.add(htmlRow);
+					}
+
+					if (settings.noIntersectY) {
+						// Into the last row, put all items, that you could not
+						// match so far.
+						List<String> htmlRow = new ArrayList<String>();
+						htmlRow.add("[no intersection]");
+
+						for (Entry<String, Collection<String>> row : xCheckSlices.entrySet()) {
+							Collection<String> column = row.getValue();
+							htmlRow.add(join(column));
+							allGrouped.removeAll(column);
+						}
+						if (settings.noIntersectX) {
+							htmlRow.add(join(allGrouped));
+						}
+						table.add(htmlRow);
+					}
+
+					String text = runVelocity(table);
+
+					pane.setText(text);
+				} catch (RuntimeException e) {
 					pane.setText(CUtils.getStackTrace(e));
 					throw e;
 				}
 			}
 
 			private void tabulateByPrimaryDocuments(TabulationSettings settings) {
-				
+
 				Project p = project.getVariable();
 				if (p == null)
 					return;
-				
+
 				Slice<PrimaryDocument> all = p.getCodeModel().getInitialFilterSlice("episode");
-				
+
 				Multimap<String, PrimaryDocument> xSlices = preprocess(settings.xDim, all);
 				Multimap<String, PrimaryDocument> ySlices = preprocess(settings.yDim, all);
-				
-				CMultimap<String, PrimaryDocument> xCheckSlices = new CMultimap<String, PrimaryDocument>(xSlices);
-				
+
+				CMultimap<String, PrimaryDocument> xCheckSlices = new CMultimap<String, PrimaryDocument>(
+					xSlices);
+
 				List<List<String>> table = new ArrayList<List<String>>();
 
 				{ // Header row
@@ -256,38 +306,39 @@ public class TabulationCanvas extends JScrollPane {
 					String rowTag = row.getKey();
 					Collection<PrimaryDocument> rowPDs = row.getValue();
 					HashSet<PrimaryDocument> checkRowPDs = new HashSet<PrimaryDocument>(rowPDs);
-					
+
 					List<String> htmlRow = new ArrayList<String>();
-					
+
 					htmlRow.add(ToHtmlHelper.toFilterA(rowTag));
 
-					for (Entry<String, Collection<PrimaryDocument>> column : xSlices.asMap().entrySet()) {
+					for (Entry<String, Collection<PrimaryDocument>> column : xSlices.asMap()
+						.entrySet()) {
 
 						String columnTag = column.getKey();
 						Collection<PrimaryDocument> columnPDs = column.getValue();
-						
+
 						@SuppressWarnings("unchecked")
 						LinkedList<PrimaryDocument> cell = new LinkedList<PrimaryDocument>(
 							CollectionUtils.intersection(rowPDs, columnPDs));
-						
+
 						checkRowPDs.removeAll(cell);
 						xCheckSlices.get(columnTag).removeAll(cell);
 
 						htmlRow.add(join(cell));
 					}
-					
+
 					htmlRow.add(join(checkRowPDs));
 
 					table.add(htmlRow);
 				}
-				
+
 				List<String> htmlRow = new ArrayList<String>();
 				htmlRow.add("[no intersection]");
-				
+
 				for (Entry<String, Collection<PrimaryDocument>> row : xCheckSlices.entrySet()) {
 					htmlRow.add(join(row.getValue()));
 				}
-				
+
 				table.add(htmlRow);
 
 				String s = runVelocity(table);
@@ -295,22 +346,20 @@ public class TabulationCanvas extends JScrollPane {
 				pane.setText(s);
 			}
 
-
 		}, "Error calculating tabulation");
 	}
 
 	private String join(Iterable<?> cell) {
-		return CStringUtils.join(Iterables.transform(cell,
-			new Function<Object, String>() {
-				public String apply(Object o) {
-					if (o instanceof PrimaryDocument)
-						return ToHtmlHelper.toA((PrimaryDocument)o);
-					else 
-						return ToHtmlHelper.toFilterA(joinSkipLevels, o.toString());
-				}
-			}), "<br>");
+		return CStringUtils.join(Iterables.transform(cell, new Function<Object, String>() {
+			public String apply(Object o) {
+				if (o instanceof PrimaryDocument)
+					return ToHtmlHelper.toA((PrimaryDocument) o);
+				else
+					return ToHtmlHelper.toFilterA(joinSkipLevels, o.toString());
+			}
+		}), "<br>");
 	}
-	
+
 	Template tableTemplate;
 
 	VelocityContext context;

@@ -10,6 +10,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -42,10 +43,14 @@ public class TabulationOptionsPanel extends JPanel {
 	}
 	
 	public void fillFields(TabulationSettings i) {
-
 		x.setText(i.xDim);
 		y.setText(i.yDim);
 		by.setText(i.groupBy);
+		filter.setText(i.filterBy);
+		noIntersectX.setSelected(i.noIntersectX);
+		noIntersectY.setSelected(i.noIntersectY);
+		
+		
 	}
 	
 	public void updateRecentSearchStrings(TabulationSettings o) {
@@ -60,6 +65,21 @@ public class TabulationOptionsPanel extends JPanel {
 	JTextField x = new JTextField(85);
 	JTextField y = new JTextField(85);
 	JTextField by = new JTextField(85);
+	JTextField filter = new JTextField(85);
+	JCheckBox noIntersectX = new JCheckBox("Show missing X properties");
+	JCheckBox noIntersectY = new JCheckBox("Show missing Y properties");
+	JButton transpose = new JButton(new AbstractAction("Transpose X and Y"){
+
+		public void actionPerformed(ActionEvent arg0) {
+			String xValue = x.getText();
+			x.setText(y.getText());
+			y.setText(xValue);
+			
+			boolean noIntersectXValue = noIntersectX.isSelected();
+			noIntersectX.setSelected(noIntersectY.isSelected());
+			noIntersectY.setSelected(noIntersectXValue);
+		}
+	});
 	
 	ProjectProxy project;
 	
@@ -74,8 +94,8 @@ public class TabulationOptionsPanel extends JPanel {
 		JLabel xLabel = new JLabel("X:");
 		JLabel yLabel = new JLabel("Y:");
 		JLabel byLabel = new JLabel("Group by:");
+		JLabel filterLabel = new JLabel("Filter by:");
 		
-
 		configuration.beforeCloseNotifier.add(new StateChangeListener<Configuration>() {
 			public void stateChangedNotification(Configuration arg0) {
 				
@@ -88,14 +108,14 @@ public class TabulationOptionsPanel extends JPanel {
 		String options = configuration.getProperty("TabulationPresets", "error");// 
 		if (options.equals("error")){
 			recentSearchStrings.add(
-				new TabulationSettings("activity","episode",""));
+				new TabulationSettings("activity","episode","", "episode", true, true));
 		} else {
 
 			try {
 				XStream xstream = new XStream();
 				recentSearchStrings = (LinkedList<TabulationSettings>) xstream.fromXML(options);
 			} catch (Exception e) {
-				recentSearchStrings.add(new TabulationSettings("activity","episode",""));
+				recentSearchStrings.add(new TabulationSettings("activity","episode","", "episode", true, true));
 			}
 		}
 		
@@ -109,7 +129,10 @@ public class TabulationOptionsPanel extends JPanel {
 				TabulationSettings t = new TabulationSettings(
 					x.getText(),
 					y.getText(),
-					by.getText());
+					by.getText(),
+					filter.getText(),
+					noIntersectX.isSelected(),
+					noIntersectY.isSelected());
 				
 				updateRecentSearchStrings(t);
 				
@@ -140,27 +163,46 @@ public class TabulationOptionsPanel extends JPanel {
 		
 		layout.setAutoCreateGaps(true);
 		
-		layout.setHorizontalGroup(		
+		layout.setHorizontalGroup(
 			layout.createSequentialGroup()
-				.addComponent(xLabel)
-		 		.addComponent(x, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)
-		 		.addComponent(yLabel)
-		 		.addComponent(y, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  Short.MAX_VALUE)
-		 		.addComponent(byLabel)
-		 		.addComponent(by, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  Short.MAX_VALUE)
+				.addGroup(layout.createParallelGroup().
+					addGroup(layout.createSequentialGroup()
+						.addComponent(xLabel)
+						.addComponent(x, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)).
+			 		addComponent(noIntersectX))
+			    .addGroup(layout.createParallelGroup().
+			    	addGroup(layout.createSequentialGroup()
+						.addComponent(yLabel)
+						.addComponent(y, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)).
+			 		addComponent(noIntersectY))
+			 	.addGroup(layout.createParallelGroup()
+			 		.addGroup(layout.createSequentialGroup()
+			    		.addComponent(byLabel)
+			    		.addComponent(by, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  Short.MAX_VALUE))
+			    	.addComponent(transpose))
+		 		.addComponent(filterLabel)
+		 		.addComponent(filter, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  Short.MAX_VALUE)
 		 		.addComponent(drawButton)
 		 		.addComponent(recentSearchesButton));
-		
+	
 		layout.setVerticalGroup(
-			layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-				.addComponent(xLabel)
-				.addComponent(x)
-				.addComponent(yLabel)
-				.addComponent(y)
-				.addComponent(byLabel)
-		 		.addComponent(by)
-				.addComponent(drawButton)
-				.addComponent(recentSearchesButton));
+			layout.createSequentialGroup()
+				.addGroup(
+					layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(xLabel)
+						.addComponent(x)
+						.addComponent(yLabel)
+						.addComponent(y)
+						.addComponent(byLabel)
+				 		.addComponent(by)
+				 		.addComponent(filterLabel)
+				 		.addComponent(filter)
+						.addComponent(drawButton)
+						.addComponent(recentSearchesButton))
+				.addGroup(layout.createParallelGroup()
+					.addComponent(noIntersectX)
+					.addComponent(noIntersectY)
+					.addComponent(transpose)));
 	}
 
 }

@@ -1,6 +1,7 @@
 
 2008-10-09
 
+   * [MINOR]    Tabulation View now supports flipping of x and y
    * [MINOR]    Changed highlight color to yellow from red, 
                 and fixed multiline bug
    * [MINOR]    Improved HTML Display for Categories
