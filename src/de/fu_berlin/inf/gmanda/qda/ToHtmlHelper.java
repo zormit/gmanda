@@ -120,6 +120,7 @@ public class ToHtmlHelper {
 
 		StringJoiner result = new StringJoiner(".");
 		StringJoiner sb = new StringJoiner(".");
+		
 		for (String s : c.getTagLevels()) {
 			sb.append(s);
 			if (skipLevels <= 0){
@@ -128,7 +129,12 @@ public class ToHtmlHelper {
 				skipLevels--;
 			}
 		}
-		return result.toString();
+
+		if (result.length() == 0){
+			result.append(".");
+		}
+		
+		return "<nobr>" + result.toString() + "</nobr>";
 	}
 
 	public static String toFilterAHref(String tag, String toDisplay) {
