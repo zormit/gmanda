@@ -46,7 +46,7 @@ public class TextView extends JScrollPane {
 	JTextPane pane = new JTextPane();
 
 	HighlightSupport highlighter = new HighlightSupport(pane);
-	
+
 	protected Object toShow;
 	protected String search;
 
@@ -92,9 +92,6 @@ public class TextView extends JScrollPane {
 		this.scrollOnShow = scrollOnShow;
 		this.gmane = gmane;
 		this.commonService = service;
-		
-		
-
 
 		setBorder(BorderFactory.createEmptyBorder());
 
@@ -232,45 +229,42 @@ public class TextView extends JScrollPane {
 			"$1*<b>$2</b>*");
 		return html;
 	}
-	
-	public void updateHighlight(){
-		
+
+	public void updateHighlight() {
+
 		highlighter.removeHighlights();
-		
+
 		if (toShow == null || !(toShow instanceof PrimaryDocument || toShow instanceof Project)) {
 			return;
 		} else {
-			
+
 			final PrimaryDocument pd = (PrimaryDocument) toShow;
-			
+
 			List<String> quoteList = new LinkedList<String>();
 
 			String code = pd.getCodeAsString();
 
 			if (code != null) {
-				for (Code c : CodedStringFactory.parse(pd.getCodeAsString()).getAllCodesDeep()) {
-					for (Code c2 : c.getProperties()) {
-						if (c2.getTag().equals("quote")) {
-							quoteList.add(StringUtils.strip(c2.getValue(),
-								". \r\n\f\t'\""));
-						}
-					}
+				for (Code c : CodedStringFactory.parse(pd.getCodeAsString()).getAllDeep("quote")) {
+					quoteList.add(StringUtils.strip(c.getValue(), ",. \r\n\f\t'\""));
 				}
 			}
 
 			StringJoiner sb = new StringJoiner("|");
 			quoteList.add(search);
-			
-			for (String s : quoteList){
-				
+
+			for (String s : quoteList) {
+
 				if (s == null)
 					continue;
 				s = s.trim();
 				if (s.length() == 0)
 					continue;
 				
-				String searchPattern = de.fu_berlin.inf.gmanda.util.CStringUtils.join(Arrays.asList(s
-					.split("\\s+")), "\\s+", new StringConverter<String>() {
+				s = s.replaceAll("\\p{Punct}", " ");
+
+				String searchPattern = de.fu_berlin.inf.gmanda.util.CStringUtils.join(Arrays
+					.asList(s.split("\\s+")), "\\s+", new StringConverter<String>() {
 
 					public String toString(String t) {
 						return Pattern.quote(t);
@@ -279,15 +273,15 @@ public class TextView extends JScrollPane {
 
 				sb.append("(?i)(" + searchPattern + ")");
 			}
-			
-							
+
 			String searchPattern = sb.toString();
-			if (searchPattern.length() > 0){
+			System.out.println(searchPattern);
+			if (searchPattern.length() > 0) {
 				highlighter.findAllMatches(Pattern.compile(searchPattern));
 			}
-			
+
 		}
-		
+
 	}
 
 	public void update() {
@@ -308,19 +302,19 @@ public class TextView extends JScrollPane {
 				// change.
 				pd.getMetaData().put("lastseen", new DateTime().toString());
 
-				pane.setText("loading...");
+				pane.setText("<html><body>loading...</body></html>");
 
 				// getText is a potentially long running operation...
 				commonService.run(new Runnable() {
 					public void run() {
 						String text = pd.getText(gmane);
-						
+
 						String html = toHTML(text);
 
 						pane.setText(html);
-						
+
 						updateHighlight();
-						
+
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
 								invalidate();
