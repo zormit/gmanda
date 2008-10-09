@@ -11,6 +11,7 @@
 				padding: 4px;
 				border-top-width:1pt; 
 				border-style:solid;
+				vertical-align: top;
 			}
 			table.my th {
 			    text-align: left;
