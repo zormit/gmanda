@@ -1,7 +1,7 @@
 package de.fu_berlin.inf.gmanda.util;
 
 
-public class StringJoiner implements Appendable {
+public class StringJoiner implements Appendable, CharSequence {
 
 	String delimiter;
 	
@@ -51,8 +51,16 @@ public class StringJoiner implements Appendable {
 		}
 		return this;
 	}
-	
-	
-	
 
+	public char charAt(int index) {
+		return sb.charAt(index);
+	}
+
+	public int length() {
+		return sb.length();
+	}
+
+	public CharSequence subSequence(int start, int end) {
+		return sb.subSequence(start, end);
+	}
 }

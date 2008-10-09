@@ -2,6 +2,7 @@
 2008-10-09
 
    * [MINOR]    Changed highlight color to yellow from red, and fixed multiline bug
+   * [INTERNAL] StringJoiner now implements CharSequence
 
 2008-09-08
 
