@@ -1,6 +1,7 @@
 
 2008-10-09
 
+   * [MINOR]    Added indexing of message metadata in the Lucene search engine
    * [MINOR]    Tabulation View now supports flipping of x and y
    * [MINOR]    Changed highlight color to yellow from red, 
                 and fixed multiline bug
