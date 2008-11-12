@@ -9,7 +9,6 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 import javax.mail.Folder;
@@ -17,7 +16,10 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 
+import org.joda.time.DateTime;
+
 import de.fu_berlin.inf.gmanda.gui.preferences.CacheDirectoryProperty;
+import de.fu_berlin.inf.gmanda.imports.GmaneImporter.ImportSettings;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 import de.fu_berlin.inf.gmanda.util.progress.ProgressInputStream;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress.ProgressStyle;
@@ -33,96 +35,111 @@ public class GmaneMboxFetcher {
 
 	public final static int CHUNKSIZE = 500;
 
-	public int getEstimatedStartEmail(IProgress progress, String mailingList, Calendar c) {
+	public int getEstimatedStartEmail(IProgress progress, String mailingList, DateTime c) {
 
 		progress.setScale(20);
 		progress.setStyle(ProgressStyle.ROTATING);
 		progress.start();
 
-		int result = 1;
+		try {
 
-		while (true) {
+			int result = 1;
 
-			Message m;
-			try {
-				m = getSingleMail(progress.getSub(1), mailingList, result);
+			if (c == null)
+				return result;
 
-				if (m == null && result > 10000) {
-					return 1;
-				}
+			while (true) {
 
-				if (m != null && (m.getSentDate() == null || m.getSentDate().after(c.getTime()))) {
+				Message m;
+				try {
+					m = getSingleMail(progress.getSub(1), mailingList, result);
+
+					if (m == null || result > 10000) {
+						return Math.max(1, result - CHUNKSIZE);
+					}
+
+					if (m != null && (m.getSentDate() == null || m.getSentDate().after(c.toDate()))) {
+						return Math.max(1, result - CHUNKSIZE);
+					}
+				} catch (Exception e) {
 					return Math.max(1, result - CHUNKSIZE);
 				}
-			} catch (Exception e) {
-				return Math.max(1, result - CHUNKSIZE);
-			}
 
-			result += CHUNKSIZE;
+				result += CHUNKSIZE;
+			}
+		} finally {
+			progress.done();
 		}
 	}
 
-	public int getEstimatedEndEmail(IProgress progress, String mailingList, int start) {
+	public int getEstimatedEndEmail(IProgress progress, String mailingList, int start, DateTime c) {
 
 		progress.setScale(20);
 		progress.setStyle(ProgressStyle.ROTATING);
 		progress.start();
 
-		int result = start;
+		try {
 
-		while (true) {
+			if (start == -1)
+				start = 1;
+			
+			int result = start;
 
-			Message m;
-			try {
-				m = getSingleMail(progress.getSub(1), mailingList, result);
-				if (m == null) {
+			while (true) {
+
+				Message m;
+				try {
+					m = getSingleMail(progress.getSub(1), mailingList, result);
+
+					if (m == null
+						|| (m.getSentDate() != null && c != null && m.getSentDate().after(c.toDate()))){
+						return result;
+					}
+				} catch (Exception e) {
 					return result;
 				}
-			} catch (Exception e) {
-				return result;
-			}
 
-			result += CHUNKSIZE;
+				result += CHUNKSIZE;
+			}
+		} finally {
+			progress.done();
 		}
 	}
 
-	public void fetch(IProgress progress, String mailingList, File target, int from, int to)
-		throws IOException {
+	public void fetch(IProgress progress, ImportSettings settings) throws IOException {
 
 		progress.setScale(100);
 		progress.start();
 
-		if (from == -1) {
-			Calendar startOfYear07 = Calendar.getInstance();
-			startOfYear07.set(2007, 0, 1);
-			from = getEstimatedStartEmail(progress.getSub(10), mailingList, startOfYear07);
-		}
-
-		if (to == -1) {
-			to = getEstimatedEndEmail(progress.getSub(10), mailingList, from);
-		}
-
-		IProgress fetchProgress = progress.getSub(80);
-		fetchProgress.setScale(to - from);
-		fetchProgress.start();
-
-		PrintWriter pw = new PrintWriter(target);
 		try {
-			for (int i = from; i < to; i += CHUNKSIZE) {
-				fetchProgress.setNote(String.format("Fetching Email #%d", i));
-				appendFetch(fetchProgress.getSub(CHUNKSIZE), pw, mailingList, i, Math.min(i
-					+ CHUNKSIZE, to));
-			}
-		} finally {
-			pw.close();
-		}
-		fetchProgress.done();
+			settings.initialize(progress.getSub(10), this);
 
-		progress.done();
+			IProgress fetchProgress = progress.getSub(90);
+			fetchProgress.setScale(settings.rangeEnd - settings.rangeStart);
+			fetchProgress.start();
+
+			PrintWriter pw = new PrintWriter(settings.mboxFile);
+
+			try {
+				for (int i = settings.rangeStart; i < settings.rangeEnd; i += CHUNKSIZE) {
+					fetchProgress.setNote(String.format("Fetching Email #%d", i));
+					appendFetch(fetchProgress.getSub(CHUNKSIZE), pw, settings.listName, i, Math
+						.min(i + CHUNKSIZE, settings.rangeEnd));
+				}
+			} finally {
+				pw.close();
+				fetchProgress.done();
+			}
+
+		} finally {
+			progress.done();
+		}
 	}
 
 	public static URL getGmaneURL(String list, int from, int to) {
 
+		list = list.trim();
+		
 		if (!list.startsWith("gmane."))
 			list = "gmane." + list;
 
@@ -137,9 +154,6 @@ public class GmaneMboxFetcher {
 		throws IOException {
 
 		progress.start();
-
-		if (!list.startsWith("gmane."))
-			list = "gmane." + list;
 
 		try {
 			File storage = new File(cacheDirectory.getValue(), "mboxes");
@@ -194,22 +208,20 @@ public class GmaneMboxFetcher {
 		}
 	}
 
-	public File fetchToTemp(IProgress pm, String mailingList, int from, int to) throws IOException {
-		File target = File.createTempFile("gmanda", "mbox");
-		target.deleteOnExit();
-		fetch(pm, mailingList, target, from, to);
-		return target;
-	}
-
 	public Message getSingleMail(IProgress pm, String mailingList, int number)
 		throws MessagingException, IOException {
 
 		pm.setScale(100);
 		pm.start();
 
-		File tempFile = fetchToTemp(pm.getSub(50), mailingList, number, number + 1);
-		Folder folder = MyMimeUtils.getFolder(pm.getSub(50), tempFile);
-		tempFile.delete();
+		ImportSettings settings = new ImportSettings();
+		settings.listName = mailingList;
+		settings.rangeStart = number;
+		settings.rangeEnd = number + 1;
+
+		fetch(pm.getSub(50), settings);
+		Folder folder = MyMimeUtils.getFolder(pm.getSub(50), settings.mboxFile);
+		settings.mboxFile.delete();
 
 		if (folder == null || folder.getMessageCount() != 1)
 			return null;
@@ -226,15 +238,25 @@ public class GmaneMboxFetcher {
 		return message;
 	}
 
+	/**
+	 * Returns a list of all Messages from the given mailing-list that have IDs
+	 * from 'from' (inclusive) to 'to' (exclusive).
+	 * 
+	 */
 	public List<Message> getMails(IProgress progress, String mailingList, int from, int to)
 		throws MessagingException, IOException {
 
 		progress.setScale(100);
 		progress.start();
 
-		File temp = fetchToTemp(progress.getSub(60), mailingList, from, to);
-		Folder folder = MyMimeUtils.getFolder(progress.getSub(40), temp);
-		temp.delete();
+		ImportSettings settings = new ImportSettings();
+		settings.listName = mailingList;
+		settings.rangeStart = from;
+		settings.rangeEnd = to;
+
+		fetch(progress.getSub(60), settings);
+		Folder folder = MyMimeUtils.getFolder(progress.getSub(40), settings.mboxFile);
+		settings.mboxFile.delete();
 
 		if (folder == null || folder.getMessageCount() == 0)
 			return null;

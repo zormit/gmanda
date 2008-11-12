@@ -151,16 +151,16 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 		
 		layout.setHorizontalGroup(		
 			
-			layout.createSequentialGroup()
-				.addComponent(label)
+			layout.createParallelGroup()
 				.addGroup(
-					layout.createParallelGroup()
+					layout.createSequentialGroup()
+						.addComponent(label)
 						.addComponent(textField, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  Short.MAX_VALUE)
-						.addComponent(filterDescriptor, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  Short.MAX_VALUE))
-		 		.addComponent(filterKindButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)
-		 		.addComponent(nextHitButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)
-				.addComponent(previousHitButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)
-		 		.addComponent(resetButton));
+				 		.addComponent(filterKindButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)
+				 		.addComponent(nextHitButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)
+						.addComponent(previousHitButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)
+				 		.addComponent(resetButton)
+				).addComponent(filterDescriptor, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  Short.MAX_VALUE));
 		
 		layout.setVerticalGroup(
 			layout.createSequentialGroup().addGroup(

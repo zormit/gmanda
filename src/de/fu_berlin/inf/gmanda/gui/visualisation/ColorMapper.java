@@ -26,6 +26,7 @@ public class ColorMapper {
 	}
 
 	public Color getColor(String s, Color defaultColor) {
+		s = s.trim();
 		try {
 			return Color.decode(s);
 		} catch (NumberFormatException e) {

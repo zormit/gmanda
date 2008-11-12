@@ -8,7 +8,6 @@ import org.joda.time.DateTime;
 
 import de.fu_berlin.inf.gmanda.qda.Code;
 import de.fu_berlin.inf.gmanda.qda.CodedString;
-import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PPath;
@@ -62,10 +61,10 @@ public class PrimaryDocumentDot extends PNode implements Comparable<PrimaryDocum
 
 		boolean gotColor = false;
 
-		CodedString pdCodes = CodedStringFactory.parse(pd.getCodeAsString());
+		CodedString pdCodes = pd.getCode();
 		if (pdCodes != null) {
 			for (Code c : colors.getAllCodes()) {
-				if (c.matchesAny(pdCodes.getAllCodes())) {
+				if (c.matchesAny(pdCodes.getAllCodesDeep())) {
 					String color = c.getValue();
 					gotColor = true;
 					p.setPaint(mapper.getColor(color, Color.LIGHT_GRAY));

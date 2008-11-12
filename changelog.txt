@@ -1,4 +1,8 @@
 
+2008-11-12
+
+   * [FEATURE]  Date based fetching from Gmane
+
 2008-10-09
 
    * [MINOR]    Added indexing of message metadata in the Lucene search engine

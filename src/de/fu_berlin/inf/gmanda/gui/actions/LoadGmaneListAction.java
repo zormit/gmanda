@@ -6,18 +6,19 @@ package de.fu_berlin.inf.gmanda.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
+import de.fu_berlin.inf.gmanda.gui.dialogs.ImportFromGmaneDialog;
+import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.imports.GmaneImporter;
 import de.fu_berlin.inf.gmanda.imports.GmaneMboxFetcher;
-import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
+import de.fu_berlin.inf.gmanda.imports.GmaneImporter.ImportSettings;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocumentData;
 import de.fu_berlin.inf.gmanda.qda.Project;
@@ -30,18 +31,17 @@ public class LoadGmaneListAction extends AbstractAction {
 
 	GmaneImporter importer;
 
-	ForegroundWindowProxy windowProxy;
-	
 	GmaneMboxFetcher fetcher;
-	
-	public LoadGmaneListAction(ProjectProxy projectProxy, GmaneImporter importer,
-		ForegroundWindowProxy windowProxy,
+
+	CommonService cs;
+
+	public LoadGmaneListAction(ProjectProxy projectProxy, GmaneImporter importer, CommonService cs,
 		GmaneMboxFetcher fetcher) {
 		super("Add Emails from a Gmane Mailing List...");
 
 		this.projectProxy = projectProxy;
 		this.importer = importer;
-		this.windowProxy = windowProxy;
+		this.cs = cs;
 		this.fetcher = fetcher;
 
 		this.projectProxy.addAndNotify(new VariableProxyListener<Project>() {
@@ -54,57 +54,93 @@ public class LoadGmaneListAction extends AbstractAction {
 		putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_G));
 	}
 
+	ImportFromGmaneDialog dialog;
+
 	JFileChooser fc;
 
 	public void actionPerformed(ActionEvent arg0) {
 
-		final Project p = projectProxy.getVariable();
+		// Run in Background...
+		cs.run(new Runnable() {
+			public void run() {
+				loadEmails();
+			}
+		}, "Error while Fetching from Gmane");
+	}
+
+	public void loadEmails() {
+
+		Project p = projectProxy.getVariable();
 
 		if (p == null)
 			return;
 
-		// Run in Background...
-		new Thread(new Runnable() {
-			public void run() {
+		if (dialog == null) {
+			dialog = new ImportFromGmaneDialog(cs.getForegroundWindowOrNull(), true);
+		}
 
-				// TODO: Show better dialog that allows partial fetch
-				String input = JOptionPane.showInputDialog(windowProxy.getVariable(),
-					"Enter List Name to Fetch");
+		dialog.setVisible(true);
 
-				if (input == null || input.trim().length() == 0)
-					return;
+		if (dialog.getReturnStatus() == ImportFromGmaneDialog.RET_OK) {
+			String input = dialog.getListName();
 
-				if (!input.startsWith("gmane."))
-					input = "gmane." + input;
-				
-				if (input.endsWith(".mbox"))
-					input = input.substring(0, input.length() - ".mbox".length());
+			if (input == null || input.trim().length() == 0)
+				return;
 
-				NestableProgressMonitor pm = new NestableProgressMonitor(windowProxy
-					.getAsFrameOrNull(), "Fetching '" + input + "' from Gmane...");
-				pm.setScale(100);
-				pm.start();
+			if (!input.startsWith("gmane."))
+				input = "gmane." + input;
 
-				try {
-					// Fetch from Gmane to temporary mbox file
-					File target = fetcher.fetchToTemp(pm.getSub(45), input, -1, -1);
+			if (input.endsWith(".mbox"))
+				input = input.substring(0, input.length() - ".mbox".length());
 
-					// Read mbox file
-					List<PrimaryDocumentData> imported = importer.importPrimaryDocuments(input, 1,
-						target, pm.getSub(45), false);
+			NestableProgressMonitor pm = new NestableProgressMonitor(
+				cs.getForegroundWindowOrNull(), "Fetching '" + input + "' from Gmane...");
 
-					p.addRootPDDs(imported);
+			pm.setScale(100);
+			pm.start();
+
+			try {
+				// Fetch from Gmane to temporary mbox file
+				ImportSettings settings = new ImportSettings();
+				settings.listName = input;
+				settings.mboxFile = null; // Fetch to temporary file
+
+				switch (dialog.getFetchType()) {
+				case BYDATE: {
+					settings.startDate = dialog.getStartDate();
+					settings.endDate = dialog.getEndDate();
 					
-					target.delete();
-
-				} catch (Exception e) {
-					JOptionPane.showMessageDialog(windowProxy.getVariable(),
-						"Error fetching Mailing list:\n" + e.getMessage(),
-						"Error while Fetching from Gmane", JOptionPane.ERROR_MESSAGE);
-				} finally {
-					pm.done();
+					settings.rangeStart = fetcher.getEstimatedStartEmail(pm.getSub(5), input,
+						dialog.getStartDate());
+					settings.rangeEnd = fetcher.getEstimatedEndEmail(pm.getSub(5), input,
+						settings.rangeStart, dialog.getEndDate());
+					break;
 				}
+				case BYID: {
+					settings.rangeStart = dialog.getStartId();
+					settings.rangeEnd = dialog.getEndId();
+					break;
+				}
+				default:
+					settings.rangeStart = -1;
+					settings.rangeEnd = -1;
+				}
+
+				fetcher.fetch(pm.getSub(45), settings);
+
+				// Read mbox file
+				List<PrimaryDocumentData> imported = importer.importPrimaryDocuments(pm.getSub(45),
+					settings);
+
+				p.addRootPDDs(imported);
+
+				settings.mboxFile.delete();
+
+			} catch (Exception e) {
+				throw new ReportToUserException(e);
+			} finally {
+				pm.done();
 			}
-		}).start();
+		}
 	}
 }

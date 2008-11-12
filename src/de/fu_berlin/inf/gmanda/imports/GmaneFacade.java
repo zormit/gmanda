@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
 import de.fu_berlin.inf.gmanda.gui.preferences.CacheDirectoryProperty;
+import de.fu_berlin.inf.gmanda.imports.GmaneImporter.ImportSettings;
 import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
@@ -131,23 +132,31 @@ public class GmaneFacade {
 		try {
 			for (Map.Entry<String, TreeSet<Integer>> entry : toMakeAvailable
 					.entrySet()) {
-				String list = entry.getKey();
+				String listName = entry.getKey();
 
 				for (Integer from : entry.getValue()) {
 					int to = from + GmaneMboxFetcher.CHUNKSIZE;
 					System.out.println(String.format("Downloading %s %d to %d",
 							entry.getKey(), from, to));
-
+					
 					try {
-						File target = fetcher.fetchToTemp(pFetching.getSub(1),
-								list, from, to);
+						ImportSettings settings = new ImportSettings();
+						settings.listName = listName;
+						settings.rangeStart = from;
+						settings.rangeEnd = to + 1;
+						settings.onlyStoreBodies = true;
+						
+						fetcher.fetch(pFetching.getSub(1), settings);
+						
 						if (pFetching.isCanceled())
 							return;
-						importer.importPrimaryDocuments(list, from, target,
-								pFetching.getSub(1), true);
+						
+						importer.importPrimaryDocuments(pFetching.getSub(1), settings);
+						
 						if (pFetching.isCanceled())
 							return;
-						target.delete();
+						
+						settings.mboxFile.delete();
 					} catch (Exception e) {
 						throw new ReportToUserException(e);
 					}
@@ -374,21 +383,26 @@ public class GmaneFacade {
 					* GmaneMboxFetcher.CHUNKSIZE + 1;
 			int to = from + GmaneMboxFetcher.CHUNKSIZE;
 
-			System.out.println(String.format("Refetching %s %d to %d", list,
+			System.out.println(String.format("Fetching %s %d to %d", list,
 					from, to));
 
 			try {
-				File target = fetcher
-						.fetchToTemp(pm.getSub(50), list, from, to);
-				importer.importPrimaryDocuments(list, from, target, pm
-						.getSub(50), true);
-				target.delete();
+				ImportSettings settings = new ImportSettings();
+				settings.listName = list;
+				settings.rangeStart = from;
+				settings.rangeEnd = to + 1;
+				settings.onlyStoreBodies = true;
+				
+				fetcher.fetch(pm.getSub(50), settings);
+				importer.importPrimaryDocuments(pm.getSub(50), settings);
+				settings.mboxFile.delete();
+				
 			} catch (Exception e) {
 				throw new ReportToUserException(e);
 			}
 
 			if (!isAvailable(pd))
-				System.out.println(String.format("Failed to refetch %s %d",
+				System.out.println(String.format("Failed to fetch %s %d",
 						list, number));
 
 		} finally {

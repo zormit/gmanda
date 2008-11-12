@@ -80,6 +80,7 @@ public abstract class AbstractCode implements Code {
 	 * '*' matches everything
 	 * hello.* matches hello.world and hello
 	 * hello matches hello but not hello.world
+	 * hello.world matches hello.world but not hello
 	 * </pre>
 	 * 
 	 * @param otherCode
@@ -107,7 +108,7 @@ public abstract class AbstractCode implements Code {
 				return false;
 		} while (thisIterator.hasNext());
 
-		return true;
+		return !otherIterator.hasNext();
 	}
 
 	public Collection<? extends Code> getProperties(String propName) {

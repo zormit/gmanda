@@ -14,6 +14,7 @@ import de.fu_berlin.inf.gmanda.gui.manager.UndoManagement;
 import de.fu_berlin.inf.gmanda.gui.misc.LockManager;
 import de.fu_berlin.inf.gmanda.imports.GmaneImporter;
 import de.fu_berlin.inf.gmanda.imports.GmaneMboxFetcher;
+import de.fu_berlin.inf.gmanda.imports.GmaneImporter.ImportSettings;
 import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 import de.fu_berlin.inf.gmanda.util.StateChangeNotifier;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
@@ -213,12 +214,18 @@ public class Project {
 
 			if (min != Integer.MAX_VALUE) {
 
+				ImportSettings settings = new ImportSettings();
+				settings.listName = list;
+				settings.mboxFile = null;
+				settings.rangeStart = min;
+				settings.rangeEnd = max + 1;
+				
 				// Fetch from Gmane to temporary mbox file
-				File target = gmaneMboxFetcher.fetchToTemp(progress.getSub(45), list, min, max + 1);
+				gmaneMboxFetcher.fetch(progress.getSub(45), settings);
 
 				// Read mbox file
-				List<PrimaryDocumentData> newPDDs = importer.importPrimaryDocuments(list, 1,
-					target, progress.getSub(45), false);
+				List<PrimaryDocumentData> newPDDs = importer.importPrimaryDocuments(progress.getSub(45), 
+					settings);
 
 				List<PrimaryDocument> newPDs = PrimaryDocumentData.toPrimaryDocuments(newPDDs);
 

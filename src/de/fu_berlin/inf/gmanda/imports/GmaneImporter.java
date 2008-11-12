@@ -2,9 +2,9 @@ package de.fu_berlin.inf.gmanda.imports;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,29 +29,122 @@ import de.fu_berlin.inf.gmanda.util.tree.ChildrenableTreeWalker;
 
 public class GmaneImporter {
 
+	public static class ImportSettings {
+
+		/**
+		 * Name of the List to Fetch
+		 * 
+		 * for instance
+		 * 
+		 * "gmane.comp.security.oss.general"
+		 */
+		public String listName;
+
+		/**
+		 * The file in mbox format to read from or write to (depending on
+		 * operation)
+		 */
+		public File mboxFile;
+
+		/**
+		 * Whether messages should be processed or only stored into the cache
+		 * directory
+		 */
+		public boolean onlyStoreBodies;
+
+		/**
+		 * Begin (inclusive) and End (exclusive) of messages to fetch
+		 * 
+		 * For instance rangeStart==2 and rangeEnd==4 will include the messages
+		 * 2 and 3.
+		 * 
+		 * Set to -1 to indicate all possible
+		 */
+		public int rangeStart, rangeEnd;
+
+		/**
+		 * Begin and end time in between (inclusive) which messages will be
+		 * imported.
+		 */
+		public DateTime startDate, endDate;
+
+		/**
+		 * The directory from/to which message bodies will be read/written.
+		 */
+		public String cacheDirectory;
+
+		public boolean isInDateRange(DateTime sentDate) {
+
+			if (sentDate == null)
+				return true;
+
+			if (startDate != null && sentDate.isBefore(startDate))
+				return false;
+
+			if (endDate != null && sentDate.isAfter(endDate))
+				return false;
+
+			return true;
+		}
+
+		public boolean isInIdRange(int id) {
+			if (rangeStart != -1 && id < rangeStart)
+				return false;
+
+			if (rangeEnd != -1 && rangeEnd < id)
+				return false;
+
+			return true;
+		}
+
+		public void initialize(IProgress progress, GmaneMboxFetcher fetcher) throws IOException {
+
+			try {
+				if (mboxFile == null) {
+					mboxFile = File.createTempFile("gmanda", "mbox");
+					mboxFile.deleteOnExit();
+				}
+
+				listName = listName.trim();
+				if (!listName.startsWith("gmane."))
+					listName = "gmane." + listName;
+
+				if (rangeStart == -1) {
+					rangeStart = 1;
+				}
+
+				if (rangeEnd == -1) {
+					rangeEnd = fetcher.getEstimatedEndEmail(progress, listName, rangeEnd, null);
+				}
+			} finally {
+				progress.done();
+			}
+		}
+	}
+
 	CacheDirectoryProperty cacheDirectory;
-	
-	public GmaneImporter(CacheDirectoryProperty cacheDirectory){
+
+	public GmaneImporter(CacheDirectoryProperty cacheDirectory) {
 		this.cacheDirectory = cacheDirectory;
 	}
-	
-	
-	public List<PrimaryDocumentData> importPrimaryDocuments(String mailingList, int startId, File source,
-		IProgress progress, boolean onlyStoreBodies) {
-		
-		if (source == null)
-			return null;
+
+	public List<PrimaryDocumentData> importPrimaryDocuments(IProgress progress,
+		ImportSettings settings) {
+
+		if (settings.mboxFile == null)
+			throw new IllegalArgumentException();
 
 		PrimaryDocumentData root;
 		try {
-			root = loadGmane(progress, mailingList, startId, source, onlyStoreBodies);
+			root = loadGmane(progress, settings);
 		} catch (MessagingException e) {
+			// TODO report to user?
 			progress.done();
 			return null;
 		}
 
 		for (PrimaryDocumentData data : new ChildrenableTreeWalker<PrimaryDocumentData>(root)) {
-			data.metadata.put("list", mailingList);
+			data.metadata.put("list", settings.listName);
 		}
 
 		List<PrimaryDocumentData> result = new LinkedList<PrimaryDocumentData>();
@@ -87,10 +180,10 @@ public class GmaneImporter {
 		if (archivedS == null)
 			return null;
 
-		Matcher m = Pattern.compile("/([^/]*?)/\\d+").matcher(archivedS[0]); 
+		Matcher m = Pattern.compile("/([^/]*?)/\\d+").matcher(archivedS[0]);
 		if (m.find() && m.group(1).startsWith("gmane."))
 			return m.group(1);
-		else 
+		else
 			return null;
 	}
 
@@ -102,7 +195,8 @@ public class GmaneImporter {
 			String to = MyMimeUtils.getRecipients(message, Message.RecipientType.TO);
 			String cc = MyMimeUtils.getRecipients(message, Message.RecipientType.CC);
 			String bcc = MyMimeUtils.getRecipients(message, Message.RecipientType.BCC);
-			String date = (message.getSentDate() != null ? new DateTime(message.getSentDate()).toString() : "unknown");
+			String date = (message.getSentDate() != null ? new DateTime(message.getSentDate())
+				.toString() : "unknown");
 			String list = getMailingList(message);
 
 			// Store Metadata
@@ -126,30 +220,35 @@ public class GmaneImporter {
 				meta.put("list", list);
 			}
 		} catch (Exception e) {
-			System.err.println(String.format("Error in Mail with ID '%d' while parsing metadata", id));
+			System.err.println(String.format("Error in Mail with ID '%d' while parsing metadata",
+				id));
 			e.printStackTrace(System.err);
 		}
 
 	}
 
 	public static Pattern referencePattern = Pattern.compile("<.*?>");
-	
-	public PrimaryDocumentData loadGmane(final IProgress progress, 
-			String mailingList, int startId, File source, boolean onlyStoreBodies)
+
+	public PrimaryDocumentData loadGmane(IProgress progress, ImportSettings settings)
 		throws MessagingException {
 
-		String absolutePath = source.getAbsolutePath();
+		String absolutePath = settings.mboxFile.getAbsolutePath();
 
 		progress.setScale(100);
 		progress.setNote("Loading Gmane " + absolutePath);
 		progress.start();
 
-		Folder folder = MyMimeUtils.getFolder(progress.getSub(50), source);
-		
+		Folder folder = MyMimeUtils.getFolder(progress.getSub(50), settings.mboxFile);
+
+		if (settings.cacheDirectory == null)
+			settings.cacheDirectory = new File(cacheDirectory.getValue(), "/messages/")
+				.getAbsolutePath();
+
 		PrimaryDocumentData result = new PrimaryDocumentData();
 		result.filename = null;
-		result.children = messagesToPDs(progress.getSub(50), mailingList, startId, new File(cacheDirectory.getValue(), "/messages/").getAbsolutePath(), Arrays.asList(folder.getMessages()), onlyStoreBodies);
-		
+		result.children = messagesToPDs(progress.getSub(50), settings, Arrays.asList(folder
+			.getMessages()));
+
 		Store s = folder.getStore();
 		folder.close(false);
 		s.close();
@@ -158,15 +257,12 @@ public class GmaneImporter {
 
 		return result;
 	}
-	
-	public List<PrimaryDocumentData> messagesToPDs(IProgress progress, 
-		String listName,
-		int startId,
-		String dataFolder, List<Message> messages,
-		boolean onlyDownloadBodies) throws MessagingException{
-		
+
+	public List<PrimaryDocumentData> messagesToPDs(IProgress progress, ImportSettings settings,
+		List<Message> messages) throws MessagingException {
+
 		List<PrimaryDocumentData> result = new LinkedList<PrimaryDocumentData>();
-		
+
 		Map<String, Message> ids = new HashMap<String, Message>();
 
 		Map<Message, PrimaryDocumentData> pds = new HashMap<Message, PrimaryDocumentData>();
@@ -175,15 +271,15 @@ public class GmaneImporter {
 
 		progress.setScale(100);
 		progress.start();
-		
+
 		IProgress pStore = progress.getSub(80);
 		pStore.setScale(messages.size());
 		pStore.start();
-		
-		int previousId = startId - 1;
-		
-		for (Message message : messages){
-		
+
+		int previousId = Math.max(1, settings.rangeStart) - 1;
+
+		for (Message message : messages) {
+
 			pStore.work(1);
 
 			PrimaryDocumentData child = new PrimaryDocumentData();
@@ -192,41 +288,37 @@ public class GmaneImporter {
 
 			if (id == -1) {
 				id = previousId + 1;
-				System.err.println(String.format("  Could not find ID in message with estimated ID '%d'", id));
+				System.err.println(String.format(
+					"  Could not find ID in message with estimated ID '%d'", id));
 			}
-			
+
 			previousId = id;
-			
+
 			String messageBody = MyMimeUtils.getBody(message);
 
-			fillMetaData(child.metadata, message, listName, id);
-			
-			child.filename = "gmane://" + listName + "." + id;
+			fillMetaData(child.metadata, message, settings.listName, id);
+
+			child.filename = "gmane://" + settings.listName + "." + id;
 
 			// Need to write text to file
 			try {
-				File directory = new File(dataFolder);
+				File directory = new File(settings.cacheDirectory);
 				directory.mkdirs();
 
-				File target = new File(directory, listName + "." + id + ".txt");
+				File target = new File(directory, settings.listName + "." + id + ".txt");
 				PrintWriter pw = new PrintWriter(target);
 				pw.write(messageBody);
 				pw.close();
 			} catch (FileNotFoundException e) {
-				System.err.println("  " + child.filename + " could not save body:" + e.getMessage());
+				System.err
+					.println("  " + child.filename + " could not save body:" + e.getMessage());
 			}
-			
-			{ // Only message in 2007 are interesting
-				Calendar c2007 = Calendar.getInstance();
-				c2007.set(2007, 0, 0);
-				Calendar c2008 = Calendar.getInstance();
-				c2008.set(2008, 0, 1);
-				if (message.getSentDate() != null
-					&& (message.getSentDate().before(c2007.getTime()) || message.getSentDate()
-						.after(c2008.getTime()))) {
-					continue;
-				}
+
+			// Filter
+			if (!settings.isInDateRange(new DateTime(message.getSentDate())) || !settings.isInIdRange(id)) {
+				continue;
 			}
+
 			result.add(child);
 
 			pds.put(message, child);
@@ -237,7 +329,7 @@ public class GmaneImporter {
 				System.out.println(Arrays.toString(mids));
 				throw new RuntimeException();
 			}
-			
+
 			String mid = mids[0];
 
 			mid = mid.replaceAll("__\\d+\\.\\d+\\$\\d+\\$gmane\\$org", "");
@@ -245,27 +337,27 @@ public class GmaneImporter {
 			ids.put(mid, message);
 		}
 		pStore.done();
-		
-		if (onlyDownloadBodies){
+
+		if (settings.onlyStoreBodies) {
 			result.clear();
 			progress.done();
 			return result;
 		}
-		
+
 		IProgress pParent = progress.getSub(10);
 		pParent.setScale(messages.size());
 		pParent.start();
 
-		for (Message message : messages){
+		for (Message message : messages) {
 
 			pParent.work(1);
-			
+
 			if (!pds.containsKey(message)) {
 				continue;
 			}
-			
+
 			PrimaryDocumentData child = pds.get(message);
-			
+
 			String[] refs = message.getHeader("References");
 
 			if (refs == null)
@@ -278,14 +370,14 @@ public class GmaneImporter {
 			// Get last reference
 			String reference = null;
 			Scanner s = new Scanner(refs[0].trim());
-			while (s.hasNext(referencePattern)){
+			while (s.hasNext(referencePattern)) {
 				reference = s.next();
 			}
-				
+
 			if (reference != null && ids.containsKey(reference)) {
 				PrimaryDocumentData parent = pds.get(ids.get(reference));
-				
-				if (child != parent && !recursiveContains(child, parent)){
+
+				if (child != parent && !recursiveContains(child, parent)) {
 					parents.put(child, parent);
 					parent.children.add(child);
 				} else {
@@ -294,7 +386,7 @@ public class GmaneImporter {
 			}
 		}
 		pParent.done();
-		
+
 		IProgress pChildren = progress.getSub(10);
 		pChildren.setScale(messages.size());
 		pChildren.start();
@@ -309,18 +401,18 @@ public class GmaneImporter {
 		progress.done();
 		return result;
 	}
-	
-	public static boolean recursiveContains(PrimaryDocumentData parent, PrimaryDocumentData child){
-		
+
+	public static boolean recursiveContains(PrimaryDocumentData parent, PrimaryDocumentData child) {
+
 		if (parent.children.contains(child))
 			return true;
-		
-		for (PrimaryDocumentData childOfParent : parent.children){
+
+		for (PrimaryDocumentData childOfParent : parent.children) {
 			if (recursiveContains(childOfParent, child))
 				return true;
 		}
 		return false;
-		
+
 	}
 
 }

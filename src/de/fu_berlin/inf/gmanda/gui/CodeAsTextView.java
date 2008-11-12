@@ -358,7 +358,7 @@ public class CodeAsTextView extends JScrollPane {
 
 			String valueTag = entry2.getKey();
 			Slice<PrimaryDocument> valueSlice = entry2.getValue();
-
+		
 			if (valueTag.equals("def") || valueTag.equals("desc") || valueTag.equals("quote"))
 				continue;
 

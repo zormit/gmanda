@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import de.fu_berlin.inf.gmanda.gui.preferences.PrimaryDocumentDirectoryProperty;
 import de.fu_berlin.inf.gmanda.imports.GmaneImporter;
 import de.fu_berlin.inf.gmanda.imports.GmaneMboxFetcher;
+import de.fu_berlin.inf.gmanda.imports.GmaneImporter.ImportSettings;
 import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.Project;
@@ -100,9 +101,15 @@ public class FetchGmaneListToFileAction extends AbstractAction {
 								return;
 
 						try {
+							
+							ImportSettings settings = new ImportSettings();
+							settings.listName = input;
+							settings.mboxFile = f;
+							settings.rangeStart = -1;
+							settings.rangeEnd = -1;
+							
 							fetcher.fetch(new NestableProgressMonitor(windowProxy.getAsFrameOrNull(),
-								"Fetching '" + input + "' from Gmane..."), input, f, -1,
-								-1);
+								"Fetching '" + input + "' from Gmane..."), settings);
 						} catch (IOException e) {
 							JOptionPane.showMessageDialog(windowProxy.getVariable(),
 								"Error fetching mailinglist from Gmane " + e.getMessage(),

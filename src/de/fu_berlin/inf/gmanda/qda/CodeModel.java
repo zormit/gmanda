@@ -267,17 +267,28 @@ public class CodeModel {
 
 				boolean containedInNone = true;
 
-				for (String code : codes) {
-					CodedString c = CodedStringFactory.parse(pd.getCodeAsString());
-					if (c != null && c.containsAny(code + ".*")) {
+				CodedString c = CodedStringFactory.parse(pd.getCodeAsString());
+				
+				if (c != null){
+				
+					for (String code : codes) {
+						if (c.containsAny(code + ".*")) {
+							list.add(new Pair<String, PrimaryDocument>(
+								("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
+									+ code.substring(partitionCode.length()) : code), pd));
+							containedInNone = false;
+						}
+					}
+					if (c.containsAny(partitionCode)){
 						list.add(new Pair<String, PrimaryDocument>(
 							("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
-								+ code.substring(partitionCode.length()) : code), pd));
+								: partitionCode), pd));
 						containedInNone = false;
 					}
 				}
-				if (containedInNone)
+				if (containedInNone){
 					list.add(new Pair<String, PrimaryDocument>("<other>", pd));
+				}
 			}
 		}
 		
