@@ -16,7 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
-import de.fu_berlin.inf.gmanda.proxies.SearchStringProxy;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 
@@ -39,7 +38,6 @@ public class SearchPanel extends JPanel {
 	public SearchPanel(
 		ProjectProxy projectProxy, 
 		RepeatSearchAction repeatSearchAction,
-		SearchStringProxy searchString,
 		final SearchField searchField) {
 		
 		setBorder(BorderFactory.createEmptyBorder(4,4,4,4));

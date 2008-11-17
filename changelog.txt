@@ -1,4 +1,8 @@
 
+2008-11-17
+
+   * [MINOR]    Improved search and highlighting
+
 2008-11-12
 
    * [FEATURE]  Date based fetching from Gmane

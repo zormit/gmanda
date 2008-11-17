@@ -77,17 +77,16 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 		}
 	}
 	
-	
-
 	String tooltip = "<html>Only show documents that match the codes entered entered.<br>" +
 	"To find documents that contain several codes separated them by <code>,</code>.<br>" +
 	"The following special syntax may be used:" +
 	"<ul>" +
-	"  <li><code>search=\"search text\"</code> Search the text (instead of the codes) of the message<br>" +
-	"		for the given keywords.</li>" + 
+	"  <li><code>search: \"search text\"</code> Search the text (instead of the codes) of the message<br>" +
+	"		for the given keywords. The syntax is the same as Google's.</li>" + 
 	"  <li><code>*</code> Show all documents that have any code at all.</li>" +
 	"  <li><code>-</code> Show all documents that do not contain the given code or search.<br>Caution: This might be slow.</li>" +
 	"</ul></html>";
+	
 	public PrimaryDocumentTreeFilterTextField(
 		ProjectProxy projectProxy, 
 		FilterTextProxy filter,

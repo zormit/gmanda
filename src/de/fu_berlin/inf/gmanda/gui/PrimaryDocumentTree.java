@@ -33,7 +33,6 @@ import de.fu_berlin.inf.gmanda.proxies.FilterProxy;
 import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
 import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
-import de.fu_berlin.inf.gmanda.proxies.SearchStringProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
@@ -497,7 +496,7 @@ public class PrimaryDocumentTree extends JTree {
 
 	public PrimaryDocumentTree(ProjectProxy projectProxy, SelectionProxy selectionProxy,
 		FilterTextProxy filterTextProxy, FilterProxy filterProxy, FilterKindProxy filterKindProxy,
-		SearchStringProxy searchString, ForegroundWindowProxy windowProxy, GmaneFacade gmane,
+		ForegroundWindowProxy windowProxy, GmaneFacade gmane,
 		PrimaryDocumentCellRenderer cellRenderer) {
 		super();
 		this.projectProxy = projectProxy;

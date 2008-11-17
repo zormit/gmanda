@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.picocontainer.annotations.Inject;
 
 import com.google.common.base.Nullable;
@@ -107,6 +108,22 @@ public class SearchService {
 
 		return newFilterList;
 	}
+	
+	public static String cleanStringForSearch(String s){
+		
+		s = s.trim();
+		
+		if (s.startsWith("\"") && s.endsWith("\"")){
+
+			// Remove leading/trailing double quotes
+			s = s.substring(1, s.length() - 1);
+			
+			// Unescape 			
+			s = StringEscapeUtils.unescapeJava(s);
+		}
+		
+		return s;
+	}
 
 	public Collection<PrimaryDocument> getSetFromSearchString(Code c, Project project) {
 
@@ -126,26 +143,19 @@ public class SearchService {
 			String searchString;
 			
 			List<? extends Code> props = c.getProperties();
-			Code first = props.get(0);
-
-			if (first.getTag().equals("desc") && props.size() == 1) {
-				searchString = c.getValue().trim();
-				
-				if (searchString.startsWith("\""))
-					searchString = searchString.substring(1);
-				if (searchString.endsWith("\""))
-					searchString = searchString.substring(0, searchString.length() - 1);
-				
-				searchStringProxy.setVariable(searchString);
-				
+			
+			if (props.size() == 1 && props.get(0).getTag().equals("desc")){
+				searchString = cleanStringForSearch(c.getValue());
 			} else {
 				StringJoiner sb = new StringJoiner(" ");
 				for (Code sub : props){
-					sb.append(sub.toString());
+					sb.append(cleanStringForSearch(sub.toString()));
 				}
 				searchString = sb.toString();
 			}
 
+			searchStringProxy.setVariable(searchString);
+			
 			Iterator<PrimaryDocument> it = luceneFacade.search(project, searchString);
 			LinkedList<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
 			CollectionUtils.addAll(result, it);

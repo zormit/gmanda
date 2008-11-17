@@ -24,6 +24,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrMatcher;
+import org.apache.commons.lang.text.StrTokenizer;
 import org.joda.time.DateTime;
 
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
@@ -48,7 +50,7 @@ public class TextView extends JScrollPane {
 	HighlightSupport highlighter = new HighlightSupport(pane);
 
 	protected Object toShow;
-	protected String search;
+	protected String highlightQuery;
 
 	Desktop desktop;
 	boolean initialized = false;
@@ -138,8 +140,8 @@ public class TextView extends JScrollPane {
 		this.toShow = selectionProxy.getVariable();
 
 		search.addAndNotify(new VariableProxyListener<String>() {
-			public void setVariable(String search) {
-				TextView.this.search = search;
+			public void setVariable(String highlightQuery) {
+				TextView.this.highlightQuery = highlightQuery;
 				updateHighlight();
 			}
 		});
@@ -249,10 +251,13 @@ public class TextView extends JScrollPane {
 					quoteList.add(StringUtils.strip(c.getValue(), ",. \r\n\f\t'\""));
 				}
 			}
+			
+			// Additional highlights from the text currently searched for using Lucene 
+			StrTokenizer st = new StrTokenizer(highlightQuery, StrMatcher.splitMatcher(), StrMatcher.quoteMatcher());
+			quoteList.addAll(Arrays.asList(st.getTokenArray()));
 
+			// Transform into one big regular expression
 			StringJoiner sb = new StringJoiner("|");
-			quoteList.add(search);
-
 			for (String s : quoteList) {
 
 				if (s == null)
@@ -261,6 +266,7 @@ public class TextView extends JScrollPane {
 				if (s.length() == 0)
 					continue;
 				
+				// Remove all punctualization !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
 				s = s.replaceAll("\\p{Punct}", " ");
 
 				String searchPattern = de.fu_berlin.inf.gmanda.util.CStringUtils.join(Arrays
@@ -275,7 +281,6 @@ public class TextView extends JScrollPane {
 			}
 
 			String searchPattern = sb.toString();
-			System.out.println(searchPattern);
 			if (searchPattern.length() > 0) {
 				highlighter.findAllMatches(Pattern.compile(searchPattern));
 			}
@@ -341,8 +346,8 @@ public class TextView extends JScrollPane {
 				String content = d.getText(0, d.getLength()).toLowerCase();
 
 				int index = -1;
-				if (search != null) {
-					index = content.indexOf(search);
+				if (highlightQuery != null) {
+					index = content.indexOf(highlightQuery);
 				}
 
 				if (index != -1) {
