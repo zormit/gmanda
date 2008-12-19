@@ -1,7 +1,3 @@
-/*
- * Created on 05.01.2005
- *
- */
 package de.fu_berlin.inf.gmanda.gui.actions;
 
 import java.awt.event.ActionEvent;
@@ -9,35 +5,31 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
+
+import org.picocontainer.annotations.Inject;
 
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
-import de.fu_berlin.inf.gmanda.imports.GmaneMboxFetcher;
-import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
+import de.fu_berlin.inf.gmanda.imports.GmaneFacade;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 
-public class RefetchRecursiveAction extends AbstractAction {
+public class ComputeThreadStatisticsAction extends AbstractAction {
 
+	@Inject
 	PrimaryDocumentTree tree;
 
-	ForegroundWindowProxy windowProxy;
-
+	@Inject
 	CommonService commonService;
-	
-	GmaneMboxFetcher fetcher;
 
-	public RefetchRecursiveAction(ProjectProxy project, ForegroundWindowProxy windowProxy,
-		PrimaryDocumentTree tree, CommonService progress, GmaneMboxFetcher fetcher) {
-		super("Refetch Recursivly...");
-		this.tree = tree;
-		this.windowProxy = windowProxy;
-		this.commonService = progress;
-		this.fetcher = fetcher;
+	@Inject
+	GmaneFacade facade;
+
+	public ComputeThreadStatisticsAction(ProjectProxy project) {
+		super("Compute Statistics...");
 
 		project.add(new VariableProxyListener<Project>() {
 			public void setVariable(Project newValue) {
@@ -45,12 +37,12 @@ public class RefetchRecursiveAction extends AbstractAction {
 			}
 		});
 
-		putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_E));
+		putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_T));
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
 
-		new Thread(new Runnable() {
+		commonService.run(new Runnable() {
 			public void run() {
 
 				TreePath path = tree.getSelectionPath();
@@ -65,17 +57,10 @@ public class RefetchRecursiveAction extends AbstractAction {
 
 				PrimaryDocument pd = (PrimaryDocument) o;
 
-				if (pd.getMetaData().get("list") == null) {
-					String list = JOptionPane.showInputDialog(windowProxy.getVariable(),
-						"Enter List Name to Fetch", pd.getListGuess());
-					if (list == null)
-						return;
-
-					pd.getMetaData().put("list", list);
-				}
-
-				pd.refetchRecursive(commonService.getProgressBar("Refetching messages"), fetcher);
+				facade.printThreadStatistics(pd, commonService
+					.getProgressBar("Calculate Project Statistics"));
 			}
-		}).start();
+		}, "Error in computing thread statistics:");
+		
 	}
 }

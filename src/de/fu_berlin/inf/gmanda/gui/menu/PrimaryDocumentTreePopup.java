@@ -10,6 +10,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
+import de.fu_berlin.inf.gmanda.gui.actions.ComputeThreadStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchListAction;
@@ -22,11 +23,14 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 		RefetchAction refetch,
 		RefetchRecursiveAction refetchRecursive,
 		RefetchListAction refetchList,
-		DeletePrimaryDocumentAction delete) {
+		DeletePrimaryDocumentAction delete,
+		ComputeThreadStatisticsAction thread) {
 
 		add(refetch);
 		add(refetchRecursive);
 		add(refetchList);
+		add(new JSeparator());
+		add(thread);
 		add(new JSeparator());
 		add(delete);
 		

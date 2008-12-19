@@ -51,7 +51,7 @@ public class ConfigurationAwareFileChooser extends JFileChooser {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			configuration.setProperty(property, getCurrentDirectory().getAbsolutePath());
 
-			// Append .gmp if not given
+			// Append extension if not given
 			File f = getSelectedFile();
 			if (getFileFilter() == ff && !f.getName().endsWith(extension)) {
 				f = new File(f.getParent(), f.getName() + extension);

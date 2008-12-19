@@ -62,6 +62,8 @@ public class VisualizationCanvas extends PScrollPane {
 		TrackCompareManager trackCompareManager, final SelectionProxy selection) {
 
 		getVerticalScrollBar().setUnitIncrement(10);
+		
+		setBorder(null);
 
 		this.project = project;
 		this.mapper = mapper;
@@ -170,6 +172,10 @@ public class VisualizationCanvas extends PScrollPane {
 			}
 		};
 
+	}
+	
+	public PCanvas getCanvas(){
+		return this.canvas;
 	}
 	
 	VariableProxyListener<Object> selectionListener;
@@ -357,4 +363,6 @@ public class VisualizationCanvas extends PScrollPane {
 	
 		partition.setX(0.0);
 	}
+
+	
 }

@@ -17,6 +17,7 @@ import javax.swing.JTextField;
 
 import com.thoughtworks.xstream.XStream;
 
+import de.fu_berlin.inf.gmanda.gui.actions.VisualizationScreenshotAction;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.Configuration;
@@ -64,8 +65,11 @@ public class VisualisationOptions extends JPanel {
 	JTextField colorField = new JTextField(85);
 	
 	@SuppressWarnings("unchecked")
-	public VisualisationOptions(ProjectProxy projectProxy, final VisualizationCanvas pane,
-		final Configuration configuration) {
+	public VisualisationOptions(
+		ProjectProxy projectProxy, 
+		final VisualizationCanvas pane,
+		final Configuration configuration,
+		final VisualizationScreenshotAction screenshotAction) {
 		
 		setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
 		
@@ -124,6 +128,8 @@ public class VisualisationOptions extends JPanel {
 			}
 		});
 		
+		final JButton screenshotButton = new JButton(screenshotAction);
+		
 		projectProxy.add(new VariableProxyListener<Project>() {
 			public void setVariable(Project newValue) {
 				drawButton.setEnabled(newValue != null);
@@ -147,7 +153,8 @@ public class VisualisationOptions extends JPanel {
 		 		.addComponent(colorLabel)
 		 		.addComponent(colorField, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,  GroupLayout.PREFERRED_SIZE)
 		 		.addComponent(drawButton)
-		 		.addComponent(recentSearchesButton));
+		 		.addComponent(recentSearchesButton)
+		 		.addComponent(screenshotButton));
 		
 		layout.setVerticalGroup(
 			layout.createParallelGroup(GroupLayout.Alignment.CENTER)
@@ -160,6 +167,7 @@ public class VisualisationOptions extends JPanel {
 		 		.addComponent(colorLabel)
 				.addComponent(colorField)
 				.addComponent(drawButton)
-				.addComponent(recentSearchesButton));
+				.addComponent(recentSearchesButton)
+				.addComponent(screenshotButton));
 	}
 }

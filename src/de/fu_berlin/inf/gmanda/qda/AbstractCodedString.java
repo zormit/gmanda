@@ -12,14 +12,21 @@ import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
 public abstract class AbstractCodedString implements CodedString {
  
 	/**
-	 * Returns a list of all plain codes (without values behind the =)
-	 * 
-	 * @return
+	 * {@inheritDoc}
 	 */
 	public Collection<String> getAll() {
 		Collection<String> variations = new LinkedList<String>();
 
 		for (Code c : getAllCodes()) {
+			variations.add(c.getTag());
+		}
+		return variations;
+	}
+	
+	public Collection<String> getAllDeep(){
+		Collection<String> variations = new LinkedList<String>();
+
+		for (Code c : getAllCodesDeep()) {
 			variations.add(c.getTag());
 		}
 		return variations;

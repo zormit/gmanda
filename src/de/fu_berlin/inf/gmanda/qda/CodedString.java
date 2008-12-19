@@ -19,7 +19,19 @@ public interface CodedString extends CodedStringCore {
 
 	Collection<String> getAllVariationsDeep();
 
+	/**
+	 * Returns a list of all plain codes (without values behind the =)
+	 * 
+	 * @return
+	 */
 	Collection<String> getAll();
+	
+	/**
+	 * Returns a list of all codes nested arbitrarily deep
+	 * 
+	 * @return
+	 */
+	Collection<String> getAllDeep();
 	
 	Collection<? extends Code> getAll(String code);
 	

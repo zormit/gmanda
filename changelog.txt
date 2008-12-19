@@ -1,4 +1,10 @@
 
+2008-12-19 
+
+   * [FEATURE]  SVG Screenshot support for visualization
+   * [FEATURE]  Statistics computation now possible on a per thread basis
+   * [BUG]      Some fixes to partitioning codes in Visualization  
+
 2008-11-17
 
    * [MINOR]    Improved search and highlighting

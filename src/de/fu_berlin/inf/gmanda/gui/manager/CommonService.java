@@ -1,9 +1,9 @@
 package de.fu_berlin.inf.gmanda.gui.manager;
 
-import java.awt.Frame;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
@@ -70,7 +70,7 @@ public class CommonService {
 		return progress;
 	}
 	
-	public Frame getForegroundWindowOrNull(){
+	public JFrame getForegroundWindowOrNull(){
 		return windowProxy.getAsFrameOrNull();
 	}
 	

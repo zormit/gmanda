@@ -43,9 +43,11 @@ import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTreeFilterTextField;
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTreeView;
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentView;
 import de.fu_berlin.inf.gmanda.gui.TextView;
+import de.fu_berlin.inf.gmanda.gui.actions.ApplicationScreenshotAction;
 import de.fu_berlin.inf.gmanda.gui.actions.BackSelectionAction;
 import de.fu_berlin.inf.gmanda.gui.actions.BasicStatisticalReportAction;
 import de.fu_berlin.inf.gmanda.gui.actions.CloseAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ComputeThreadStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.CreateDSVFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExecuteTrailAction;
@@ -76,6 +78,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.SearchWithLuceneAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SetCacheLocationAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ShowPreferencesAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SplitTrailAction;
+import de.fu_berlin.inf.gmanda.gui.actions.VisualizationScreenshotAction;
 import de.fu_berlin.inf.gmanda.gui.docking.DefaultPerspective;
 import de.fu_berlin.inf.gmanda.gui.docking.DockablePerspectiveMenu;
 import de.fu_berlin.inf.gmanda.gui.docking.DockableViewMenu;
@@ -97,6 +100,8 @@ import de.fu_berlin.inf.gmanda.gui.misc.GmandaInfoBox;
 import de.fu_berlin.inf.gmanda.gui.misc.LockManager;
 import de.fu_berlin.inf.gmanda.gui.misc.PrimaryDocumentCellRenderer;
 import de.fu_berlin.inf.gmanda.gui.misc.ProjectFileChooser;
+import de.fu_berlin.inf.gmanda.gui.misc.SVGScreenshotTaker;
+import de.fu_berlin.inf.gmanda.gui.misc.ScreenshotFileChooser;
 import de.fu_berlin.inf.gmanda.gui.misc.StorageFileChooser;
 import de.fu_berlin.inf.gmanda.gui.preferences.CacheDirectoryProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.CodedColorProperty;
@@ -223,6 +228,7 @@ public class GmandaMain {
 			.addComponent(DefaultPerspective.class)
 			.addComponent(VisualizationPerspective.class)
 			// Actions
+			.addComponent(ComputeThreadStatisticsAction.class)
 			.addComponent(CloseAction.class)
 			.addComponent(ExitAction.class)
 			.addComponent(LoadAction.class)
@@ -257,6 +263,8 @@ public class GmandaMain {
 			.addComponent(InsertSubCodeTemplateAction.class)
 			.addComponent(InsertSessionLogTemplateAction.class)
 			.addComponent(RewindSelectionAction.class)
+			.addComponent(VisualizationScreenshotAction.class)
+			.addComponent(ApplicationScreenshotAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)
@@ -275,6 +283,7 @@ public class GmandaMain {
 			.addComponent(GmaneImporter.class)
 			.addComponent(ProjectFileChooser.class)
 			.addComponent(StorageFileChooser.class)
+			.addComponent(ScreenshotFileChooser.class)
 			.addComponent(GmaneMboxFetcher.class)
 			.addComponent(GmaneFacade.class)
 			// Properties
@@ -299,7 +308,8 @@ public class GmandaMain {
 			.addComponent(SearchService.class)
 			.addComponent(SelectionViewManager.class)
 			.addComponent(TrailManager.class)
-			.addComponent(GmandaHyperlinkListener.class);
+			.addComponent(GmandaHyperlinkListener.class)
+			.addComponent(SVGScreenshotTaker.class);
 		
 	}
 

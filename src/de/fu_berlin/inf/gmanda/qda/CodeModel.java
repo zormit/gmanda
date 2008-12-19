@@ -23,7 +23,7 @@ import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 public class CodeModel {
 
 	HashMap<String, PrimaryDocument> allDocs = new HashMap<String, PrimaryDocument>();
-	
+
 	HashMap<PrimaryDocument, String> currentlyStoredCodes = new HashMap<PrimaryDocument, String>();
 
 	Map<String, List<PrimaryDocument>> codeMap = new HashMap<String, List<PrimaryDocument>>();
@@ -33,11 +33,11 @@ public class CodeModel {
 	SortedList<String> sortedList = new SortedList<String>(internalList);
 
 	Project project;
-	
+
 	public CodeModel(Project project) {
 
 		this.project = project;
-		
+
 		for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(project.getPrimaryDocuments())) {
 			add(pd);
 		}
@@ -48,22 +48,22 @@ public class CodeModel {
 			}
 		});
 	}
-	
-	public PrimaryDocument getByFilename(String filename){
+
+	public PrimaryDocument getByFilename(String filename) {
 		return allDocs.get(filename);
 	}
 
 	public void remove(PrimaryDocument t) {
 
-		if (t.filename != null){
+		if (t.filename != null) {
 			allDocs.remove(t.filename);
 		}
-		
+
 		// Remove if existing
 		if (currentlyStoredCodes.containsKey(t)) {
 
-			for (String partialQualifiedCode : CodedStringFactory.parse(currentlyStoredCodes.get(t))
-				.getAllVariationsDeep()) {
+			for (String partialQualifiedCode : CodedStringFactory
+				.parse(currentlyStoredCodes.get(t)).getAllVariationsDeep()) {
 				if (codeMap.containsKey(partialQualifiedCode)) {
 					boolean removed = codeMap.get(partialQualifiedCode).remove(t);
 					if (removed && codeMap.get(partialQualifiedCode).size() == 0) {
@@ -77,17 +77,18 @@ public class CodeModel {
 	}
 
 	public void add(PrimaryDocument t) {
-		
-		if (t.filename != null){
+
+		if (t.filename != null) {
 			allDocs.put(t.filename, t);
 		}
-		
+
 		if (t.getCodeAsString() != null && t.getCodeAsString().trim().length() > 0) {
 			// Add again
 			String codes = t.getCodeAsString();
 			currentlyStoredCodes.put(t, codes);
 
-			for (String partialQualifiedCode : CodedStringFactory.parse(codes).getAllVariationsDeep()) {
+			for (String partialQualifiedCode : CodedStringFactory.parse(codes)
+				.getAllVariationsDeep()) {
 				if (!codeMap.containsKey(partialQualifiedCode)) {
 					codeMap.put(partialQualifiedCode, new LinkedList<PrimaryDocument>());
 				}
@@ -110,11 +111,11 @@ public class CodeModel {
 	public Set<PrimaryDocument> getPrimaryDocuments() {
 		return currentlyStoredCodes.keySet();
 	}
-	
+
 	public int getDocumentCount(String s) {
 		return getPrimaryDocuments(s).size();
 	}
-	
+
 	public int getSubCodeCount(String s) {
 		return expand(s).size();
 	}
@@ -126,10 +127,10 @@ public class CodeModel {
 			return Collections.emptyList();
 		}
 	}
-	
+
 	public List<PrimaryDocument> rename(String renameFrom, String renameTo) {
-		
-		if (!codeMap.containsKey(renameFrom)){
+
+		if (!codeMap.containsKey(renameFrom)) {
 			return Collections.emptyList();
 		}
 
@@ -139,32 +140,33 @@ public class CodeModel {
 		codes = new LinkedList<PrimaryDocument>(codes);
 
 		List<PrimaryDocument> result = new ArrayList<PrimaryDocument>(codes.size());
-		
+
 		for (PrimaryDocument codeable : codes) {
 			if (codeable.renameCodes(renameFrom, renameTo))
 				result.add(codeable);
 		}
 		return result;
 	}
-	
-	
-	public List<String> expand(String s){
+
+	public List<String> expand(String s) {
 		return expand(s, Integer.MAX_VALUE);
 	}
-	
+
 	/**
-	 * Takes the given code and returns all subcodes up to the given depth. The code itself is NOT included in the result.
+	 * Takes the given code and returns all subcodes up to the given depth. The
+	 * code itself is NOT included in the result.
+	 * 
 	 * @param code
 	 * @param maxdepth
 	 * @return
 	 */
-	public List<String> expand(String code, int maxdepth){
-		
+	public List<String> expand(String code, int maxdepth) {
+
 		List<String> result = new LinkedList<String>();
-		
+
 		int index;
-		
-		if (code.equals("")){
+
+		if (code.equals("")) {
 			// Start at first
 			index = 0;
 		} else {
@@ -175,18 +177,18 @@ public class CodeModel {
 			// Skip match itself
 			index++;
 		}
-		
+
 		while (index < sortedList.size()) {
 			String next = sortedList.get(index);
-			
+
 			if (!next.startsWith(code))
 				return result;
-	
+
 			if (StringUtils.countMatches(next.substring(code.length()), ".") <= maxdepth)
 				result.add(next);
-			
+
 			index++;
-		} 
+		}
 		return result;
 	}
 
@@ -195,21 +197,23 @@ public class CodeModel {
 	}
 
 	public List<PrimaryDocument> filter(Iterable<PrimaryDocument> pds, CodedString searchTerm) {
-	
+
 		List<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
-	
+
 		for (PrimaryDocument pd : pds) {
 			if (pd.getCodeAsString() == null)
 				continue;
-	
-			if (CodedStringFactory.parse(pd.getCodeAsString()).containsAny(searchTerm.getAllCodes()))
+
+			if (CodedStringFactory.parse(pd.getCodeAsString())
+				.containsAny(searchTerm.getAllCodes()))
 				result.add(pd);
 		}
-	
+
 		return result;
 	}
 
-	public Multimap<PrimaryDocument, Code> getValues(Iterable<PrimaryDocument> it, String code, String property){
+	public Multimap<PrimaryDocument, Code> getValues(Iterable<PrimaryDocument> it, String code,
+		String property) {
 		Multimap<PrimaryDocument, Code> result = new TreeMultimap<PrimaryDocument, Code>();
 		for (PrimaryDocument pd : it) {
 			for (Code c : pd.getCode().getAllDeep(code)) {
@@ -218,11 +222,24 @@ public class CodeModel {
 		}
 		return result;
 	}
-	
-	public Multimap<PrimaryDocument, Code> getValues(String code, String property){
+
+	public Multimap<PrimaryDocument, Code> getValues(String code, String property) {
 		return getValues(getPrimaryDocuments(code), code, property);
 	}
-		
+
+	/**
+	 * Given a set of PrimaryDocuments and a partitionCode, will return a
+	 * partitioning of the set of documents according to the following rules for
+	 * partition codes:
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * @param pds
+	 * @param partitionCode
+	 * @return
+	 */
 	public List<Pair<String, List<PrimaryDocument>>> partition(List<PrimaryDocument> pds,
 		String partitionCode) {
 
@@ -235,75 +252,73 @@ public class CodeModel {
 
 		if (partitionCode.trim().equals("**")) {
 			for (PrimaryDocument pd : pds) {
-				for (String code : CodedStringFactory.parse(pd.getCodeAsString()).getAll()) {
+				for (String code : CodedStringFactory.parse(pd.getCodeAsString()).getAllDeep()) {
 					list.add(new Pair<String, PrimaryDocument>(code, pd));
 				}
 			}
 		} else {
 			int maxDepth;
-			
-			if (partitionCode.trim().equals("*")){
+
+			if (partitionCode.trim().equals("*")) {
 				maxDepth = 0;
 			} else {
 				maxDepth = StringUtils.countMatches(partitionCode, ".*");
-	
+
 				if (maxDepth == 0)
 					maxDepth = Integer.MAX_VALUE;
-				else 
+				else
 					partitionCode = partitionCode.substring(0, partitionCode.indexOf(".*"));
 			}
 
 			if (partitionCode.trim().equals("*"))
 				partitionCode = "";
-			
-			List<String> codes = project.getCodeModel().expand(partitionCode,
-				maxDepth);
 
-			if (codes.size() == 0){
+			List<String> codes = project.getCodeModel().expand(partitionCode, maxDepth);
+
+			if (codes.size() == 0) {
 				codes.add(partitionCode);
 			}
-			
+
 			for (PrimaryDocument pd : pds) {
 
 				boolean containedInNone = true;
 
-				CodedString c = CodedStringFactory.parse(pd.getCodeAsString());
-				
-				if (c != null){
-				
+				CodedString c = pd.getCode();
+
+				if (c != null) {
+
 					for (String code : codes) {
 						if (c.containsAny(code + ".*")) {
-							list.add(new Pair<String, PrimaryDocument>(
-								("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
-									+ code.substring(partitionCode.length()) : code), pd));
+							list
+								.add(new Pair<String, PrimaryDocument>(
+									("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
+										+ code.substring(partitionCode.length())
+										: code), pd));
 							containedInNone = false;
 						}
 					}
-					if (c.containsAny(partitionCode)){
+					if (c.containsAny(partitionCode)) {
 						list.add(new Pair<String, PrimaryDocument>(
 							("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
 								: partitionCode), pd));
 						containedInNone = false;
 					}
 				}
-				if (containedInNone){
+				if (containedInNone) {
 					list.add(new Pair<String, PrimaryDocument>("<other>", pd));
 				}
 			}
 		}
-		
+
 		List<Pair<String, List<PrimaryDocument>>> l = Pair.disjointPartition(list);
-		
+
 		Collections.reverse(l);
-		
+
 		return l;
 	}
-	
-	public Slice<PrimaryDocument> getInitialFilterSlice(String code){
+
+	public Slice<PrimaryDocument> getInitialFilterSlice(String code) {
 		return SliceImpl.fromPDs(getPrimaryDocuments(code));
 	}
-	
-	
-	
-	
+
 }

@@ -25,5 +25,15 @@ public class CUtils {
 		t.printStackTrace(new PrintWriter(sw));
 		return sw.toString();
 	}
+	
+	public static int size(Iterable<?> t){
+		int result = 0;
+		
+		for (@SuppressWarnings("unused") Object o : t){
+			result++;
+		}
+		
+		return result;
+	}
 
 }

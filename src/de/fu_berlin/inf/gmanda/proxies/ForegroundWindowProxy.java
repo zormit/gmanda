@@ -1,7 +1,8 @@
 package de.fu_berlin.inf.gmanda.proxies;
 
 import java.awt.Component;
-import java.awt.Frame;
+
+import javax.swing.JFrame;
 
 import de.fu_berlin.inf.gmanda.util.VariableProxy;
 
@@ -14,9 +15,9 @@ public class ForegroundWindowProxy extends VariableProxy<Component> {
 		super(null);
 	}
 	
-	public Frame getAsFrameOrNull(){
-		if (getVariable() instanceof Frame)
-			return (Frame)getVariable();
+	public JFrame getAsFrameOrNull(){
+		if (getVariable() instanceof JFrame)
+			return (JFrame)getVariable();
 		return null;
 	}
 
