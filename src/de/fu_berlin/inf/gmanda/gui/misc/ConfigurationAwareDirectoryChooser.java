@@ -17,7 +17,7 @@ public class ConfigurationAwareDirectoryChooser extends JFileChooser {
 
 	public ConfigurationAwareDirectoryChooser(
 		Configuration configuration, ForegroundWindowProxy windowProxy, String configurationPropertyName) {
-		super(new File(configuration.getProperty(configurationPropertyName, ".")));
+		super(new File(configuration.getProperty(configurationPropertyName, "."), "."));
 
 		this.configuration = configuration;
 		this.property = configurationPropertyName;

@@ -184,5 +184,4 @@ public class Pair<P, V> {
 		Pair<?, ?> other = (Pair<?, ?>) o;
 		return ObjectUtils.equals(this.p, other.p) && ObjectUtils.equals(this.v, other.v);
 	}
-
 }

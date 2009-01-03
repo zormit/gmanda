@@ -38,4 +38,8 @@ public class EnableComponentBridge {
 			}
 		});
 	}
+
+	public static <T> void connectNonNull(Action action, VariableProxy<T> proxy) {
+		connect(action, proxy, new NotNullConverter<T>());
+	}
 }

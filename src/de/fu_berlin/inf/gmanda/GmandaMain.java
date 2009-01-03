@@ -52,6 +52,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.CreateDSVFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExecuteTrailAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExitAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ExportCitationsToLatexAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FetchGmaneListToFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FormatCodeAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ForwardSelectionAction;
@@ -97,6 +98,7 @@ import de.fu_berlin.inf.gmanda.gui.menu.ToolsMenu;
 import de.fu_berlin.inf.gmanda.gui.menu.WindowMenu;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaInfoBox;
+import de.fu_berlin.inf.gmanda.gui.misc.LaTeXDirectoryChooser;
 import de.fu_berlin.inf.gmanda.gui.misc.LockManager;
 import de.fu_berlin.inf.gmanda.gui.misc.PrimaryDocumentCellRenderer;
 import de.fu_berlin.inf.gmanda.gui.misc.ProjectFileChooser;
@@ -265,6 +267,7 @@ public class GmandaMain {
 			.addComponent(RewindSelectionAction.class)
 			.addComponent(VisualizationScreenshotAction.class)
 			.addComponent(ApplicationScreenshotAction.class)
+			.addComponent(ExportCitationsToLatexAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)
@@ -284,6 +287,7 @@ public class GmandaMain {
 			.addComponent(ProjectFileChooser.class)
 			.addComponent(StorageFileChooser.class)
 			.addComponent(ScreenshotFileChooser.class)
+			.addComponent(LaTeXDirectoryChooser.class)
 			.addComponent(GmaneMboxFetcher.class)
 			.addComponent(GmaneFacade.class)
 			// Properties

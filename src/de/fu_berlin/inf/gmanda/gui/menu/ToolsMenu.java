@@ -6,6 +6,7 @@ import javax.swing.JSeparator;
 import de.fu_berlin.inf.gmanda.gui.actions.BasicStatisticalReportAction;
 import de.fu_berlin.inf.gmanda.gui.actions.CreateDSVFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExecuteTrailAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ExportCitationsToLatexAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FetchGmaneListToFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ReindexWithLuceneAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SearchWithLuceneAction;
@@ -18,7 +19,7 @@ public class ToolsMenu extends JMenu {
 		SetCacheLocationAction setPDLocationAction, CreateDSVFileAction createDSVAction,
 		SearchWithLuceneAction searchLucene, ReindexWithLuceneAction reindexLucene,
 		BasicStatisticalReportAction stats, ExecuteTrailAction executeTrail,
-		SplitTrailAction splitTrail) {
+		SplitTrailAction splitTrail, ExportCitationsToLatexAction latex) {
 
 		super("Tools");
 		add(fetchAction);
@@ -35,6 +36,10 @@ public class ToolsMenu extends JMenu {
 		add(stats);
 		add(executeTrail);
 		add(splitTrail);
+		
+		add(new JSeparator());
+		
+		add(latex);
 	}
 
 }

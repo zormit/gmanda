@@ -29,11 +29,11 @@ public interface Slice<T> {
 	 */
 	public Slice<T> filter(Code code);
 	
+	public Map<String, Slice<T>> slice();
+
 	/**
 	 * Returns a map of subslices based on the trimmed values for the given code. 
 	 */
-	public Map<String, Slice<T>> slice();
-	
 	public Map<String, Slice<T>> slice(String by, int depth);
 	
 	public Slice<String> sliceAndPack(String by, int depth);

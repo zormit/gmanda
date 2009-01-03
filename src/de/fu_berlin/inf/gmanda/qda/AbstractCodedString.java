@@ -165,8 +165,21 @@ public abstract class AbstractCodedString implements CodedString {
 				return true;
 		}
 		return false;
+	}
+	
+	public boolean containsAnyDeep(String code) {
+
+		Code search = parse(code);
+
+		for (Code c : getAllCodesDeep()) {
+
+			if (search.matches(c))
+				return true;
+		}
+		return false;
 
 	}
+
 
 	public boolean containsAny(Iterable<? extends Code> codes) {
 

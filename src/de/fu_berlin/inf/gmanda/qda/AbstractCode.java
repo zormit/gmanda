@@ -70,22 +70,7 @@ public abstract class AbstractCode implements Code {
 		}
 		return false;
 	}
-
-	/**
-	 * Will return true if both codes are identical by their code Levels or if
-	 * the codes match up to a * of this
-	 * 
-	 * <pre>
-	 * hello.world matches hello.world
-	 * '*' matches everything
-	 * hello.* matches hello.world and hello
-	 * hello matches hello but not hello.world
-	 * hello.world matches hello.world but not hello
-	 * </pre>
-	 * 
-	 * @param otherCode
-	 * @return
-	 */
+	
 	public boolean matches(Code otherCode) {
 
 		if (tagLevels.size() == 0)

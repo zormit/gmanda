@@ -17,6 +17,14 @@ public interface CodedString extends CodedStringCore {
 
 	boolean containsAny(String string);
 
+	/**
+	 * Will return whether the given string as a code can be found in the Codes returned by getAllDeep. 
+	 * 
+	 * @param string
+	 * @return
+	 */
+	boolean containsAnyDeep(String string);	
+	
 	Collection<String> getAllVariationsDeep();
 
 	/**
@@ -41,5 +49,5 @@ public interface CodedString extends CodedStringCore {
 	
 	Collection<? extends Code> getProperties(String code, String propName);
 
-	Iterable<? extends Code> getAllCodesDeep();	
+	Iterable<? extends Code> getAllCodesDeep();
 }

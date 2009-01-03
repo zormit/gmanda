@@ -1,4 +1,8 @@
 
+2008-12-25
+
+   * [FEATURE]  Export a Glossary to LaTeX
+
 2008-12-19 
 
    * [FEATURE]  SVG Screenshot support for visualization

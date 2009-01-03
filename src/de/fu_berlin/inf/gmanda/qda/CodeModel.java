@@ -232,9 +232,11 @@ public class CodeModel {
 	 * partitioning of the set of documents according to the following rules for
 	 * partition codes:
 	 * 
+	 *   - null or "" will return a single partition including all 
 	 * 
-	 * 
-	 * 
+	 *   - "**" will return a partition for all codes (deep) found
+	 *   
+	 *   -
 	 * 
 	 * @param pds
 	 * @param partitionCode
@@ -242,8 +244,8 @@ public class CodeModel {
 	 */
 	public List<Pair<String, List<PrimaryDocument>>> partition(List<PrimaryDocument> pds,
 		String partitionCode) {
-
-		if (partitionCode.trim().length() == 0) {
+		
+		if (partitionCode == null || partitionCode.trim().length() == 0) {
 			return new LinkedList<Pair<String, List<PrimaryDocument>>>(Collections
 				.singletonList(new Pair<String, List<PrimaryDocument>>("All codes", pds)));
 		}
@@ -288,7 +290,7 @@ public class CodeModel {
 				if (c != null) {
 
 					for (String code : codes) {
-						if (c.containsAny(code + ".*")) {
+						if (c.containsAnyDeep(code + ".*")) {
 							list
 								.add(new Pair<String, PrimaryDocument>(
 									("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
@@ -297,7 +299,7 @@ public class CodeModel {
 							containedInNone = false;
 						}
 					}
-					if (c.containsAny(partitionCode)) {
+					if (c.containsAnyDeep(partitionCode)) {
 						list.add(new Pair<String, PrimaryDocument>(
 							("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
 								: partitionCode), pd));

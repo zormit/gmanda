@@ -295,7 +295,7 @@ public class VisualizationCanvas extends PScrollPane {
 			
 			int days = Days.daysIn(month).getDays();
 			
-			MonthNode monthNode = new MonthNode(days, currentDate.toString("MMM"));
+			MonthNode monthNode = new MonthNode(days, currentDate.toString("MMM"), month.getStart().getDayOfWeek());
 			monthNode.offset(currentDate.getMillis() / 1000 / 60 - start, 0.0);
 			
 			SemanticGrid dayGrid = new SemanticGrid(0.0f, 24.0f * 60, days, 0.0f, trackDistance * 2 * tracks.size(), false, 0.05f); 

@@ -26,13 +26,13 @@ public class CodeDetailBox extends JPanel {
 			textField.setText("");
 		}
 	});
-	
+
 	ProxyTextComponentBridge bridge;
 
-	 AutoCompleter<String> completer;
+	AutoCompleter<String> completer;
 
-	public CodeDetailBox(final CodeList codeList, ProjectProxy projectProxy, 
-		CodeDetailProxy proxy, FilterTextProxy filter) {
+	public CodeDetailBox(final CodeList codeList, ProjectProxy projectProxy, CodeDetailProxy proxy,
+		FilterTextProxy filter) {
 		super();
 
 		setLayout(new BorderLayout(3, 3));
@@ -45,15 +45,15 @@ public class CodeDetailBox extends JPanel {
 				setEnabled(newValue != null);
 			}
 		});
-		 
-		filter.add(new VariableProxyListener<String>(){
+
+		filter.add(new VariableProxyListener<String>() {
 			public void setVariable(String newValue) {
 				textField.setText(newValue);
 			}
 		});
-		
+
 		bridge = new ProxyTextComponentBridge(textField, proxy);
-		
+
 		completer = new AutoCompleter<String>(new CodeCompleter(textField, projectProxy));
 	}
 }

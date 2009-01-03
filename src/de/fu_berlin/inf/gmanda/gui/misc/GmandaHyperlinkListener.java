@@ -47,6 +47,8 @@ public class GmandaHyperlinkListener implements HyperlinkListener {
 			String filename = arg0.getDescription();
 			if (filename.startsWith("gmane://")) {
 
+				// TODO: Add possibility to hyperlink to a certain code in a primary document.
+				
 				PrimaryDocument pd = project.getVariable().getCodeModel().getByFilename(
 					filename);
 

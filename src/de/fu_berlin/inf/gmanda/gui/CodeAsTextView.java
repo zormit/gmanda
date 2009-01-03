@@ -178,7 +178,14 @@ public class CodeAsTextView extends JScrollPane {
 		}
 
 		// First definition
-		sb.append(definition2html(tag, newFilterList));
+		if (tag.startsWith("#")){
+			Slice<PrimaryDocument> propSlice = p.getCodeModel().getInitialFilterSlice(tag).select(
+				CodedStringFactory.parseOne(tag));
+			
+			sb.append(property2html(tag, propSlice));
+		} else {
+			sb.append(definition2html(tag, newFilterList));
+		}
 
 		// Then properties
 		sb.append(properties2html(tag, p));
@@ -307,10 +314,9 @@ public class CodeAsTextView extends JScrollPane {
 		StringBuilder sb = new StringBuilder();
 		
 		Slice<PrimaryDocument> parentSlice = p.getCodeModel().getInitialFilterSlice(code).select(
-			CodedStringFactory.parseOne(code));
+			CodedStringFactory.parseOne(code + ".*"));
 		for (Entry<String, Slice<PrimaryDocument>> slice : parentSlice.slice().entrySet()) {
 			
-
 			String property = slice.getKey().trim();
 			Slice<PrimaryDocument> childSlice = slice.getValue();
 
@@ -365,7 +371,7 @@ public class CodeAsTextView extends JScrollPane {
 			Collection<Entry<PrimaryDocument, Collection<Code>>> docs = valueSlice.getDocuments()
 				.entrySet();
 
-			sb.append(surround("<li><b>" + toFilterA(valueTag) + "</b> (" + docs.size() + "):<br>",
+			sb.append(surround("<li><b>" + toFilterA(valueTag) + "</b> (" + docs.size() + "):<br>" + surround("<ul>", slice2html(valueSlice, "def"), "</ul>"),
 				CStringUtils.join(docs, "<br>",
 					new StringConverter<Entry<PrimaryDocument, Collection<Code>>>() {
 						public String toString(Entry<PrimaryDocument, Collection<Code>> docs) {
@@ -392,7 +398,7 @@ public class CodeAsTextView extends JScrollPane {
 
 		return surround("<ul>", sb.toString(), "</ul>");
 	}
-
+	
 	public static String pd2html(PrimaryDocument pd, Collection<? extends Code> codes, boolean dateBased) {
 
 		StringBuilder sb = new StringBuilder();
