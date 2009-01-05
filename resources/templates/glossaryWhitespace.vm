@@ -1,0 +1,21 @@
+#macro( writeSection $section)
+\subsection{$section.title}
+  \label{def:$section.code}
+
+#if ($section.definition)
+  \textbf{Def.:} $section.definition
+#end
+
+  \begin{itemize} 
+#foreach ($item in $section.items)
+    \phantomsection
+    \item \emph{$item.title} \label{def:$item.code} (\texttt{$item.code})\\
+    $item.definition
+#end
+  \end{itemize} 
+#end
+\section{Glossary}
+\label{sec:glossary}
+#foreach ($section in $sections)
+#writeSection($section)
+#end

@@ -32,6 +32,7 @@ import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.misc.LaTeXDirectoryChooser;
+import de.fu_berlin.inf.gmanda.gui.preferences.DebugModeProperty;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.Code;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
@@ -47,6 +48,9 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 	@Inject
 	LaTeXDirectoryChooser latexFileChooser;
+
+	@Inject
+	DebugModeProperty debugMode;
 
 	ProjectProxy proxy;
 
@@ -66,7 +70,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 		for (File tex : dir.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.endsWith(".tex"); // && !name.equals("glossary.tex");
+				return name.endsWith(".tex"); // &&
+												// !name.equals("glossary.tex");
 			}
 		})) {
 
@@ -77,7 +82,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 				throw new ReportToUserException(e);
 			}
 
-			Pattern p = Pattern.compile("\\\\dref\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}");
+			Pattern p = Pattern
+				.compile("\\\\dref\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}");
 			Matcher m = p.matcher(input);
 
 			while (m.find()) {
@@ -99,22 +105,22 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 			// Skip the code of the section itself
 			if (code.equals(section.code))
 				continue;
-			
+
 			String shortCode;
-			
+
 			if (section.code != null && code.startsWith(section.code + ".")) {
 				shortCode = code.substring(section.code.length() + 1);
 			} else {
 				shortCode = code;
 			}
-			
+
 			Section item = new Section(shortCode, code);
-			
+
 			item.initializeDefinition(p);
 
 			section.getItems().add(item);
 		}
-		
+
 		return section;
 	}
 
@@ -144,10 +150,13 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 					categories.add(new Section("Projects", "project"));
 					categories.add(new Section("Activities", "activity"));
 					categories.add(new Section("Concepts", "concept"));
-					
+					categories.add(new Section("Episode Outcomes", "outcome"));
+
 					Section uncategorized = new Section("Uncategorized Codes", null);
-					uncategorized.definition = ""; // Set to non-null so that it is not queried for a definition					
-					
+					uncategorized.definition = ""; // Set to non-null so that it
+													// is not queried for a
+													// definition
+
 					Multimap<Section, String> citationsByCategory = new TreeMultimap<Section, String>();
 
 					nextCitation: for (String citation : citations) {
@@ -172,9 +181,12 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 						sections.add(buildSection(p, entry.getKey(), entry.getValue()));
 					}
 
-					uncategorized.definition = null; // Set to null again, so no definition is generated in the LaTeX output
-					uncategorized.code = "uncategorized"; 
-					
+					uncategorized.definition = null; // Set to null again, so no
+														// definition is
+														// generated in the
+														// LaTeX output
+					uncategorized.code = "uncategorized";
+
 					// Run template engine
 					String glossary = runVelocity(sections);
 
@@ -224,18 +236,18 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 			if (definition != null)
 				return;
-			
+
 			for (Entry<PrimaryDocument, Code> defs : p.getCodeModel().getValues(code, "def")
 				.entries()) {
 
 				String value = defs.getValue().getValue();
-				
-				if (value != null){
+
+				if (value != null) {
 					value = StringUtils.strip(value, " \"");
-					
+
 					value = value.split("----", 2)[0].trim();
-					
-					if (value.length() > 0){
+
+					if (value.length() > 0) {
 						if (definition == null)
 							definition = value;
 						else
@@ -269,18 +281,27 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 	public String runVelocity(List<Section> sections) {
 
-		if (true || context == null) {
+		if (context == null) {
 
 			Properties p = new Properties();
 
-			p.setProperty("resource.loader", "class, file");
-			p.setProperty("class.resource.loader.class",
-				"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+			
+			if (debugMode.getValue()) {
+				// Enable auto reload
+				p.setProperty("resource.loader", "file");
+				p.setProperty("file.resource.loader.cache", "false");
+				p.setProperty("velocimacro.library.autoreload", "true");
+			} else {
+				p.setProperty("resource.loader", "class, file");
+				p.setProperty("class.resource.loader.class",
+					"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+			}
+
 			try {
 				Velocity.init(p);
-				
+
 				context = new VelocityContext();
-				
+
 				latexTemplate = Velocity.getTemplate("resources/templates/glossary.vm");
 
 			} catch (Exception e) {

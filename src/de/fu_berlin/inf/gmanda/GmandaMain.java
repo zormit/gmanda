@@ -107,9 +107,12 @@ import de.fu_berlin.inf.gmanda.gui.misc.ScreenshotFileChooser;
 import de.fu_berlin.inf.gmanda.gui.misc.StorageFileChooser;
 import de.fu_berlin.inf.gmanda.gui.preferences.CacheDirectoryProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.CodedColorProperty;
+import de.fu_berlin.inf.gmanda.gui.preferences.DebugModePreferenceUI;
+import de.fu_berlin.inf.gmanda.gui.preferences.DebugModeProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.MatchColorProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.PreferenceWindow;
 import de.fu_berlin.inf.gmanda.gui.preferences.PrimaryDocumentDirectoryProperty;
+import de.fu_berlin.inf.gmanda.gui.preferences.ScrollOnShowPreferenceUI;
 import de.fu_berlin.inf.gmanda.gui.preferences.ScrollOnShowProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.SeenColorProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.SelectedColorProperty;
@@ -206,7 +209,6 @@ public class GmandaMain {
 			.addComponent(CodeListFilterTextBox.class)
 			.addComponent(VisualisationOptions.class)
 			.addComponent(VisualizationCanvas.class)
-			.addComponent(PreferenceWindow.class)
 			.addComponent(PrimaryDocumentCellRenderer.class)
 			.addComponent(CodeableTreeView.class)
 			.addComponent(CodeableControl.class)
@@ -299,6 +301,11 @@ public class GmandaMain {
 			.addComponent(MatchColorProperty.class)
 			.addComponent(SelectedColorProperty.class)
 			.addComponent(CodedColorProperty.class)
+			.addComponent(DebugModeProperty.class)
+			// Preference UI
+			.addComponent(PreferenceWindow.class)
+			.addComponent(ScrollOnShowPreferenceUI.class)
+			.addComponent(DebugModePreferenceUI.class)
 			// Converters
 			.addComponent(FileConverter.class)
 			// Others

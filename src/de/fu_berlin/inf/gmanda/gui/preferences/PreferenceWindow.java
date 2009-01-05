@@ -4,47 +4,52 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.picocontainer.annotations.Inject;
+
+import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
-import de.fu_berlin.inf.gmanda.util.Configuration;
 
 public class PreferenceWindow extends JFrame {
 
-	Configuration configuration;
-	
-	ForegroundWindowProxy windowProxy;
+	@Inject
+	CommonService commonService;
 	
 	public void showPreferences(){
-		setLocationRelativeTo(windowProxy.getAsFrameOrNull());
-		
-		occurance.setSelected(scrollOnShow.getValue());
+		setLocationRelativeTo(commonService.getForegroundWindowOrNull());
 
+		for (PreferenceUI<?> ui : preferenceUIs){
+			ui.refresh();
+		}
+		
 		setVisible(true);
 	}
 
 	public void hidePreferences() {
-		scrollOnShow.setValue(occurance.isSelected());
+
+		for (PreferenceUI<?> ui : preferenceUIs){
+			ui.store();
+		}
 		
 		setVisible(false);
 	}
 	
-	JCheckBox occurance = new JCheckBox("Jump to first occurance of search term");
+	List<PreferenceUI<?>> preferenceUIs;
 	
-	ScrollOnShowProperty scrollOnShow;
-	
-	public PreferenceWindow(ScrollOnShowProperty scrollOnShow, 
+	@SuppressWarnings("unchecked")
+	public PreferenceWindow(List<PreferenceUI> preferenceUIs, 
 		ForegroundWindowProxy foreground) {
 		super("Preferences");
 		
-		this.scrollOnShow = scrollOnShow;
-		this.windowProxy = foreground;
+		this.preferenceUIs = (List)preferenceUIs;
 
 		setPreferredSize(new Dimension(600, 400));
 		
@@ -64,12 +69,19 @@ public class PreferenceWindow extends JFrame {
 		master.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
 		master.setLayout(new BorderLayout(5, 5));
 
-		master.add(occurance, BorderLayout.PAGE_START);
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 3, 3));
-		panel.add(cancel);
-		panel.add(ok);
-		master.add(panel, BorderLayout.PAGE_END);
+		JPanel center = new JPanel();
+		center.setLayout(new BoxLayout(center, BoxLayout.PAGE_AXIS));
+		
+		for (PreferenceUI<?> ui : preferenceUIs){
+			center.add(ui.getPreferenceUI());
+		}
+		master.add(center, BorderLayout.PAGE_START);
+		
+		JPanel bottomRow = new JPanel();
+		bottomRow.setLayout(new FlowLayout(FlowLayout.CENTER, 3, 3));
+		bottomRow.add(cancel);
+		bottomRow.add(ok);
+		master.add(bottomRow, BorderLayout.PAGE_END);
 
 		getContentPane().add(master);
 

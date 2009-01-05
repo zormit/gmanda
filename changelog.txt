@@ -1,4 +1,9 @@
 
+2008-01-05
+
+   * [FEATURE]  Added Debug Mode for extra output, and template reloading
+   * [BUG]      LaTeX Export Whitespace fixes
+
 2008-12-25
 
    * [FEATURE]  Export a Glossary to LaTeX

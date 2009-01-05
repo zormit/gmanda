@@ -23,7 +23,6 @@
 	<classpathentry kind="lib" path="lib/velocity-dep-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/piccolo.jar"/>
 	<classpathentry kind="lib" path="lib/piccolox.jar"/>
-	<classpathentry kind="lib" path="lib/picocontainer-2.5.1.jar" sourcepath="lib/picocontainer-2.5.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/batik-awt-util.jar"/>
 	<classpathentry kind="lib" path="lib/batik-css.jar"/>
 	<classpathentry kind="lib" path="lib/batik-dom.jar"/>
@@ -37,6 +36,7 @@
 	<classpathentry kind="lib" path="lib/batik-xml.jar"/>
 	<classpathentry kind="lib" path="lib/batik-extension.jar"/>
 	<classpathentry kind="lib" path="lib/batik-codec.jar"/>
+	<classpathentry kind="lib" path="lib/picocontainer-2.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
