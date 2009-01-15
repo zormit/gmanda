@@ -9,7 +9,7 @@
   \begin{itemize} 
 #foreach ($item in $section.items)
     \phantomsection
-    \item \emph{$item.title} \label{def:$item.code} (\texttt{$item.code})\\
+    \item \emph{$item.title} \label{def:$item.code} (\texttt{\hyphenchar\font45\relax $item.codeHyp})\\
     $item.definition
 #end
   \end{itemize} 

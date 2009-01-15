@@ -38,6 +38,7 @@ import de.fu_berlin.inf.gmanda.qda.Code;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.VelocityWhitespaceRepair;
 import de.fu_berlin.inf.gmanda.util.gui.EnableComponentBridge;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 
@@ -63,6 +64,13 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 		putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_E));
 	}
+	
+	public String hyphenate(String s){
+		
+		s = s.replace(".", "\\dothyp{}");
+		
+		return s;
+	}
 
 	public List<String> getCitationList(File dir) {
 
@@ -71,7 +79,7 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		for (File tex : dir.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
 				return name.endsWith(".tex"); // &&
-												// !name.equals("glossary.tex");
+				// !name.equals("glossary.tex");
 			}
 		})) {
 
@@ -83,7 +91,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 			}
 
 			Pattern p = Pattern
-				.compile("\\\\dref\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}");
+				.compile("\\\\dref\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}\\s*\\{((?:\\w|\\s|\\/|[@\\-.?!'\\(\\)])+?)\\}");
+
 			Matcher m = p.matcher(input);
 
 			while (m.find()) {
@@ -154,8 +163,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 					Section uncategorized = new Section("Uncategorized Codes", null);
 					uncategorized.definition = ""; // Set to non-null so that it
-													// is not queried for a
-													// definition
+					// is not queried for a
+					// definition
 
 					Multimap<Section, String> citationsByCategory = new TreeMultimap<Section, String>();
 
@@ -182,9 +191,9 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 					}
 
 					uncategorized.definition = null; // Set to null again, so no
-														// definition is
-														// generated in the
-														// LaTeX output
+					// definition is
+					// generated in the
+					// LaTeX output
 					uncategorized.code = "uncategorized";
 
 					// Run template engine
@@ -212,11 +221,15 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		}
 
 		public String getTitle() {
-			return title;
+			return hyphenate(title);
 		}
 
 		public String getCode() {
 			return code;
+		}
+		
+		public String getCodeHyp(){
+			return hyphenate(code);
 		}
 
 		public String getDefinition() {
@@ -285,7 +298,6 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 			Properties p = new Properties();
 
-			
 			if (debugMode.getValue()) {
 				// Enable auto reload
 				p.setProperty("resource.loader", "file");
@@ -302,7 +314,9 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 				context = new VelocityContext();
 
-				latexTemplate = Velocity.getTemplate("resources/templates/glossary.vm");
+				FileUtils.writeStringToFile(new File("resources/templates/glossaryWhitespace.vm"), new VelocityWhitespaceRepair().fixWhitespace(FileUtils.readFileToString(new File("resources/templates/glossary.vm"))));
+				
+				latexTemplate = Velocity.getTemplate("resources/templates/glossaryWhitespace.vm");
 
 			} catch (Exception e) {
 				throw new DoNotShowToUserException(e);
