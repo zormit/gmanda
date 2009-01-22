@@ -85,7 +85,16 @@ public class SearchService {
 					if (nextSearchString.startsWith("^") || nextSearchString.startsWith("-")) {
 						newFilterList.removeAll(getSetFromSearchString(c, project));
 					} else {
-						newFilterList.retainAll(getSetFromSearchString(c, project));
+						if (nextSearchString.startsWith("|")){
+							
+							Collection<PrimaryDocument> nextSet = getSetFromSearchString(c, project);
+							
+							nextSet.removeAll(newFilterList);
+							
+							newFilterList.addAll(nextSet);
+						} else {
+							newFilterList.retainAll(getSetFromSearchString(c, project));
+						}
 					}
 
 					if (subProgress.isCanceled())
@@ -131,7 +140,7 @@ public class SearchService {
 
 		char operation = '+';
 
-		if (nextSearchString.startsWith("^") || nextSearchString.startsWith("-")) {
+		if (nextSearchString.startsWith("^") || nextSearchString.startsWith("-") || nextSearchString.startsWith("|")) {
 			operation = nextSearchString.charAt(0);
 			nextSearchString = nextSearchString.substring(1);
 		}
