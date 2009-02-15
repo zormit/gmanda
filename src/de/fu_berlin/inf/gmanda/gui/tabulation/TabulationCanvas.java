@@ -353,7 +353,7 @@ public class TabulationCanvas extends JScrollPane {
 		return CStringUtils.join(Iterables.transform(cell, new Function<Object, String>() {
 			public String apply(Object o) {
 				if (o instanceof PrimaryDocument)
-					return ToHtmlHelper.toA((PrimaryDocument) o);
+					return ToHtmlHelper.toA((PrimaryDocument) o, null);
 				else
 					return ToHtmlHelper.toFilterA(joinSkipLevels, o.toString());
 			}

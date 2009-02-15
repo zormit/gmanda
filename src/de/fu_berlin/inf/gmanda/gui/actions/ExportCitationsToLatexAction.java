@@ -64,11 +64,12 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 		putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_E));
 	}
-	
-	public String hyphenate(String s){
-		
+
+	public String hyphenate(String s) {
+
 		s = s.replace(".", "\\dothyp{}");
-		
+		s = s.replace("@", "\\atnohyp{}");
+
 		return s;
 	}
 
@@ -91,7 +92,7 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 			}
 
 			Pattern p = Pattern
-				.compile("\\\\dref\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}\\s*\\{((?:\\w|\\s|\\/|[@\\-.?!'\\(\\)])+?)\\}");
+					.compile("\\\\dref\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}\\s*\\{((?:\\w|\\s|\\/|[@\\-.?!'\\(\\)])+?)\\}");
 
 			Matcher m = p.matcher(input);
 
@@ -105,7 +106,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		return result;
 	}
 
-	public Section buildSection(Project p, Section section, Collection<String> codes) {
+	public Section buildSection(Project p, Section section,
+			Collection<String> codes) {
 
 		section.initializeDefinition(p);
 
@@ -147,7 +149,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 				if (openDir == null)
 					return;
 
-				IProgress progress = commonService.getProgressBar("Exporting LaTeX-Citations", 5);
+				IProgress progress = commonService.getProgressBar(
+						"Exporting LaTeX-Citations", 5);
 
 				try {
 					List<String> citations = getCitationList(openDir);
@@ -161,7 +164,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 					categories.add(new Section("Concepts", "concept"));
 					categories.add(new Section("Episode Outcomes", "outcome"));
 
-					Section uncategorized = new Section("Uncategorized Codes", null);
+					Section uncategorized = new Section("Uncategorized Codes",
+							null);
 					uncategorized.definition = ""; // Set to non-null so that it
 					// is not queried for a
 					// definition
@@ -172,9 +176,12 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 						for (Section section : categories) {
 
-							Code c = CodedStringFactory.parseOne(section.code + ".*");
+							Code c = CodedStringFactory.parseOne(section.code
+									+ ".*");
 
-							if (c.matches(CodedStringFactory.parseOne(citation))) {
+							if (c
+									.matches(CodedStringFactory
+											.parseOne(citation))) {
 								citationsByCategory.put(section, citation);
 								continue nextCitation;
 							}
@@ -184,10 +191,11 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 					List<Section> sections = new ArrayList<Section>();
 
-					for (Entry<Section, Collection<String>> entry : citationsByCategory.asMap()
-						.entrySet()) {
+					for (Entry<Section, Collection<String>> entry : citationsByCategory
+							.asMap().entrySet()) {
 
-						sections.add(buildSection(p, entry.getKey(), entry.getValue()));
+						sections.add(buildSection(p, entry.getKey(), entry
+								.getValue()));
 					}
 
 					uncategorized.definition = null; // Set to null again, so no
@@ -200,7 +208,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 					String glossary = runVelocity(sections);
 
 					try {
-						FileUtils.writeStringToFile(new File(openDir, "glossary.tex"), glossary);
+						FileUtils.writeStringToFile(new File(openDir,
+								"glossary.tex"), glossary);
 					} catch (IOException e) {
 						throw new ReportToUserException(e);
 					}
@@ -227,8 +236,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		public String getCode() {
 			return code;
 		}
-		
-		public String getCodeHyp(){
+
+		public String getCodeHyp() {
 			return hyphenate(code);
 		}
 
@@ -250,28 +259,46 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 			if (definition != null)
 				return;
 
-			for (Entry<PrimaryDocument, Code> defs : p.getCodeModel().getValues(code, "def")
-				.entries()) {
+			for (Entry<PrimaryDocument, Code> defs : p.getCodeModel()
+					.getValues(code, "def").entries()) {
 
-				String value = defs.getValue().getValue();
+				Code defCode = defs.getValue();
 
-				if (value != null) {
-					value = StringUtils.strip(value, " \"");
+				// Check if there is an explicit title given in the definition
+				Collection<? extends Code> titles = defCode
+						.getProperties("title");
+				if (titles.size() > 0) {
+					String newTitle = titles.iterator().next().getValue();
+					newTitle = StringUtils.strip(newTitle, " \"");
+					if (newTitle.length() > 0){
+						// If so, we overwrite the given title
+						title = newTitle;	
+					}
+				}	
 
-					value = value.split("----", 2)[0].trim();
+				for (Code def : defCode.getProperties("desc")) {
 
-					if (value.length() > 0) {
-						if (definition == null)
-							definition = value;
-						else
-							definition += "\n\n" + value;
+					String value = def.getValue();
+
+					if (value != null) {
+						value = StringUtils.strip(value, " \"");
+
+						value = value.split("----", 2)[0].trim();
+
+						if (value.length() > 0) {
+							if (definition == null)
+								definition = value;
+							else
+								definition += "\n\n" + value;
+						}
 					}
 				}
 			}
 
 			if (definition == null) {
-				System.out.println("WARN: No definition found for " + code);
-				definition = "<No Definition>";
+				// @SECURITY should sanitize the code
+				definition = "\\PackageWarning{GmanDA}{No Definition found for "
+						+ code + "}" + "No Definition found";
 			}
 		}
 
@@ -305,8 +332,9 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 				p.setProperty("velocimacro.library.autoreload", "true");
 			} else {
 				p.setProperty("resource.loader", "class, file");
-				p.setProperty("class.resource.loader.class",
-					"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+				p
+						.setProperty("class.resource.loader.class",
+								"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 			}
 
 			try {
@@ -314,9 +342,14 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 				context = new VelocityContext();
 
-				FileUtils.writeStringToFile(new File("resources/templates/glossaryWhitespace.vm"), new VelocityWhitespaceRepair().fixWhitespace(FileUtils.readFileToString(new File("resources/templates/glossary.vm"))));
-				
-				latexTemplate = Velocity.getTemplate("resources/templates/glossaryWhitespace.vm");
+				FileUtils.writeStringToFile(new File(
+						"resources/templates/glossaryWhitespace.vm"),
+						new VelocityWhitespaceRepair().fixWhitespace(FileUtils
+								.readFileToString(new File(
+										"resources/templates/glossary.vm"))));
+
+				latexTemplate = Velocity
+						.getTemplate("resources/templates/glossaryWhitespace.vm");
 
 			} catch (Exception e) {
 				throw new DoNotShowToUserException(e);

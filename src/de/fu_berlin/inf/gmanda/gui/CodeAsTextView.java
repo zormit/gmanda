@@ -251,7 +251,7 @@ public class CodeAsTextView extends JScrollPane {
 
 			sb.append("<li>");
 			if (pd.getFilename() != null) {
-				sb.append(ToHtmlHelper.toA(pd));
+				sb.append(ToHtmlHelper.toA(pd,null));
 			} else {
 				sb.append("Document with no file");
 			}
@@ -270,7 +270,7 @@ public class CodeAsTextView extends JScrollPane {
 			sb.append("<li> Occurances with no values:<br>");
 			for (PrimaryDocument pd : noValueList) {
 				if (pd.getFilename() != null) {
-					sb.append(toA(pd)).append("<br>");
+					sb.append(toA(pd, null)).append("<br>");
 				}
 			}
 			sb.append("</li>");
@@ -295,7 +295,7 @@ public class CodeAsTextView extends JScrollPane {
 					definitionFound = true;
 					sb.append("<li>");
 					sb.append(code2html(sub, true, false));
-					sb.append(" (<i>Definition from ").append(pd2a(pd)).append("</i>)");
+					sb.append(" (<i>Definition from ").append(pd2a(pd, tag)).append("</i>)");
 					sb.append("</li>");
 				}
 			}
@@ -354,7 +354,7 @@ public class CodeAsTextView extends JScrollPane {
 		return surround("<ul>", sb.toString(), "</ul>");
 	}
 
-	public static String property2html(String tag, Slice<PrimaryDocument> s) {
+	public static String property2html(final String tag, Slice<PrimaryDocument> s) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -375,7 +375,7 @@ public class CodeAsTextView extends JScrollPane {
 				CStringUtils.join(docs, "<br>",
 					new StringConverter<Entry<PrimaryDocument, Collection<Code>>>() {
 						public String toString(Entry<PrimaryDocument, Collection<Code>> docs) {
-							return pd2a(docs.getKey());
+							return pd2a(docs.getKey(), tag);
 						}
 					}), "</li>"));
 		}
@@ -390,7 +390,7 @@ public class CodeAsTextView extends JScrollPane {
 							return null;
 					}
 
-					return pd2a(docs.getKey());
+					return pd2a(docs.getKey(), tag);
 				}
 			});
 
@@ -418,7 +418,7 @@ public class CodeAsTextView extends JScrollPane {
 		}
 
 		if (pd.getFilename() != null) {
-			sb.append(toA(pd));
+			sb.append(toA(pd, null));
 			if (dateBased && date != null)
 				sb.append(" (").append(StringUtils.strip(date.getValue(), "\"'\n \r\f\t")).append(")");
 		}

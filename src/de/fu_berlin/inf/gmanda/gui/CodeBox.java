@@ -22,6 +22,7 @@ import org.joda.time.DateTime;
 import de.fu_berlin.inf.gmanda.gui.actions.AutoIndentAction;
 import de.fu_berlin.inf.gmanda.gui.misc.CodeCompleter;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaInfoBox;
+import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
 import de.fu_berlin.inf.gmanda.qda.CodeModel;
@@ -53,7 +54,9 @@ public class CodeBox extends JTextArea {
 
 	DocumentListener completerListener;
 
-	public CodeBox(CodeBoxView codeBoxView, final ProjectProxy project, SelectionProxy selection, GmandaInfoBox gmandaInfoBox) {
+	public CodeBox(CodeBoxView codeBoxView, final ProjectProxy project,
+			SelectionProxy selection, GmandaInfoBox gmandaInfoBox,
+			final CodeDetailProxy codeDetailProxy) {
 		super();
 		this.codeBoxView = codeBoxView;
 
@@ -158,8 +161,18 @@ public class CodeBox extends JTextArea {
 					receiveChanges = true;
 					currentlyShowing.getCodeChangeNotifier().addAndNotify(listener,
 						currentlyShowing);
+			
+					Integer i = null;
 					
-					Integer i = caretPositions.get(currentlyShowing);
+					String codeDetail = codeDetailProxy.getVariable();
+					if (codeDetail != null){
+						int index = getText().indexOf(codeDetail);
+						
+						if (index != -1)
+							i = index;
+					} else {
+						i = caretPositions.get(currentlyShowing);
+					}
 					
 					if (i != null){
 						setCaretPosition(Math.max(0, Math.min(i, getText().length())));
@@ -210,5 +223,10 @@ public class CodeBox extends JTextArea {
 		insertAtCaret("session : {\n  start : \""
 			+ new DateTime().toString("YYYY-MM-dd'T'HH:mm") + "\", end : \"\", revision : \"\",\n"
 			+ "  memo : \"", "\"\n},");
+	}
+
+	public void jumpTo(String query) {
+
+		
 	}
 }

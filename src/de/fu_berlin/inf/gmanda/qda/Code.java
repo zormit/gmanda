@@ -90,6 +90,8 @@ public interface Code {
 	
 	/**
 	 * Returns a collection of all those codes from getProperties that have the given name (tag).
+	 * 
+	 * Returns an empty collection if the property could not be found. 
 	 */
 	public Collection<? extends Code> getProperties(String propName);
 }

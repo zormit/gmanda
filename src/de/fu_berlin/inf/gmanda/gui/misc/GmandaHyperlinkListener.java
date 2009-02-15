@@ -19,6 +19,8 @@
 package de.fu_berlin.inf.gmanda.gui.misc;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 
 import javax.swing.event.HyperlinkEvent;
@@ -26,6 +28,7 @@ import javax.swing.event.HyperlinkListener;
 
 import org.picocontainer.annotations.Inject;
 
+import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
@@ -42,18 +45,47 @@ public class GmandaHyperlinkListener implements HyperlinkListener {
 	@Inject
 	FilterTextProxy filter;
 	
+	@Inject
+	CodeDetailProxy codeDetailProxy;
+	
+	/* (non-Javadoc)
+	 * @see javax.swing.event.HyperlinkListener#hyperlinkUpdate(javax.swing.event.HyperlinkEvent)
+	 */
 	public void hyperlinkUpdate(HyperlinkEvent arg0) {
 		if (arg0.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
 			String filename = arg0.getDescription();
 			if (filename.startsWith("gmane://")) {
 
-				// TODO: Add possibility to hyperlink to a certain code in a primary document.
-				
-				PrimaryDocument pd = project.getVariable().getCodeModel().getByFilename(
-					filename);
+				URI fileurl;
+				String query = null;
+				try {
+					fileurl = new URI(filename);
+					filename = fileurl.getAuthority();
+					String rawQuery = fileurl.getRawQuery();
+					if (rawQuery != null)
+						query = URLDecoder.decode(rawQuery, "UTF-8"); 
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				} catch (UnsupportedEncodingException e) {
+				}
 
-				if (pd != null)
+				PrimaryDocument pd = project.getVariable().getCodeModel().getByFilename(
+					"gmane://" + filename);
+
+				if (pd != null){
 					selection.setVariable(pd);
+				
+					// Hyperlink to a certain code in a primary document.
+					if (query != null){
+						if (query.startsWith("jumpTo=")){
+							query = query.substring("jumpTo=".length());
+							
+							if (!codeDetailProxy.getVariable().equals(query)){
+								codeDetailProxy.setVariable(query);
+							}
+						}
+					}
+				}
 			}
 			if (filename.startsWith("gmaneFilter://")) {
 				try {

@@ -1,6 +1,7 @@
 package de.fu_berlin.inf.gmanda.qda;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class ToHtmlHelper {
 
 			for (Map.Entry<PrimaryDocument, Code> def : defs.entries()){
 				sb.append(code2html(def.getValue(), true, false));
-				sb.append(" (<i>Definition from ").append(pd2a(def.getKey())).append("</i>)");
+				sb.append(" (<i>Definition from ").append(pd2a(def.getKey(), code)).append("</i>)");
 				sb.append("</p>");
 			}
 			return sb.toString();
@@ -38,7 +39,7 @@ public class ToHtmlHelper {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(code2html(sub, expandSubCodes, false));
-		sb.append(" (<i>Definition from ").append(pd2a(pd)).append("</i>)");
+		sb.append(" (<i>Definition from ").append(pd2a(pd, null)).append("</i>)");
 
 		return sb.toString();
 
@@ -91,9 +92,9 @@ public class ToHtmlHelper {
 		}
 	}
 	
-	public static String pd2a(PrimaryDocument pd) {
+	public static String pd2a(PrimaryDocument pd, String jumpTo) {
 		if (pd.getFilename() != null) {
-			return toA(pd);
+			return toA(pd, jumpTo);
 		} else {
 			return "Document with no file";
 		}
@@ -103,13 +104,21 @@ public class ToHtmlHelper {
 		return s.replaceAll("(gmane(://|\\.)|devel\\.|comp\\.)", "");
 	}
 
-	public static String toA(PrimaryDocument pd) {
+	public static String toA(PrimaryDocument pd, String jumpTo) {
 		String s = pd.getFilename();
 
 		if (s == null || s.trim().length() == 0)
 			return pd.getName();
+		
+		String query = "";
+		if (jumpTo != null && jumpTo.trim().length() > 0){
+			try {
+				query = "?jumpTo=" + URLEncoder.encode(jumpTo, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+			}
+		}
 
-		return String.format("<a href='%s'>%s</a>", s, toShortId(s));
+		return String.format("<a href='%s%s'>%s</a>", s, query, toShortId(s));
 	}
 
 	public static String toFilterA(Code c){
