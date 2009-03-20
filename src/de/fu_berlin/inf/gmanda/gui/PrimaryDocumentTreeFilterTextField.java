@@ -14,6 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.commons.lang.StringUtils;
+
 import de.fu_berlin.inf.gmanda.gui.misc.CodeCompleter;
 import de.fu_berlin.inf.gmanda.proxies.Filter;
 import de.fu_berlin.inf.gmanda.proxies.FilterKindProxy;
@@ -199,7 +201,7 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 					}
 					
 					if (newValue.filterText != null){
-						filterDescriptorLabel += String.format("Filtering for term '%s' (%d results", newValue.filterText, newValue.filterResult.size());
+						filterDescriptorLabel += String.format("Filtering for term '%s' (%d results", StringUtils.abbreviate(newValue.filterText, 40), newValue.filterResult.size());
 						if (!newValue.fresh){
 							filterDescriptorLabel += " from cache)";
 						} else {

@@ -1,4 +1,8 @@
 
+2009-03-20
+
+   * [FIX] Prevent PrimaryDocumentTreeView to become too large because of Label showing filter.
+
 2009-01-31
 
    * [FEATURE]  LaTeX Export now uses the title property of a definition to 
