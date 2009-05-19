@@ -9,7 +9,8 @@ import javax.swing.JPanel;
 import de.fu_berlin.inf.gmanda.gui.docking.DockableView;
 
 /**
- * The coding view contains the CodeBox where the user can enter Tags about the current PrimaryDocument
+ * The coding view contains the CodeBox where the user can enter Tags about the
+ * current PrimaryDocument
  */
 public class CodingView extends JPanel implements DockableView {
 
@@ -35,8 +36,8 @@ public class CodingView extends JPanel implements DockableView {
 	}
 
 	public String getTooltip() {
-		return "<html>" + "The Coding View gives direct access<br>" +
-				"to the codes associated with an document</html>";
+		return "<html>" + "The Coding View gives direct access<br>"
+				+ "to the codes associated with an document</html>";
 	}
 
 }

@@ -1,4 +1,10 @@
 
+2009-05-19
+
+   * [FEATURE] Export a social network to a Graphviz-Dot file (right click on a 
+     document in the primary document tree -> Print Social Network to Dot-File...)
+   * [FEATURE] Support meta data in Visualization partitioning (e.g. meta:from) to partition by author
+
 2009-03-20
 
    * [FIX] Prevent PrimaryDocumentTreeView to become too large because of Label showing filter.

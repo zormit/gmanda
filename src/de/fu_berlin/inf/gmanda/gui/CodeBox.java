@@ -3,12 +3,8 @@
  */
 package de.fu_berlin.inf.gmanda.gui;
 
-import java.awt.AWTKeyStroke;
-import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -34,14 +30,12 @@ import de.fu_berlin.inf.gmanda.util.gui.AutoCompleter;
 
 public class CodeBox extends JTextArea {
 
-	CodeBoxView codeBoxView;
-
 	Codeable currentlyShowing;
 
 	boolean sendChanges = false;
 
 	boolean receiveChanges = false;
-	
+
 	HashMap<Codeable, Integer> caretPositions = new HashMap<Codeable, Integer>();
 
 	public AutoCompleter<String> completer;
@@ -54,30 +48,19 @@ public class CodeBox extends JTextArea {
 
 	DocumentListener completerListener;
 
-	public CodeBox(CodeBoxView codeBoxView, final ProjectProxy project,
-			SelectionProxy selection, GmandaInfoBox gmandaInfoBox,
-			final CodeDetailProxy codeDetailProxy) {
+	public CodeBox(final ProjectProxy project, SelectionProxy selection,
+			GmandaInfoBox gmandaInfoBox, final CodeDetailProxy codeDetailProxy) {
 		super();
-		this.codeBoxView = codeBoxView;
-
-		codeBoxView.setViewportView(this);
 
 		// setBorder(BorderFactory.createEmptyBorder());
 		setWrapStyleWord(true);
 		setLineWrap(true);
 
-		Set<AWTKeyStroke> newForwardKeys = new HashSet<AWTKeyStroke>();
-		newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
-		newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
-
-		this.codeBoxView.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
-			newForwardKeys);
-		this.codeBoxView.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
-
-		Action action = new AutoIndentAction(":{", 2); 
-		getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), action); 
+		Action action = new AutoIndentAction(":{", 2);
+		getInputMap(JComponent.WHEN_FOCUSED).put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), action);
 		getActionMap().put(action, action);
-		
+
 		project.add(new VariableProxyListener<Project>() {
 			public void setVariable(Project newValue) {
 				if (newValue == null) {
@@ -132,20 +115,22 @@ public class CodeBox extends JTextArea {
 
 					if (!receiveChanges)
 						return;
-					
+
 					int i = getCaretPosition();
 
 					sendChanges = false;
 					setText(currentlyShowing.getCodeAsString());
-					
-					setCaretPosition(Math.max(0, Math.min(i, getText().length())));
-					
-//					SwingUtilities.invokeLater(new Runnable() {
-//						public void run() {
-//							CodeBox.this.codeBoxView.getVerticalScrollBar().setValue(0);
-//						}
-//					});
-					
+
+					setCaretPosition(Math.max(0, Math
+							.min(i, getText().length())));
+
+					// SwingUtilities.invokeLater(new Runnable() {
+					// public void run() {
+					//CodeBox.this.codeBoxView.getVerticalScrollBar().setValue(0
+					// );
+					// }
+					// });
+
 					sendChanges = true;
 				}
 			};
@@ -159,36 +144,42 @@ public class CodeBox extends JTextArea {
 				if (newSelected instanceof Codeable) {
 					currentlyShowing = (Codeable) newSelected;
 					receiveChanges = true;
-					currentlyShowing.getCodeChangeNotifier().addAndNotify(listener,
-						currentlyShowing);
-			
-					Integer i = null;
-					
-					String codeDetail = codeDetailProxy.getVariable();
-					if (codeDetail != null){
-						int index = getText().indexOf(codeDetail);
-						
-						if (index != -1)
-							i = index;
-					} else {
-						i = caretPositions.get(currentlyShowing);
+					currentlyShowing.getCodeChangeNotifier().addAndNotify(
+							listener, currentlyShowing);
+
+					int i = -1;
+
+					if (i == -1) {
+						Integer oldCaret = caretPositions.get(currentlyShowing);
+						if (oldCaret != null) {
+							i = oldCaret;
+						}
+					}
+
+					if (i == -1) {
+						String codeDetail = codeDetailProxy.getVariable();
+						if (codeDetail != null
+								&& codeDetail.trim().length() > 0) {
+							i = getText().indexOf(codeDetail);
+						}
 					}
 					
-					if (i != null){
-						setCaretPosition(Math.max(0, Math.min(i, getText().length())));
+					if (i != -1) {
+						setCaretPosition(Math.max(0, Math.min(i, getText()
+								.length())));
 					}
-					
-					CodeBox.this.codeBoxView.setEnabled(true);
+
+					setEnabled(true);
 				} else {
 					currentlyShowing = null;
 					sendChanges = false;
-					CodeBox.this.codeBoxView.setEnabled(false);
+					setEnabled(false);
 					setText("");
 				}
 			}
 		});
 	}
-	
+
 	public void insertAtCaret(String beforeCaretInsert, String afterCaretInsert) {
 		if (currentlyShowing == null)
 			return;
@@ -199,20 +190,22 @@ public class CodeBox extends JTextArea {
 
 		String before = text.substring(0, caret);
 		String after = text.substring(caret);
-		
-		int lineStart = before.lastIndexOf('\n') + 1; 
-		String whiteSpace = de.fu_berlin.inf.gmanda.util.CStringUtils.getLeadingWhiteSpace(before.substring(lineStart, caret));
+
+		int lineStart = before.lastIndexOf('\n') + 1;
+		String whiteSpace = de.fu_berlin.inf.gmanda.util.CStringUtils
+				.getLeadingWhiteSpace(before.substring(lineStart, caret));
 
 		beforeCaretInsert = beforeCaretInsert.replace("\n", "\n" + whiteSpace);
 		afterCaretInsert = afterCaretInsert.replace("\n", "\n" + whiteSpace);
-		
+
 		setText(before + beforeCaretInsert + afterCaretInsert + after);
 		setCaretPosition(before.length() + beforeCaretInsert.length());
 	}
 
 	public void insertSubCodeTemplate() {
-		insertAtCaret(": {\n  date: \"" + new DateTime().toString("YYYY-MM-dd'T'HH:mm") + "\",\n  desc: \"",
-			"\"\n},");
+		insertAtCaret(": {\n  date: \""
+				+ new DateTime().toString("YYYY-MM-dd'T'HH:mm")
+				+ "\",\n  desc: \"", "\"\n},");
 	}
 
 	public void insertDateAction() {
@@ -221,12 +214,12 @@ public class CodeBox extends JTextArea {
 
 	public void insertSessionLogTemplate() {
 		insertAtCaret("session : {\n  start : \""
-			+ new DateTime().toString("YYYY-MM-dd'T'HH:mm") + "\", end : \"\", revision : \"\",\n"
-			+ "  memo : \"", "\"\n},");
+				+ new DateTime().toString("YYYY-MM-dd'T'HH:mm")
+				+ "\", end : \"\", revision : \"\",\n" + "  memo : \"",
+				"\"\n},");
 	}
 
 	public void jumpTo(String query) {
 
-		
 	}
 }

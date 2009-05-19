@@ -3,6 +3,11 @@ Important:
 
   * Inherited Codes from Aggregation codes, or a better mode to put codes to codes themselves.
 
+Incorporate a email address clean-up modules like the one described in 
+  Bird, C., Gourley, A., Devanbu, P., Swaminathan, A., and Gertz, M. Mining Email Social Networks, ICSE 2006 Workshop on Mining Software Repositories (MSR 2006)
+  and made available as: 
+  http://code.google.com/p/picktools/source/browse/#svn/trunk/cluster%3Fstate%3Dclosed
+
 Medium:
 
   * Consistency Check

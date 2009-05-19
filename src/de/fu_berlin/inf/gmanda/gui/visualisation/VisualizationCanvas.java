@@ -16,6 +16,8 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.picocontainer.annotations.Inject;
 
+import com.google.common.base.Function;
+
 import de.fu_berlin.inf.gmanda.gui.search.SearchService;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
@@ -41,7 +43,7 @@ public class VisualizationCanvas extends PScrollPane {
 
 	@Inject
 	SearchService searchService;
-	
+
 	ProjectProxy project;
 
 	ColorMapper mapper;
@@ -59,10 +61,11 @@ public class VisualizationCanvas extends PScrollPane {
 	SelectionProxy selection;
 
 	public VisualizationCanvas(ProjectProxy project, ColorMapper mapper,
-		TrackCompareManager trackCompareManager, final SelectionProxy selection) {
+			TrackCompareManager trackCompareManager,
+			final SelectionProxy selection) {
 
 		getVerticalScrollBar().setUnitIncrement(10);
-		
+
 		setBorder(null);
 
 		this.project = project;
@@ -82,14 +85,16 @@ public class VisualizationCanvas extends PScrollPane {
 			public void keyPressed(PInputEvent aEvent) {
 				if (aEvent.getKeyCode() == KeyEvent.VK_UP) {
 					PAffineTransform a = cam.getViewTransform();
-					a = new PAffineTransform(a.getScaleX() * 1.1, 0.0, 0.0, a.getScaleY(), a
-						.getTranslateX() * 1.1, a.getTranslateY());
+					a = new PAffineTransform(a.getScaleX() * 1.1, 0.0, 0.0, a
+							.getScaleY(), a.getTranslateX() * 1.1, a
+							.getTranslateY());
 					cam.animateViewToTransform(a, 0);
 				}
 				if (aEvent.getKeyCode() == KeyEvent.VK_DOWN) {
 					PAffineTransform a = cam.getViewTransform();
-					a = new PAffineTransform(a.getScaleX() * 0.9, 0.0, 0.0, a.getScaleY(), a
-						.getTranslateX() * 0.9, a.getTranslateY());
+					a = new PAffineTransform(a.getScaleX() * 0.9, 0.0, 0.0, a
+							.getScaleY(), a.getTranslateX() * 0.9, a
+							.getTranslateY());
 					cam.animateViewToTransform(a, 0);
 				}
 				if (aEvent.getKeyCode() == KeyEvent.VK_LEFT) {
@@ -132,18 +137,20 @@ public class VisualizationCanvas extends PScrollPane {
 				PNode p = event.getPickedNode();
 				if ((p instanceof PPath && p.getParent() instanceof PrimaryDocumentDot)) {
 					event.setHandled(true);
-					selection.setVariable(((PrimaryDocumentDot) p.getParent()).pd);
+					selection
+							.setVariable(((PrimaryDocumentDot) p.getParent()).pd);
 				}
 			}
 		});
-		
-		canvas.getCamera().addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener(){
 
-			public void propertyChange(PropertyChangeEvent evt) {
-				updateHeaders();
-			}
-		});
-		
+		canvas.getCamera().addPropertyChangeListener(
+				PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
+
+					public void propertyChange(PropertyChangeEvent evt) {
+						updateHeaders();
+					}
+				});
+
 		selectionListener = new VariableProxyListener<Object>() {
 
 			PrimaryDocument oldValue = null;
@@ -153,17 +160,17 @@ public class VisualizationCanvas extends PScrollPane {
 
 					if (oldValue != null) {
 						List<PrimaryDocumentDot> dots = allDots.get(oldValue);
-						if (dots != null){
+						if (dots != null) {
 							for (PrimaryDocumentDot dot : dots)
 								dot.setSelected(false);
 						}
 					}
-					
+
 					oldValue = (PrimaryDocument) newValue;
-				
+
 					if (newValue != null) {
 						List<PrimaryDocumentDot> dots = allDots.get(newValue);
-						if (dots != null){
+						if (dots != null) {
 							for (PrimaryDocumentDot dot : dots)
 								dot.setSelected(true);
 						}
@@ -173,13 +180,13 @@ public class VisualizationCanvas extends PScrollPane {
 		};
 
 	}
-	
-	public PCanvas getCanvas(){
+
+	public PCanvas getCanvas() {
 		return this.canvas;
 	}
-	
+
 	VariableProxyListener<Object> selectionListener;
-	
+
 	double aspectRatio;
 
 	public void resetView() {
@@ -191,35 +198,35 @@ public class VisualizationCanvas extends PScrollPane {
 		PBounds vBounds = cam.getViewBounds();
 		PAffineTransform vTrans = cam.getViewTransform();
 
-		double scaleX = (vBounds.getWidth() * vTrans.getScaleX() - pBounds.getWidth() - 20.0)
-			/ rBounds.getWidth();
+		double scaleX = (vBounds.getWidth() * vTrans.getScaleX()
+				- pBounds.getWidth() - 20.0)
+				/ rBounds.getWidth();
 
 		if (scaleX <= 0 || scaleX == Double.POSITIVE_INFINITY)
 			scaleX = 1.0;
 
 		cam.animateViewToTransform(new PAffineTransform(scaleX, 0.0, 0.0, 1.0,
-			pBounds.getWidth() + 10.0, tBounds.getHeight() + 10.0), 1000);
+				pBounds.getWidth() + 10.0, tBounds.getHeight() + 10.0), 1000);
 	}
 
 	public void updateHeaders() {
 		AffineTransform a = cam.getViewTransform();
 
-		timeline.setTransform(new AffineTransform(a.getScaleX(), 0.0, 0.0, 1.0, a.getTranslateX(),
-			timeline.getY()));
-		partition.setTransform(new AffineTransform(1.0, 0.0, 0.0, a.getScaleY(), partition.getX(),
-			a.getTranslateY()));
+		timeline.setTransform(new AffineTransform(a.getScaleX(), 0.0, 0.0, 1.0,
+				a.getTranslateX(), timeline.getY()));
+		partition.setTransform(new AffineTransform(1.0, 0.0, 0.0,
+				a.getScaleY(), partition.getX(), a.getTranslateY()));
 	}
 
 	static final float trackDistance = 10.0f;
 
-	
-
 	public HashMap<PrimaryDocument, List<PrimaryDocumentDot>> allDots;
 
-	public void update(String filterCode, String partitionCode, String rank, String colorField) {
+	public void update(String filterCode, String partitionCode, String rank,
+			String colorField) {
 
 		Project project = this.project.getVariable();
-		
+
 		CodedString colors = CodedStringFactory.parse(colorField);
 
 		root.removeAllChildren();
@@ -227,27 +234,34 @@ public class VisualizationCanvas extends PScrollPane {
 		partition.removeAllChildren();
 
 		allDots = new HashMap<PrimaryDocument, List<PrimaryDocumentDot>>();
-		
-		List<PrimaryDocument> allEvents = searchService.filter(filterCode, null, project);
-		
-		if (allEvents.size() == 0){
-			
-			PNode noMatchLabel = new PFixedText("No matching results", true, true, false);
-			PPath rect = PPath.createRectangle(0.0f, 0.0f, (float)(noMatchLabel.getWidth() * 5.0), (float) noMatchLabel.getHeight() * 2);
+
+		List<PrimaryDocument> allEvents = searchService.filter(filterCode,
+				null, project);
+
+		if (allEvents.size() == 0) {
+
+			PNode noMatchLabel = new PFixedText("No matching results", true,
+					true, false);
+			PPath rect = PPath.createRectangle(0.0f, 0.0f,
+					(float) (noMatchLabel.getWidth() * 5.0),
+					(float) noMatchLabel.getHeight() * 2);
 			rect.setPaint(null);
 			rect.setStroke(null);
 			noMatchLabel.setOffset(rect.getWidth() / 2, 0.0);
 			root.addChild(rect);
 			root.addChild(noMatchLabel);
-			
+
 		} else {
-			List<Pair<String, List<PrimaryDocument>>> tracks = project.getCodeModel().partition(allEvents, partitionCode);
-	
+
+			List<Pair<String, List<PrimaryDocument>>> tracks = partition(
+					partitionCode, project, allEvents);
+
 			if (!rank.trim().equals(""))
-				Collections.sort(tracks, trackCompareManager.getComparator(rank));
-	
+				Collections.sort(tracks, trackCompareManager
+						.getComparator(rank));
+
 			buildVisualization(tracks, colors);
-			
+
 			// Install selection listener to highlight the currently selected PD
 			selection.remove(selectionListener);
 			selection.addAndNotify(selectionListener);
@@ -260,7 +274,36 @@ public class VisualizationCanvas extends PScrollPane {
 		resetView();
 	}
 
-	public void buildVisualization(List<Pair<String, List<PrimaryDocument>>> tracks, CodedString colors) {
+	private List<Pair<String, List<PrimaryDocument>>> partition(
+			String partitionCode, Project project,
+			List<PrimaryDocument> allEvents) {
+
+		if (partitionCode.trim().startsWith("meta:")) {
+			final String newPartitionCode = partitionCode.trim().substring(
+					"meta:".length());
+
+			return Pair.partition(allEvents,
+					new Function<PrimaryDocument, String>() {
+						@Override
+						public String apply(PrimaryDocument arg0) {
+							String metaData = arg0
+									.getMetaData(newPartitionCode);
+							if (metaData == null
+									|| metaData.trim().length() == 0) {
+								return "Unknown";
+							} else {
+								return metaData;
+							}
+						}
+
+					});
+		} else {
+			return project.getCodeModel().partition(allEvents, partitionCode);
+		}
+	}
+
+	public void buildVisualization(
+			List<Pair<String, List<PrimaryDocument>>> tracks, CodedString colors) {
 
 		double start = Long.MAX_VALUE;
 		double end = Long.MIN_VALUE;
@@ -274,54 +317,60 @@ public class VisualizationCanvas extends PScrollPane {
 				end = Math.max(end, d.getMillis());
 			}
 		}
-		if (start == Long.MAX_VALUE || end == Long.MIN_VALUE){
+		if (start == Long.MAX_VALUE || end == Long.MIN_VALUE) {
 			start = new DateTime().getMillis();
 			end = start + 60000;
 		}
-		
+
 		start = start / 1000 / 60;
 		end = end / 1000 / 60;
 
 		int trackId = 0;
 
-		DateTime currentDate = new DateTime((long)(start * 1000 * 60)).monthOfYear().roundFloorCopy();
+		DateTime currentDate = new DateTime((long) (start * 1000 * 60))
+				.monthOfYear().roundFloorCopy();
 		DateTime startDate = currentDate;
 		start = startDate.getMillis() / 1000 / 60;
-		
+
 		PNode dayGrids = new PNode();
-		while (currentDate.getMillis() / 1000 / 60 < end){
-			
-			Interval month = new Interval(currentDate, currentDate.plus(Period.months(1)));
-			
+		while (currentDate.getMillis() / 1000 / 60 < end) {
+
+			Interval month = new Interval(currentDate, currentDate.plus(Period
+					.months(1)));
+
 			int days = Days.daysIn(month).getDays();
-			
-			MonthNode monthNode = new MonthNode(days, currentDate.toString("MMM"), month.getStart().getDayOfWeek());
+
+			MonthNode monthNode = new MonthNode(days, currentDate
+					.toString("MMM"), month.getStart().getDayOfWeek());
 			monthNode.offset(currentDate.getMillis() / 1000 / 60 - start, 0.0);
-			
-			SemanticGrid dayGrid = new SemanticGrid(0.0f, 24.0f * 60, days, 0.0f, trackDistance * 2 * tracks.size(), false, 0.05f); 
+
+			SemanticGrid dayGrid = new SemanticGrid(0.0f, 24.0f * 60, days,
+					0.0f, trackDistance * 2 * tracks.size(), false, 0.05f);
 			dayGrid.offset(currentDate.getMillis() / 1000 / 60 - start, 0.0);
 			dayGrids.addChild(dayGrid);
-			
+
 			timeline.addChild(monthNode);
-						
+
 			currentDate = currentDate.plus(Period.months(1));
 		}
 		SemanticNode grid = new SemanticNode();
-		float startMillis = (float)(startDate.getMillis() / 1000 / 60 - start);
-		float width = (float)(currentDate.getMillis() / 1000 / 60 - start) - startMillis;
-		PPath all = PPath.createRectangle(startMillis, 0.0f, width, trackDistance * 2 * tracks.size());
+		float startMillis = (float) (startDate.getMillis() / 1000 / 60 - start);
+		float width = (float) (currentDate.getMillis() / 1000 / 60 - start)
+				- startMillis;
+		PPath all = PPath.createRectangle(startMillis, 0.0f, width,
+				trackDistance * 2 * tracks.size());
 		all.setPaint(null);
 		grid.setLargest(all);
 		grid.add(0.0005, dayGrids);
 		root.addChild(grid);
-		
+
 		List<PNode> allTextNodes = new ArrayList<PNode>(tracks.size());
-		
+
 		double partitionOffset = 0.0;
 		double currentNoTimeOffset = 0.0;
-		
+
 		HashMap<PrimaryDocument, Double> noTimeOffsets = new HashMap<PrimaryDocument, Double>();
-		
+
 		for (Pair<String, List<PrimaryDocument>> p : tracks) {
 
 			PNode track = new PNode();
@@ -330,24 +379,27 @@ public class VisualizationCanvas extends PScrollPane {
 
 			PText text = new PFixedText(p.p, false, false, true);
 			partitionOffset = Math.max(partitionOffset, text.getWidth());
-			text.offset(0.0, trackId++ * trackDistance - 0.5 * text.getHeight());
+			text
+					.offset(0.0, trackId++ * trackDistance - 0.5
+							* text.getHeight());
 			partition.addChild(text);
 			allTextNodes.add(text);
 
 			for (PrimaryDocument pd : p.v) {
 
-				PrimaryDocumentDot dot = new PrimaryDocumentDot(pd, colors, mapper);
+				PrimaryDocumentDot dot = new PrimaryDocumentDot(pd, colors,
+						mapper);
 
 				DateTime date = dot.getDate();
-				if (date != null){
+				if (date != null) {
 					dot.offset(date.getMillis() / 1000 / 60 - start, 10.0f);
 				} else {
-					if (noTimeOffsets.containsKey(pd)){
+					if (noTimeOffsets.containsKey(pd)) {
 						dot.offset(noTimeOffsets.get(pd), 10.0f);
 					} else {
 						dot.offset(currentNoTimeOffset, 10.0f);
 						noTimeOffsets.put(pd, currentNoTimeOffset);
-						
+
 						currentNoTimeOffset += 6.0 * 60.0;
 					}
 				}
@@ -356,13 +408,34 @@ public class VisualizationCanvas extends PScrollPane {
 				HashMapUtils.putList(allDots, pd, dot);
 			}
 		}
-		
+//
+//		for (Map.Entry<PrimaryDocument, List<PrimaryDocumentDot>> entry : allDots
+//				.entrySet()) {
+//
+//			PrimaryDocument parent = entry.getKey().getParent();
+//			if (parent == null)
+//				continue;
+//			List<PrimaryDocumentDot> parentDots = allDots.get(parent);
+//			if (parentDots == null)
+//				continue;
+//
+//			for (PrimaryDocumentDot from : entry.getValue()) {
+//				for (PrimaryDocumentDot to : parentDots) {
+//					PBounds fromP = from.getGlobalBounds();
+//					PBounds toP = to.getGlobalBounds();
+//
+//					root.addChild(PPath.createLine((float) fromP.getCenterX(),
+//							(float) fromP.getCenterY(), (float) toP
+//									.getCenterX(), (float) toP.getCenterY()));
+//				}
+//			}
+//		}
+
 		for (PNode text : allTextNodes) {
 			text.offset(partitionOffset - text.getWidth(), 0.0);
 		}
-	
+
 		partition.setX(0.0);
 	}
 
-	
 }

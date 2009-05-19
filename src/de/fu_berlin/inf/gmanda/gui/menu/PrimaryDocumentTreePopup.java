@@ -15,6 +15,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchListAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchRecursiveAction;
+import de.fu_berlin.inf.gmanda.gui.actions.SocialNetworkThreadAction;
 
 public class PrimaryDocumentTreePopup extends JPopupMenu  {
 
@@ -24,16 +25,18 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 		RefetchRecursiveAction refetchRecursive,
 		RefetchListAction refetchList,
 		DeletePrimaryDocumentAction delete,
-		ComputeThreadStatisticsAction thread) {
+		ComputeThreadStatisticsAction thread,
+		SocialNetworkThreadAction network) {
 
 		add(refetch);
 		add(refetchRecursive);
 		add(refetchList);
 		add(new JSeparator());
 		add(thread);
+		add(network);
 		add(new JSeparator());
 		add(delete);
-		
+
 		tree.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				if (e.isPopupTrigger()) {
@@ -54,5 +57,4 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 			}
 		});
 	}
-
 }

@@ -22,6 +22,8 @@
  */
 package de.fu_berlin.inf.gmanda.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -29,6 +31,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang.ObjectUtils;
+
+import com.google.common.base.Function;
 
 public class Pair<P, V> {
 
@@ -41,6 +45,38 @@ public class Pair<P, V> {
 		this.v = v;
 	}
 
+	public static <P extends Comparable<P>, V extends Comparable<V>> Comparator<Pair<P, V>> pvCompare() {
+		
+		final Comparator<Pair<P, V>> pCompare = pCompare();
+		final Comparator<Pair<P, V>> vCompare = vCompare();
+		
+		return new Comparator<Pair<P, V>>() {
+			public int compare(Pair<P, V> arg0, Pair<P, V> arg1) {
+				int i = pCompare.compare(arg0, arg1);
+				if (i != 0)
+					return i;
+				else 
+					return vCompare.compare(arg0, arg1);
+			}
+		};
+	}
+	
+	public static <P extends Comparable<P>, V extends Comparable<V>> Comparator<Pair<P, V>> vpCompare() {
+		
+		final Comparator<Pair<P, V>> pCompare = pCompare();
+		final Comparator<Pair<P, V>> vCompare = vCompare();
+		
+		return new Comparator<Pair<P, V>>() {
+			public int compare(Pair<P, V> arg0, Pair<P, V> arg1) {
+				int i = vCompare.compare(arg0, arg1);
+				if (i != 0)
+					return i;
+				else 
+					return pCompare.compare(arg0, arg1);
+			}
+		};
+	}
+	
 	public static <P extends Comparable<P>, V> Comparator<Pair<P, V>> pCompare() {
 		return new Comparator<Pair<P, V>>() {
 			public int compare(Pair<P, V> arg0, Pair<P, V> arg1) {
@@ -184,4 +220,19 @@ public class Pair<P, V> {
 		Pair<?, ?> other = (Pair<?, ?>) o;
 		return ObjectUtils.equals(this.p, other.p) && ObjectUtils.equals(this.v, other.v);
 	}
+
+    public static <P, V> List<Pair<P, V>> map(Collection<V> vs,
+        Function<V, P> function) {
+        List<Pair<P, V>> result = new ArrayList<Pair<P, V>>(vs.size());
+        for (V v : vs) {
+            result.add(new Pair<P, V>(function.apply(v), v));
+        }
+        return result;
+    }
+
+    public static <P extends Comparable<P>, V> List<Pair<P, List<V>>> partition(
+        Collection<V> input, Function<V, P> function) {
+
+        return disjointPartition(map(input, function));
+    }
 }

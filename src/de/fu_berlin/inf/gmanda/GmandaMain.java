@@ -78,6 +78,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.SaveAsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SearchWithLuceneAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SetCacheLocationAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ShowPreferencesAction;
+import de.fu_berlin.inf.gmanda.gui.actions.SocialNetworkThreadAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SplitTrailAction;
 import de.fu_berlin.inf.gmanda.gui.actions.VisualizationScreenshotAction;
 import de.fu_berlin.inf.gmanda.gui.docking.DefaultPerspective;
@@ -96,6 +97,7 @@ import de.fu_berlin.inf.gmanda.gui.menu.PrimaryDocumentMenu;
 import de.fu_berlin.inf.gmanda.gui.menu.PrimaryDocumentTreePopup;
 import de.fu_berlin.inf.gmanda.gui.menu.ToolsMenu;
 import de.fu_berlin.inf.gmanda.gui.menu.WindowMenu;
+import de.fu_berlin.inf.gmanda.gui.misc.DotFileFileChooser;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaInfoBox;
 import de.fu_berlin.inf.gmanda.gui.misc.LaTeXDirectoryChooser;
@@ -270,6 +272,7 @@ public class GmandaMain {
 			.addComponent(VisualizationScreenshotAction.class)
 			.addComponent(ApplicationScreenshotAction.class)
 			.addComponent(ExportCitationsToLatexAction.class)
+			.addComponent(SocialNetworkThreadAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)
@@ -292,6 +295,7 @@ public class GmandaMain {
 			.addComponent(LaTeXDirectoryChooser.class)
 			.addComponent(GmaneMboxFetcher.class)
 			.addComponent(GmaneFacade.class)
+			.addComponent(DotFileFileChooser.class)
 			// Properties
 			.addComponent(ScrollOnShowProperty.class)
 			.addComponent(PrimaryDocumentDirectoryProperty.class)

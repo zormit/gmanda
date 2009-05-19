@@ -470,9 +470,7 @@ public class GmaneFacade {
 						author = "unknown";
 					}	
 					
-					author = author.replaceFirst("<.*$", "");
-					author = author.replaceAll("\"", "").trim();
-					author = author.replaceAll("(\\w*?), *(.*)$", "$2 $1");
+					author = CUtils.cleanAuthor(author);
 										
 					authors.put(author, pd);
 					pToFetch.work(1);
@@ -537,4 +535,6 @@ public class GmaneFacade {
 		}
 
 	}
+
+	
 }

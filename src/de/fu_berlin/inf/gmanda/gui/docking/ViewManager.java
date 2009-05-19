@@ -82,7 +82,6 @@ public class ViewManager {
 		if (!dockables.containsKey(view)) {
 			DefaultDockable dockable = new DefaultDockable(view.getComponent(), view.getTitle());
 			dockable.setTitleToolTip(view.getTooltip());
-			
 			dockSituation.put(view.getId(), dockable);
 
 			dockables.put(view, dockable);

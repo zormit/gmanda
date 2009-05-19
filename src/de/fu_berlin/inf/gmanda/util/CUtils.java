@@ -35,5 +35,12 @@ public class CUtils {
 		
 		return result;
 	}
+	
+	public static String cleanAuthor(String author) {
+		author = author.replaceFirst("<.*$", "");
+		author = author.replaceAll("[\"\\\\]", "").trim();
+		author = author.replaceAll("(\\w*?), *(.*)$", "$2 $1");
+		return CStringUtils.convertNonAscii(author);
+	}
 
 }
