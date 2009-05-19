@@ -270,11 +270,11 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 				if (titles.size() > 0) {
 					String newTitle = titles.iterator().next().getValue();
 					newTitle = StringUtils.strip(newTitle, " \"");
-					if (newTitle.length() > 0){
+					if (newTitle.length() > 0) {
 						// If so, we overwrite the given title
-						title = newTitle;	
+						title = newTitle;
 					}
-				}	
+				}
 
 				for (Code def : defCode.getProperties("desc")) {
 
