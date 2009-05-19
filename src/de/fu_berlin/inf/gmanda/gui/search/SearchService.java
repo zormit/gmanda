@@ -27,6 +27,17 @@ import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 /**
  * Service to search within all primary documents those that either contain a
  * text (using LuceneService) or are tagged (using CodeModel);
+ * 
+ * For Lucene use the following syntax:
+ * 
+ * search: "<term to search for"
+ * 
+ * for Metadata use:
+ * 
+ * search: {
+ *   from: "Bogdan",
+ *   OR from: "Aleksandr"
+ * }
  */
 public class SearchService {
 
