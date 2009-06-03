@@ -23,6 +23,7 @@ import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.StringJoiner;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
+import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
 
 /**
  * Service to search within all primary documents those that either contain a
@@ -69,7 +70,9 @@ public class SearchService {
 			Iterator<? extends Code> codes = codesIterable.iterator();
 
 			if (!codes.hasNext()) {
-				newFilterList = Collections.emptyList();
+				TreeWalker<PrimaryDocument> walker = PrimaryDocument.getTreeWalker(project.getPrimaryDocuments());
+				newFilterList = new ArrayList<PrimaryDocument>(CollectionUtils.size(walker.iterator()));
+				CollectionUtils.addAll(newFilterList, walker.iterator());
 			} else {
 				Code c = codes.next();
 				String nextSearchString = c.getTag();

@@ -1,4 +1,8 @@
 
+2009-06-03
+
+   * [FIX] An empty filter will now return all documents
+
 2009-05-19
 
    * [FEATURE] Export a social network to a Graphviz-Dot file (right click on a 
