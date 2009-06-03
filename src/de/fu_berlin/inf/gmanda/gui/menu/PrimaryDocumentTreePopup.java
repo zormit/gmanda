@@ -10,6 +10,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
+import de.fu_berlin.inf.gmanda.gui.actions.ComputeEmailStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ComputeThreadStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchAction;
@@ -26,6 +27,7 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 		RefetchListAction refetchList,
 		DeletePrimaryDocumentAction delete,
 		ComputeThreadStatisticsAction thread,
+		ComputeEmailStatisticsAction email,
 		SocialNetworkThreadAction network) {
 
 		add(refetch);
@@ -33,6 +35,7 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 		add(refetchList);
 		add(new JSeparator());
 		add(thread);
+		add(email);
 		add(network);
 		add(new JSeparator());
 		add(delete);

@@ -47,6 +47,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.ApplicationScreenshotAction;
 import de.fu_berlin.inf.gmanda.gui.actions.BackSelectionAction;
 import de.fu_berlin.inf.gmanda.gui.actions.BasicStatisticalReportAction;
 import de.fu_berlin.inf.gmanda.gui.actions.CloseAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ComputeEmailStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ComputeThreadStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.CreateDSVFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
@@ -234,7 +235,6 @@ public class GmandaMain {
 			.addComponent(DefaultPerspective.class)
 			.addComponent(VisualizationPerspective.class)
 			// Actions
-			.addComponent(ComputeThreadStatisticsAction.class)
 			.addComponent(CloseAction.class)
 			.addComponent(ExitAction.class)
 			.addComponent(LoadAction.class)
@@ -272,7 +272,10 @@ public class GmandaMain {
 			.addComponent(VisualizationScreenshotAction.class)
 			.addComponent(ApplicationScreenshotAction.class)
 			.addComponent(ExportCitationsToLatexAction.class)
+			.addComponent(ComputeThreadStatisticsAction.class)
+			.addComponent(ComputeEmailStatisticsAction.class)
 			.addComponent(SocialNetworkThreadAction.class)
+			
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)

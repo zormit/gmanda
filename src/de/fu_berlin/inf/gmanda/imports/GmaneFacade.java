@@ -1,6 +1,8 @@
 package de.fu_berlin.inf.gmanda.imports;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +24,7 @@ import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.CMultimap;
 import de.fu_berlin.inf.gmanda.util.CUtils;
+import de.fu_berlin.inf.gmanda.util.StringJoiner;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 import de.fu_berlin.inf.gmanda.util.progress.NestableProgressMonitor;
 import de.fu_berlin.inf.gmanda.util.tree.TreeAcceptor;
@@ -35,7 +38,7 @@ public class GmaneFacade {
 	ForegroundWindowProxy foreground;
 
 	public GmaneFacade(GmaneImporter importer, GmaneMboxFetcher fetcher,
-		CacheDirectoryProperty cache, ForegroundWindowProxy foreground) {
+			CacheDirectoryProperty cache, ForegroundWindowProxy foreground) {
 		this.importer = importer;
 		this.fetcher = fetcher;
 		this.cache = cache;
@@ -110,8 +113,8 @@ public class GmaneFacade {
 
 				String list = getListFromGmaneIdentifier(pd.getFilename());
 				int number = getNumberFromGmaneIdentifier(pd.getFilename());
-				int from = ((number - 1) / GmaneMboxFetcher.CHUNKSIZE) * GmaneMboxFetcher.CHUNKSIZE
-					+ 1;
+				int from = ((number - 1) / GmaneMboxFetcher.CHUNKSIZE)
+						* GmaneMboxFetcher.CHUNKSIZE + 1;
 
 				if (!toMakeAvailable.containsKey(list))
 					toMakeAvailable.put(list, new TreeSet<Integer>());
@@ -137,13 +140,14 @@ public class GmaneFacade {
 		pFetching.setScale(chunksToFetch * 2);
 		pFetching.start();
 		try {
-			for (Map.Entry<String, TreeSet<Integer>> entry : toMakeAvailable.entrySet()) {
+			for (Map.Entry<String, TreeSet<Integer>> entry : toMakeAvailable
+					.entrySet()) {
 				String listName = entry.getKey();
 
 				for (Integer from : entry.getValue()) {
 					int to = from + GmaneMboxFetcher.CHUNKSIZE;
-					System.out.println(String.format("Downloading %s %d to %d", entry.getKey(),
-						from, to));
+					System.out.println(String.format("Downloading %s %d to %d",
+							entry.getKey(), from, to));
 
 					try {
 						ImportSettings settings = new ImportSettings();
@@ -157,7 +161,8 @@ public class GmaneFacade {
 						if (pFetching.isCanceled())
 							return;
 
-						importer.importPrimaryDocuments(pFetching.getSub(1), settings);
+						importer.importPrimaryDocuments(pFetching.getSub(1),
+								settings);
 
 						if (pFetching.isCanceled())
 							return;
@@ -191,7 +196,8 @@ public class GmaneFacade {
 				// Ah this is bad
 				String list = getListFromGmaneIdentifier(pd.getFilename());
 				int number = getNumberFromGmaneIdentifier(pd.getFilename());
-				System.out.println(String.format("Failed to refetch %s %d", list, number));
+				System.out.println(String.format("Failed to refetch %s %d",
+						list, number));
 			}
 		} finally {
 			pVerify.done();
@@ -206,7 +212,8 @@ public class GmaneFacade {
 
 		int numberOfPds = 0;
 		for (@SuppressWarnings("unused")
-		PrimaryDocument pd : PrimaryDocument.getTreeWalker(p.getPrimaryDocuments())) {
+		PrimaryDocument pd : PrimaryDocument.getTreeWalker(p
+				.getPrimaryDocuments())) {
 			numberOfPds++;
 		}
 		System.out.println("# of PDs: " + numberOfPds);
@@ -225,7 +232,7 @@ public class GmaneFacade {
 		int ntSeen = 0;
 		int ntCoded = 0;
 		int ntCodes = 0;
-		
+
 		int ntThreads = 0;
 		int ntSeenThreads = 0;
 		int ntCodedThreads = 0;
@@ -241,14 +248,19 @@ public class GmaneFacade {
 
 		TreeAcceptor<PrimaryDocument> coded = new TreeAcceptor<PrimaryDocument>() {
 			public boolean accept(PrimaryDocument t) {
-				return t.getCodeAsString() != null && t.getCodeAsString().trim().length() > 0;
+				return t.getCodeAsString() != null
+						&& t.getCodeAsString().trim().length() > 0;
 			}
 		};
 
-		System.out.println(String.format(
-			"%-50s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s", "Name of List",
-			"ntEmails", "ntAvailable", "ntSeen", "ntCoded", "ntCodes", "ntThreads", "ntCodedTh", "ntSeenTh",
-			"ntMailsCT", "ntMailsST"));
+		System.out
+				.println(String
+						.format(
+								"%-50s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s",
+								"Name of List", "ntEmails", "ntAvailable",
+								"ntSeen", "ntCoded", "ntCodes", "ntThreads",
+								"ntCodedTh", "ntSeenTh", "ntMailsCT",
+								"ntMailsST"));
 
 		try {
 			for (PrimaryDocument list : p.getPrimaryDocuments()) {
@@ -263,7 +275,7 @@ public class GmaneFacade {
 				int nThreads = 0;
 				int nSeenThreads = 0;
 				int nCodedThreads = 0;
-				
+
 				int nMailsInCodedThread = 0;
 				int nMailsInSeenThread = 0;
 
@@ -278,11 +290,11 @@ public class GmaneFacade {
 					if (seen.accept(pd))
 						nSeen++;
 
-					if (coded.accept(pd)){
+					if (coded.accept(pd)) {
 						nCoded++;
 						nCodes += CUtils.size(pd.getCode().getAllCodesDeep());
 					}
-					
+
 					pToFetch.work(1);
 					if (pToFetch.isCanceled())
 						return;
@@ -292,7 +304,8 @@ public class GmaneFacade {
 
 					nThreads++;
 
-					TreeWalker<PrimaryDocument> t = PrimaryDocument.getTreeWalker(pd);
+					TreeWalker<PrimaryDocument> t = PrimaryDocument
+							.getTreeWalker(pd);
 
 					if (t.find(seen) != null) {
 						nSeenThreads++;
@@ -305,10 +318,15 @@ public class GmaneFacade {
 					}
 				}
 
-				System.out.println(String.format(
-					"%-50s\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d", list
-						.getListGuess(), nEmails, nEmailsAvailable, nSeen, nCoded, nCodes, nThreads,
-					nCodedThreads, nSeenThreads, nMailsInCodedThread, nMailsInSeenThread));
+				System.out
+						.println(String
+								.format(
+										"%-50s\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d",
+										list.getListGuess(), nEmails,
+										nEmailsAvailable, nSeen, nCoded,
+										nCodes, nThreads, nCodedThreads,
+										nSeenThreads, nMailsInCodedThread,
+										nMailsInSeenThread));
 
 				ntEmails += nEmails;
 				ntEmailsAvailable += nEmailsAvailable;
@@ -321,10 +339,14 @@ public class GmaneFacade {
 				ntMailsInCodedThread += nMailsInCodedThread;
 				ntMailsInSeenThread += nMailsInSeenThread;
 			}
-			System.out.println(String.format(
-				"%-50s\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d", "All lists",
-				ntEmails, ntEmailsAvailable, ntSeen, ntCoded, ntCodes, ntThreads, ntCodedThreads,
-				ntSeenThreads, ntMailsInCodedThread, ntMailsInSeenThread));
+			System.out
+					.println(String
+							.format(
+									"%-50s\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d",
+									"All lists", ntEmails, ntEmailsAvailable,
+									ntSeen, ntCoded, ntCodes, ntThreads,
+									ntCodedThreads, ntSeenThreads,
+									ntMailsInCodedThread, ntMailsInSeenThread));
 		} finally {
 			pToFetch.done();
 		}
@@ -344,7 +366,8 @@ public class GmaneFacade {
 
 		if (isGmaneIdentifier(filename)) {
 			filename = filename.substring("gmane://".length());
-			File fromCache = new File(new File(cache.getValue(), "messages"), filename + ".txt");
+			File fromCache = new File(new File(cache.getValue(), "messages"),
+					filename + ".txt");
 			return fromCache.exists();
 		} else {
 			return new File(filename).exists();
@@ -367,10 +390,12 @@ public class GmaneFacade {
 			String list = getListFromGmaneIdentifier(pd.getFilename());
 			int number = getNumberFromGmaneIdentifier(pd.getFilename());
 
-			int from = ((number - 1) / GmaneMboxFetcher.CHUNKSIZE) * GmaneMboxFetcher.CHUNKSIZE + 1;
+			int from = ((number - 1) / GmaneMboxFetcher.CHUNKSIZE)
+					* GmaneMboxFetcher.CHUNKSIZE + 1;
 			int to = from + GmaneMboxFetcher.CHUNKSIZE;
 
-			System.out.println(String.format("Fetching %s %d to %d", list, from, to));
+			System.out.println(String.format("Fetching %s %d to %d", list,
+					from, to));
 
 			try {
 				ImportSettings settings = new ImportSettings();
@@ -388,7 +413,8 @@ public class GmaneFacade {
 			}
 
 			if (!isAvailable(pd))
-				System.out.println(String.format("Failed to fetch %s %d", list, number));
+				System.out.println(String.format("Failed to fetch %s %d", list,
+						number));
 
 		} finally {
 			pm.done();
@@ -402,15 +428,16 @@ public class GmaneFacade {
 		if (filename.startsWith("gmane://")) {
 			filename = filename.substring("gmane://".length());
 
-			File fromCache = new File(new File(cache.getValue(), "messages"), filename + ".txt");
+			File fromCache = new File(new File(cache.getValue(), "messages"),
+					filename + ".txt");
 
 			if (fromCache.exists()) {
 				return fromCache;
 			} else {
 				if (refetchIfNotFound) {
 					// Not in cache -> Refetch
-					NestableProgressMonitor pm = new NestableProgressMonitor(foreground
-						.getAsFrameOrNull(), "Refetching...");
+					NestableProgressMonitor pm = new NestableProgressMonitor(
+							foreground.getAsFrameOrNull(), "Refetching...");
 					makeAvailable(pd, pm);
 
 					return getFileForPD(false, pd);
@@ -468,10 +495,10 @@ public class GmaneFacade {
 
 					if (author == null) {
 						author = "unknown";
-					}	
-					
+					}
+
 					author = CUtils.cleanAuthor(author);
-										
+
 					authors.put(author, pd);
 					pToFetch.work(1);
 				}
@@ -481,52 +508,65 @@ public class GmaneFacade {
 			System.out.println("# of Authors: " + authors.size());
 
 			{ // Print
-				
-				
+
 				IProgress pToFetch = pm.getSub(10);
 				pToFetch.setScale(authors.size());
 				pToFetch.start();
-				
-				ArrayList<Entry<String, Collection<PrimaryDocument>>> sorted = new ArrayList<Entry<String, Collection<PrimaryDocument>>>(authors.entrySet());
-				
-				Collections.sort(sorted, new Comparator<Entry<String, Collection<PrimaryDocument>>>(){
-					public int compare(Entry<String, Collection<PrimaryDocument>> one,
-						Entry<String, Collection<PrimaryDocument>> two) {
-						return one.getKey().compareToIgnoreCase(two.getKey());
-					}
-				});
-				
+
+				ArrayList<Entry<String, Collection<PrimaryDocument>>> sorted = new ArrayList<Entry<String, Collection<PrimaryDocument>>>(
+						authors.entrySet());
+
+				Collections
+						.sort(
+								sorted,
+								new Comparator<Entry<String, Collection<PrimaryDocument>>>() {
+									public int compare(
+											Entry<String, Collection<PrimaryDocument>> one,
+											Entry<String, Collection<PrimaryDocument>> two) {
+										return one.getKey()
+												.compareToIgnoreCase(
+														two.getKey());
+									}
+								});
+
 				System.out.println("Authors (alphabetically):");
 				System.out.println("-------------------------");
-				
+
 				for (Entry<String, Collection<PrimaryDocument>> author : sorted) {
-					System.out.println(String.format("%4d : %s", author.getValue().size(), author
-						.getKey()));
+					System.out.println(String.format("%4d : %s", author
+							.getValue().size(), author.getKey()));
 					pToFetch.work(1);
 				}
-				
-				Collections.sort(sorted, new Comparator<Entry<String, Collection<PrimaryDocument>>>(){
-					public int compare(Entry<String, Collection<PrimaryDocument>> one,
-						Entry<String, Collection<PrimaryDocument>> two) {
-						return new Integer(one.getValue().size()).compareTo(two.getValue().size());
-					}
-				});
-				
+
+				Collections
+						.sort(
+								sorted,
+								new Comparator<Entry<String, Collection<PrimaryDocument>>>() {
+									public int compare(
+											Entry<String, Collection<PrimaryDocument>> one,
+											Entry<String, Collection<PrimaryDocument>> two) {
+										return new Integer(one.getValue()
+												.size()).compareTo(two
+												.getValue().size());
+									}
+								});
+
 				System.out.println();
 				System.out.println("Authors (by emails written):");
 				System.out.println("----------------------------");
-				
+
 				int i = sorted.size();
-				
+
 				int sum = 0;
-				
+
 				for (Entry<String, Collection<PrimaryDocument>> author : sorted) {
-					System.out.println(String.format("%4d. (%2.2f) %4d : %s", i--, (100.0 * sum) / numberOfPds, author.getValue().size(), author
-						.getKey()));
+					System.out.println(String.format("%4d. (%2.2f) %4d : %s",
+							i--, (100.0 * sum) / numberOfPds, author.getValue()
+									.size(), author.getKey()));
 					sum = sum + author.getValue().size();
 					pToFetch.work(1);
 				}
-				
+
 				pToFetch.done();
 			}
 
@@ -536,5 +576,68 @@ public class GmaneFacade {
 
 	}
 
-	
+	public void printEmailStatistics(PrimaryDocument root, File target,
+			IProgress pm) {
+
+		pm.setScale(100);
+		pm.start();
+
+		try {
+			int numberOfPds = 0;
+
+			{ // Determine number of PDs
+				for (@SuppressWarnings("unused")
+				PrimaryDocument pd : PrimaryDocument.getTreeWalker(root)) {
+					numberOfPds++;
+				}
+
+				pm.work(5);
+			}
+
+			IProgress pmToPrint = pm.getSub(95);
+			pmToPrint.setScale(numberOfPds);
+			pmToPrint.start();
+
+			PrintWriter pw = null;
+			try {
+				try {
+					pw = new PrintWriter(target);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					return;
+				}
+
+				pw.write("id\tdate\tfromComplete\tfrom\tsubject\n");
+
+				for (PrimaryDocument p : PrimaryDocument.getTreeWalker(root)) {
+
+					if (null == p.getMetaData("id"))
+						continue;
+
+					String author = p.getMetaData("from");
+
+					if (author == null) {
+						author = "unknown";
+					}
+
+					StringJoiner sj = new StringJoiner("\t");
+					sj.append(p.getMetaData("id"));
+					sj.append(p.getMetaData("date"));
+					sj.append(author);
+					sj.append(CUtils.cleanAuthor(author));
+					sj.append(CUtils.cleanTitle(p.getName()));
+
+					pw.write(sj.toString());
+					pw.write("\n");
+					pmToPrint.work(1);
+				}
+
+			} finally {
+				if (pw != null)
+					pw.close();
+			}
+		} finally {
+			pm.done();
+		}
+	}
 }
