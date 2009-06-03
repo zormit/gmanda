@@ -25,6 +25,7 @@ import de.fu_berlin.inf.gmanda.qda.CodedString;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.CUtils;
 import de.fu_berlin.inf.gmanda.util.HashMapUtils;
 import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
@@ -279,27 +280,49 @@ public class VisualizationCanvas extends PScrollPane {
 			List<PrimaryDocument> allEvents) {
 
 		if (partitionCode.trim().startsWith("meta:")) {
-			final String newPartitionCode = partitionCode.trim().substring(
+			String newPartitionCode = partitionCode.trim().substring(
 					"meta:".length());
-
-			return Pair.partition(allEvents,
-					new Function<PrimaryDocument, String>() {
-						@Override
-						public String apply(PrimaryDocument arg0) {
-							String metaData = arg0
-									.getMetaData(newPartitionCode);
-							if (metaData == null
-									|| metaData.trim().length() == 0) {
-								return "Unknown";
-							} else {
-								return metaData;
-							}
-						}
-
-					});
+			
+			Function<String, String> cleaningFunction;
+			if (newPartitionCode.endsWith("[cleanAuthor]")){
+				newPartitionCode = newPartitionCode.substring(0, newPartitionCode.length() - "[cleanAuthor]".length());
+				cleaningFunction = new Function<String, String>(){
+				@Override
+					public String apply(String arg0) {
+						return CUtils.cleanAuthor(arg0);
+					}
+				};
+			} else {
+				cleaningFunction = null;
+			}
+			return partition(allEvents, newPartitionCode, cleaningFunction);
 		} else {
 			return project.getCodeModel().partition(allEvents, partitionCode);
 		}
+	}
+
+	private List<Pair<String, List<PrimaryDocument>>> partition(
+			List<PrimaryDocument> allEvents, final String partitionCode, 
+			final Function<String, String> cleaningFunction) {
+		
+		return Pair.partition(allEvents,
+				new Function<PrimaryDocument, String>() {
+					@Override
+					public String apply(PrimaryDocument arg0) {
+						String metaData = arg0
+								.getMetaData(partitionCode);
+						if (metaData == null
+								|| metaData.trim().length() == 0) {
+							return "Unknown";
+						} else {
+							if (cleaningFunction == null)
+								return metaData;
+							else 
+								return cleaningFunction.apply(metaData);
+						}
+					}
+
+				});
 	}
 
 	public void buildVisualization(

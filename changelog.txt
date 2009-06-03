@@ -3,6 +3,8 @@
 
    * [FIX] An empty filter will now return all documents
    * [FEATURE] Functionality added to print summary statistics regarding email written
+   * [FEATURE] Suffix [cleanAuthor] in code for partitioning will call CUtils.cleanAuthor() 
+               to make author names more readable. 
 
 2009-05-19
 
