@@ -39,8 +39,23 @@ public class CUtils {
 	public static String cleanAuthor(String author) {
 		author = author.replaceFirst("<.*$", "");
 		author = author.replaceAll("[\"\\\\]", "").trim();
+
+		// Flip "Doe, John" into "John Doe"
 		author = author.replaceAll("(\\w*?), *(.*)$", "$2 $1");
+		
+		// Collapse spaces
+		author = author.replaceAll("\\s+", " ");
+		if (author.length() >= 30){
+			author = author.substring(0, 27) + "...";
+		}
+		
 		return CStringUtils.convertNonAscii(author);
+	}
+
+	public static String cleanTitle(String name) {
+		name = name.replaceAll("\\s+", " ");
+		name = name.trim();
+		return CStringUtils.convertNonAscii(name);
 	}
 
 }
