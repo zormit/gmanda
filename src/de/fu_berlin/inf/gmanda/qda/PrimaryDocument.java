@@ -77,7 +77,7 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 		else
 			if (metadata.containsKey("list"))
 				return metadata.get("list");
-			else				
+			else
 				return filename;
 	}
 
