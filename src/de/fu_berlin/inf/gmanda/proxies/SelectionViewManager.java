@@ -21,13 +21,30 @@ public class SelectionViewManager {
 		FilterKind filterKind;
 
 		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result
+					+ ((filter == null) ? 0 : filter.hashCode());
+			result = prime * result
+					+ ((filterKind == null) ? 0 : filterKind.hashCode());
+			result = prime * result
+					+ ((selection == null) ? 0 : selection.hashCode());
+			return result;
+		}
+
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
-			if (obj == null || getClass() != obj.getClass())
+			if (obj == null)
 				return false;
-			
+			if (getClass() != obj.getClass())
+				return false;
 			View other = (View) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
 			if (filter == null) {
 				if (other.filter != null)
 					return false;
@@ -44,6 +61,10 @@ public class SelectionViewManager {
 			} else if (!selection.equals(other.selection))
 				return false;
 			return true;
+		}
+
+		private SelectionViewManager getOuterType() {
+			return SelectionViewManager.this;
 		}
 	}
 	

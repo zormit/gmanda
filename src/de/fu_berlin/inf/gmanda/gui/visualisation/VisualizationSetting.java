@@ -25,6 +25,18 @@ public class VisualizationSetting {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((color == null) ? 0 : color.hashCode());
+		result = prime * result + ((filter == null) ? 0 : filter.hashCode());
+		result = prime * result
+				+ ((partition == null) ? 0 : partition.hashCode());
+		result = prime * result + ((rank == null) ? 0 : rank.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -32,7 +44,7 @@ public class VisualizationSetting {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final VisualizationSetting other = (VisualizationSetting) obj;
+		VisualizationSetting other = (VisualizationSetting) obj;
 		if (color == null) {
 			if (other.color != null)
 				return false;

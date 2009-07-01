@@ -44,9 +44,9 @@ import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 
 /**
  * Good fdp graph:
-
-  fdp -x -Tsvg -Gepsilon=0.0000001 -Gmaxiter=100000 -Gstart=5 dot2.dot > diagram.svg
-
+ * 
+ * fdp -x -Tsvg -Gepsilon=0.0000001 -Gmaxiter=100000 -Gstart=5 dot2.dot >
+ * diagram.svg
  */
 public class SocialNetworkThreadAction extends AbstractAction {
 
@@ -98,18 +98,21 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 					PrimaryDocument pd = (PrimaryDocument) o;
 
-					File dotFile = dotFileChooser.getOpenFile();
+					File dotFile = dotFileChooser.getSaveFile();
 
 					if (dotFile == null)
 						return;
 
-					Map<String, Object> data = computeSocialNetwork(pd, progress);
+					Map<String, Object> data = computeSocialNetwork(pd,
+							progress);
 
 					// Run template engine
-					String dotString = runVelocity(data);
+					String dotString = runVelocity(data, dotFile.getName()
+							.endsWith(".dot") ? "graphDOT" : "graphML");
 
 					try {
-						FileUtils.writeStringToFile(dotFile, dotString, "latin1");
+						FileUtils.writeStringToFile(dotFile, dotString,
+								"latin1");
 					} catch (IOException e) {
 						throw new ReportToUserException(e);
 					}
@@ -120,13 +123,13 @@ public class SocialNetworkThreadAction extends AbstractAction {
 				}
 
 			}
-		}, "Error in computing thread statistics:");
+		}, "Error in computing thread statistics");
 
 	}
 
 	Template latexTemplate;
 
-	public String runVelocity(Map<String, Object> data) {
+	public String runVelocity(Map<String, Object> data, String velocityFile) {
 
 		Properties p = new Properties();
 
@@ -151,14 +154,14 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 			context = new VelocityContext(data);
 
-			FileUtils.writeStringToFile(new File(
-					"resources/templates/graphWhitespace.vm"),
+			FileUtils.writeStringToFile(new File("resources/templates/"
+					+ velocityFile + "Whitespace.vm"),
 					new VelocityWhitespaceRepair().fixWhitespace(FileUtils
-							.readFileToString(new File(
-									"resources/templates/graph.vm"))));
+							.readFileToString(new File("resources/templates/"
+									+ velocityFile + ".vm"))));
 
-			latexTemplate = engine
-					.getTemplate("resources/templates/graphWhitespace.vm");
+			latexTemplate = engine.getTemplate("resources/templates/"
+					+ velocityFile + "Whitespace.vm");
 
 		} catch (Exception e) {
 			throw new DoNotShowToUserException(e);
@@ -176,13 +179,13 @@ public class SocialNetworkThreadAction extends AbstractAction {
 		return writer.toString();
 	}
 
-	public static class Author implements Comparable<Author>{
+	public static class Author implements Comparable<Author> {
 		int emailsWritten;
 		String name;
-		
+
 		boolean project = false;
 
-		public Author(String name){
+		public Author(String name) {
 			this.setName(name);
 		}
 
@@ -194,10 +197,10 @@ public class SocialNetworkThreadAction extends AbstractAction {
 			return emailsWritten;
 		}
 
-		public String getMultiLineName(){
+		public String getMultiLineName() {
 			return getName().replaceAll("\\s+", "\\\\n");
 		}
-		
+
 		public void setName(String name) {
 			this.name = name;
 		}
@@ -205,12 +208,12 @@ public class SocialNetworkThreadAction extends AbstractAction {
 		public String getName() {
 			return name;
 		}
-		
-		public double getWeight(){
+
+		public double getWeight() {
 			return Math.sqrt(emailsWritten) / 2.0;
 		}
-		
-		public String getColor(){
+
+		public String getColor() {
 			return "blue";
 		}
 
@@ -219,7 +222,7 @@ public class SocialNetworkThreadAction extends AbstractAction {
 			return this.emailsWritten - arg0.emailsWritten;
 		}
 	}
-	
+
 	public static class Edge {
 		@Override
 		public int hashCode() {
@@ -277,23 +280,24 @@ public class SocialNetworkThreadAction extends AbstractAction {
 			return weight;
 		}
 	}
-	
+
 	public class ProjectToPlot {
-		
+
 		public String name;
-		
+
 		List<Author> members;
-		
+
 		public String getName() {
 			return name;
 		}
-		
+
 		public List<Author> getMembers() {
 			return members;
 		}
 	}
 
-	public Map<String, Object> computeSocialNetwork(PrimaryDocument root, IProgress pm) {
+	public Map<String, Object> computeSocialNetwork(PrimaryDocument root,
+			IProgress pm) {
 
 		pm.setScale(100);
 		pm.start();
@@ -304,9 +308,9 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 			CMultimap<Pair<String, String>, PrimaryDocument> conversations = new CMultimap<Pair<String, String>, PrimaryDocument>(
 					pComp);
-			
+
 			HashMap<String, Author> authors = new HashMap<String, Author>();
-						
+
 			int numberOfPds = PrimaryDocument.getTreeWalker(root).size();
 			pm.work(5);
 
@@ -325,35 +329,35 @@ public class SocialNetworkThreadAction extends AbstractAction {
 					}
 
 					authorsName = CUtils.cleanAuthor(authorsName);
-					
+
 					Author author = authors.get(authorsName);
-					if (author == null){
+					if (author == null) {
 						author = new Author(authorsName);
 						authors.put(authorsName, author);
 					}
 					author.emailsWritten++;
-					
+
 					PrimaryDocument parent = pd.getParent();
 					String parentAuthor;
-					if (parent == null){
+					if (parent == null) {
 						continue;
 					} else {
 						parentAuthor = parent.getMetaData("from");
 
-						if (parentAuthor == null){
+						if (parentAuthor == null) {
 							continue;
 						}
 						parentAuthor = CUtils.cleanAuthor(parentAuthor);
 					}
 
-//					if (parentAuthor.compareTo(authorsName) < 0){
-//						String s = authorsName;
-//						authorsName = parentAuthor;
-//						parentAuthor = s;
-//					}
-					
-					conversations.put(new Pair<String, String>(parentAuthor, authorsName),
-							pd);
+					// if (parentAuthor.compareTo(authorsName) < 0){
+					// String s = authorsName;
+					// authorsName = parentAuthor;
+					// parentAuthor = s;
+					// }
+
+					conversations.put(new Pair<String, String>(parentAuthor,
+							authorsName), pd);
 					pToFetch.work(1);
 				}
 				pToFetch.done();
@@ -363,19 +367,20 @@ public class SocialNetworkThreadAction extends AbstractAction {
 			Collections.sort(plainAuthors);
 			Collections.reverse(plainAuthors);
 			List<Author> projectMembers = new ArrayList<Author>();
-			
-			a:
-			for (Author a : plainAuthors){
-				for (Author b : projectMembers){
-					if (!(conversations.containsKey(new Pair<String, String>(a.name,b.name)) && 
-							conversations.containsKey(new Pair<String, String>(b.name,a.name)))){
+
+			a: for (Author a : plainAuthors) {
+				for (Author b : projectMembers) {
+					if (!(conversations.containsKey(new Pair<String, String>(
+							a.name, b.name)) && conversations
+							.containsKey(new Pair<String, String>(b.name,
+									a.name)))) {
 						continue a;
 					}
 				}
 				projectMembers.add(a);
 				a.project = true;
 			}
-			
+
 			System.out.println("# of Authors: " + conversations.size());
 
 			List<Edge> edges = new ArrayList<Edge>(conversations.size());
@@ -387,31 +392,31 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 				for (Entry<Pair<String, String>, Collection<PrimaryDocument>> entry : conversations
 						.entrySet()) {
-					
+
 					edges.add(new Edge(entry.getKey().p, entry.getKey().v,
 							entry.getValue().size()));
-										pToFetch.work(1);
+					pToFetch.work(1);
 				}
 				pToFetch.done();
 			}
-			
-			boolean collapseEdges = true;
-			if (collapseEdges == true){
+
+			boolean collapseEdges = false;
+			if (collapseEdges == true) {
 
 				List<Edge> collapsedEdges = new ArrayList<Edge>(edges.size());
 				HashMap<Author, Edge> collapsing = new HashMap<Author, Edge>();
-				
-				for (Edge e : edges){
-					
-					Author one =authors.get(e.author);
+
+				for (Edge e : edges) {
+
+					Author one = authors.get(e.author);
 					Author two = authors.get(e.reply);
-					
-					if (one.project){
-						if (two.project){
+
+					if (one.project) {
+						if (two.project) {
 							collapsedEdges.add(e);
 						} else {
 							Edge e2 = collapsing.get(two);
-							if (e2 == null){
+							if (e2 == null) {
 								e2 = new Edge("cluster0", two.name, 0);
 								collapsing.put(two, e2);
 								collapsedEdges.add(e2);
@@ -419,9 +424,9 @@ public class SocialNetworkThreadAction extends AbstractAction {
 							e2.weight += e.weight;
 						}
 					} else {
-						if (two.project){
+						if (two.project) {
 							Edge e2 = collapsing.get(one);
-							if (e2 == null){
+							if (e2 == null) {
 								e2 = new Edge(one.name, "cluster0", 0);
 								collapsing.put(one, e2);
 								collapsedEdges.add(e2);
@@ -434,12 +439,11 @@ public class SocialNetworkThreadAction extends AbstractAction {
 				}
 				edges = collapsedEdges;
 			}
-			
 
 			ProjectToPlot project = new ProjectToPlot();
 			project.name = root.getMetaData("list");
 			project.members = projectMembers;
-			
+
 			HashMap<String, Object> result = new HashMap<String, Object>();
 			result.put("edges", edges);
 			result.put("authors", plainAuthors);
