@@ -18,7 +18,6 @@
  */
 package de.fu_berlin.inf.gmanda;
 
-import org.picocontainer.Characteristics;
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoBuilder;
 import org.picocontainer.injectors.AnnotatedFieldInjection;
@@ -161,6 +160,7 @@ import de.fu_berlin.inf.gmanda.startup.LocaleInitializer;
 import de.fu_berlin.inf.gmanda.startup.Starter;
 import de.fu_berlin.inf.gmanda.startup.Stoppable;
 import de.fu_berlin.inf.gmanda.util.Configuration;
+import de.fu_berlin.inf.gmanda.util.pico.DotGraphMonitor;
 import de.fu_berlin.inf.gmanda.util.preferences.ColorProperties;
 import de.fu_berlin.inf.gmanda.util.preferences.FileConverter;
 
@@ -170,11 +170,25 @@ public class GmandaMain {
 	
 	public GmandaMain(CommandLineOptions cmd) {
 		
-		container = new PicoBuilder(new CompositeInjection(   
-		    new ConstructorInjection(), new AnnotatedFieldInjection())).withCaching().build();
+		DotGraphMonitor dotMonitor = null;
 		
-		// Cache object instances (we only want every object created once as a singleton)
-		container = container.change(Characteristics.CACHE);
+		// Only start a DotGraphMonitor if asserts are enabled (aka debug mode)
+		assert (dotMonitor = new DotGraphMonitor()) != null;
+
+		PicoBuilder picoBuilder = new PicoBuilder(new CompositeInjection(
+				new ConstructorInjection(), new AnnotatedFieldInjection()))
+				.withCaching().withLifecycle();
+
+		/*
+		 * If given, the dotMonitor is used to capture an architecture diagram
+		 * of the application
+		 */
+		if (dotMonitor != null) {
+			picoBuilder = picoBuilder.withMonitor(dotMonitor);
+		}
+
+		// Initialize our dependency injection container
+		container = picoBuilder.build();
 		
 		container
 			// Register the command line
@@ -275,7 +289,6 @@ public class GmandaMain {
 			.addComponent(ComputeThreadStatisticsAction.class)
 			.addComponent(ComputeEmailStatisticsAction.class)
 			.addComponent(SocialNetworkThreadAction.class)
-			
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)
@@ -328,6 +341,10 @@ public class GmandaMain {
 			.addComponent(TrailManager.class)
 			.addComponent(GmandaHyperlinkListener.class)
 			.addComponent(SVGScreenshotTaker.class);
+		
+			if (dotMonitor != null){
+				container.addComponent(DotGraphMonitor.class, dotMonitor);
+			}
 		
 	}
 

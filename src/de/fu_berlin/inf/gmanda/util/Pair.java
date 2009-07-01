@@ -30,8 +30,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang.ObjectUtils;
-
 import com.google.common.base.Function;
 
 public class Pair<P, V> {
@@ -208,20 +206,38 @@ public class Pair<P, V> {
 			.toString();
 	}
 
-	@Override
+    @Override
 	public int hashCode() {
-		return (this.p == null ? 0 : this.p.hashCode()) | (this.v == null ? 0 : this.v.hashCode());
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((p == null) ? 0 : p.hashCode());
+		result = prime * result + ((v == null) ? 0 : v.hashCode());
+		return result;
 	}
 
-	public boolean equals(Object o) {
-		if (!(o instanceof Pair))
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
 			return false;
-
-		Pair<?, ?> other = (Pair<?, ?>) o;
-		return ObjectUtils.equals(this.p, other.p) && ObjectUtils.equals(this.v, other.v);
+		if (getClass() != obj.getClass())
+			return false;
+		Pair<?,?> other = (Pair<?,?>) obj;
+		if (p == null) {
+			if (other.p != null)
+				return false;
+		} else if (!p.equals(other.p))
+			return false;
+		if (v == null) {
+			if (other.v != null)
+				return false;
+		} else if (!v.equals(other.v))
+			return false;
+		return true;
 	}
 
-    public static <P, V> List<Pair<P, V>> map(Collection<V> vs,
+	public static <P, V> List<Pair<P, V>> map(Collection<V> vs,
         Function<V, P> function) {
         List<Pair<P, V>> result = new ArrayList<Pair<P, V>>(vs.size());
         for (V v : vs) {
