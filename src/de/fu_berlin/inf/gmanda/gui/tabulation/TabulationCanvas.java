@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -76,10 +77,12 @@ public class TabulationCanvas extends JScrollPane {
 	}
 
 	public Iterable<PrimaryDocument> getDocs() {
-		return PrimaryDocument.getTreeWalker(project.getVariable().getPrimaryDocuments());
+		return PrimaryDocument.getTreeWalker(project.getVariable()
+				.getPrimaryDocuments());
 	}
 
-	public <T> Map<String, Slice<T>> byValue(Iterable<? extends Code> codes, Slice<T> s) {
+	public <T> Map<String, Slice<T>> byValue(Iterable<? extends Code> codes,
+			Slice<T> s) {
 
 		for (Code c : codes) {
 			s = s.select(c);
@@ -96,7 +99,8 @@ public class TabulationCanvas extends JScrollPane {
 			return result;
 		}
 
-		LinkedList<Code> codes = Lists.newLinkedList(CodedStringFactory.parse(dim).getAllCodes());
+		LinkedList<Code> codes = Lists.newLinkedList(CodedStringFactory.parse(
+				dim).getAllCodes());
 
 		String lastTag = codes.getLast().getTag();
 		int depth;
@@ -107,17 +111,19 @@ public class TabulationCanvas extends JScrollPane {
 			depth = 0;
 		}
 
-		Map<String, Slice<T>> slices = new TreeMap<String, Slice<T>>(byValue(codes, all));
+		Map<String, Slice<T>> slices = new TreeMap<String, Slice<T>>(byValue(
+				codes, all));
 
 		for (Entry<String, Slice<T>> row : slices.entrySet()) {
 			String codeString = row.getKey();
 
-			if (codeString.equals("def") || codeString.equals("quote") || codeString.equals("date"))
+			if (codeString.equals("def") || codeString.equals("quote")
+					|| codeString.equals("date") || codeString.equals("desc"))
 				continue;
 
 			if (depth > 0) {
-				codeString = StringUtils.join(CUtils.first(CodedStringFactory.parseOne(codeString)
-					.getTagLevels(), depth), ".");
+				codeString = StringUtils.join(CUtils.first(CodedStringFactory
+						.parseOne(codeString).getTagLevels(), depth), ".");
 			}
 
 			result.putAll(codeString, row.getValue().getDocuments().keySet());
@@ -145,16 +151,16 @@ public class TabulationCanvas extends JScrollPane {
 					if (settings.yDim.trim().length() == 0) {
 						settings.yDim = null;
 					}
-					
+
 					if (settings.xDim.trim().length() == 0) {
 						settings.xDim = null;
 					}
-					
-					if (settings.xDim == null){
+
+					if (settings.xDim == null) {
 						settings.noIntersectX = true;
 					}
-					
-					if (settings.yDim == null){
+
+					if (settings.yDim == null) {
 						settings.noIntersectY = true;
 					}
 
@@ -167,7 +173,8 @@ public class TabulationCanvas extends JScrollPane {
 						filterBy = "episode";
 					}
 					Code c = CodedStringFactory.parseOne(filterBy);
-					Slice<PrimaryDocument> all = p.getCodeModel().getInitialFilterSlice(c.getTag());
+					Slice<PrimaryDocument> all = p.getCodeModel()
+							.getInitialFilterSlice(c.getTag());
 
 					do {
 						List<? extends Code> props = c.getProperties();
@@ -177,32 +184,38 @@ public class TabulationCanvas extends JScrollPane {
 
 						c = props.get(0);
 
-						if (c.getTag().equals("desc") && c.getProperties().size() == 1) {
+						if (c.getTag().equals("desc")
+								&& c.getProperties().size() == 1) {
 							break;
 						}
 						all = all.select(c);
 					} while (true);
 
-					joinSkipLevels = CodedStringFactory.parseOne(settings.groupBy).getTagLevels()
-						.size();
-					Slice<String> grouped = all.sliceAndPack(settings.groupBy, 0);
+					joinSkipLevels = CodedStringFactory.parseOne(
+							settings.groupBy).getTagLevels().size();
+					Slice<String> grouped = all.sliceAndPack(settings.groupBy,
+							0);
 
-					TreeSet<String> allGrouped = new TreeSet<String>(grouped.getDocuments()
-						.keySet());
+					TreeSet<String> allGrouped = new TreeSet<String>(grouped
+							.getDocuments().keySet());
 
-					Multimap<String, String> xSlices = preprocess(settings.xDim, grouped);
-					Multimap<String, String> ySlices = preprocess(settings.yDim, grouped);
+					Multimap<String, String> xSlices = preprocess(
+							settings.xDim, grouped);
+					Multimap<String, String> ySlices = preprocess(
+							settings.yDim, grouped);
 
-					CMultimap<String, String> xCheckSlices = new CMultimap<String, String>(xSlices);
+					CMultimap<String, String> xCheckSlices = new CMultimap<String, String>(
+							xSlices);
 
 					List<List<String>> table = new ArrayList<List<String>>();
 
 					{ // Header row
 						List<String> headerRow = new ArrayList<String>();
+						String xHeader = ToHtmlHelper.toFilterA(getLastRelevantTag(settings.xDim)) + " &rarr;<br/>";
 						if (settings.yDim != null) {
-							headerRow.add(ToHtmlHelper.toFilterA(settings.yDim));
+							headerRow.add(xHeader + ToHtmlHelper.toFilterA(getLastRelevantTag(settings.yDim)) + " &darr;");
 						} else {
-							headerRow.add("No y-dimension");
+							headerRow.add(xHeader + "No y-dimension &darr;");
 						}
 
 						for (String s : xSlices.keySet()) {
@@ -216,24 +229,28 @@ public class TabulationCanvas extends JScrollPane {
 						table.add(headerRow);
 					}
 
-					for (Entry<String, Collection<String>> row : ySlices.asMap().entrySet()) {
+					for (Entry<String, Collection<String>> row : ySlices
+							.asMap().entrySet()) {
 
 						String rowTag = row.getKey();
 						Collection<String> rowPDs = row.getValue();
-						HashSet<String> checkRowPDs = new HashSet<String>(rowPDs);
+						HashSet<String> checkRowPDs = new HashSet<String>(
+								rowPDs);
 
 						List<String> htmlRow = new ArrayList<String>();
 
 						htmlRow.add(ToHtmlHelper.toFilterA(rowTag));
 
-						for (Entry<String, Collection<String>> column : xSlices.asMap().entrySet()) {
+						for (Entry<String, Collection<String>> column : xSlices
+								.asMap().entrySet()) {
 
 							String columnTag = column.getKey();
 							Collection<String> columnPDs = column.getValue();
 
 							@SuppressWarnings("unchecked")
-							LinkedList<String> cell = new LinkedList<String>(CollectionUtils
-								.intersection(rowPDs, columnPDs));
+							LinkedList<String> cell = new LinkedList<String>(
+									CollectionUtils.intersection(rowPDs,
+											columnPDs));
 
 							checkRowPDs.removeAll(cell);
 							xCheckSlices.get(columnTag).removeAll(cell);
@@ -255,7 +272,8 @@ public class TabulationCanvas extends JScrollPane {
 						List<String> htmlRow = new ArrayList<String>();
 						htmlRow.add("[no intersection]");
 
-						for (Entry<String, Collection<String>> row : xCheckSlices.entrySet()) {
+						for (Entry<String, Collection<String>> row : xCheckSlices
+								.entrySet()) {
 							Collection<String> column = row.getValue();
 							htmlRow.add(join(column));
 							allGrouped.removeAll(column);
@@ -264,6 +282,54 @@ public class TabulationCanvas extends JScrollPane {
 							htmlRow.add(join(allGrouped));
 						}
 						table.add(htmlRow);
+					}
+
+					// Remove all completely empty rows and columns
+					if (settings.removeEmptyRowsColumns) {
+
+						// Delete Rows
+						nextRow: for (Iterator<List<String>> iterator = table
+								.iterator(); iterator.hasNext();) {
+							List<String> list = iterator.next();
+
+							Iterator<String> column = list.iterator();
+							column.next(); // Skip header
+
+							while (column.hasNext()) {
+								if (column.next().trim().length() > 0)
+									continue nextRow;
+							}
+							iterator.remove();
+						}
+
+						// Delete Columns
+						@SuppressWarnings("unchecked")
+						Iterator<String>[] columnIts = new Iterator[table
+								.size()];
+						int i = 0;
+						for (List<String> list : table) {
+							columnIts[i] = list.iterator();
+							columnIts[i].next();
+							i++;
+						}
+
+						while (columnIts[0].hasNext()) {
+							columnIts[0].next();
+							
+							boolean deleteRow = true;
+							for (i = 1; i < columnIts.length; i++) {
+								if (columnIts[i].next().trim().length() > 0) {
+									deleteRow = false;
+								}
+							}
+
+							if (deleteRow) {
+								for (Iterator<String> it : columnIts) {
+									it.remove();
+								}
+							}
+							
+						}
 					}
 
 					String text = runVelocity(table);
@@ -281,19 +347,29 @@ public class TabulationCanvas extends JScrollPane {
 				if (p == null)
 					return;
 
-				Slice<PrimaryDocument> all = p.getCodeModel().getInitialFilterSlice("episode");
+				Slice<PrimaryDocument> all = p.getCodeModel()
+						.getInitialFilterSlice("episode");
 
-				Multimap<String, PrimaryDocument> xSlices = preprocess(settings.xDim, all);
-				Multimap<String, PrimaryDocument> ySlices = preprocess(settings.yDim, all);
+				Multimap<String, PrimaryDocument> xSlices = preprocess(
+						settings.xDim, all);
+				Multimap<String, PrimaryDocument> ySlices = preprocess(
+						settings.yDim, all);
 
 				CMultimap<String, PrimaryDocument> xCheckSlices = new CMultimap<String, PrimaryDocument>(
-					xSlices);
+						xSlices);
 
 				List<List<String>> table = new ArrayList<List<String>>();
 
 				{ // Header row
 					List<String> headerRow = new ArrayList<String>();
-					headerRow.add(ToHtmlHelper.toFilterA(settings.yDim));
+					
+					String xHeader = ToHtmlHelper.toFilterA(getLastRelevantTag(settings.xDim)) + " &rarr;<br/>";
+					if (settings.yDim != null) {
+						headerRow.add(xHeader + ToHtmlHelper.toFilterA(getLastRelevantTag(settings.yDim)) + " &darr;");
+					} else {
+						headerRow.add(xHeader + "No y-dimension &darr;");
+					}
+					
 					for (String s : xSlices.keySet()) {
 						headerRow.add(ToHtmlHelper.toFilterA(s));
 					}
@@ -301,25 +377,28 @@ public class TabulationCanvas extends JScrollPane {
 					table.add(headerRow);
 				}
 
-				for (Entry<String, Collection<PrimaryDocument>> row : ySlices.asMap().entrySet()) {
+				for (Entry<String, Collection<PrimaryDocument>> row : ySlices
+						.asMap().entrySet()) {
 
 					String rowTag = row.getKey();
 					Collection<PrimaryDocument> rowPDs = row.getValue();
-					HashSet<PrimaryDocument> checkRowPDs = new HashSet<PrimaryDocument>(rowPDs);
+					HashSet<PrimaryDocument> checkRowPDs = new HashSet<PrimaryDocument>(
+							rowPDs);
 
 					List<String> htmlRow = new ArrayList<String>();
 
 					htmlRow.add(ToHtmlHelper.toFilterA(rowTag));
 
-					for (Entry<String, Collection<PrimaryDocument>> column : xSlices.asMap()
-						.entrySet()) {
+					for (Entry<String, Collection<PrimaryDocument>> column : xSlices
+							.asMap().entrySet()) {
 
 						String columnTag = column.getKey();
-						Collection<PrimaryDocument> columnPDs = column.getValue();
+						Collection<PrimaryDocument> columnPDs = column
+								.getValue();
 
 						@SuppressWarnings("unchecked")
 						LinkedList<PrimaryDocument> cell = new LinkedList<PrimaryDocument>(
-							CollectionUtils.intersection(rowPDs, columnPDs));
+								CollectionUtils.intersection(rowPDs, columnPDs));
 
 						checkRowPDs.removeAll(cell);
 						xCheckSlices.get(columnTag).removeAll(cell);
@@ -335,7 +414,8 @@ public class TabulationCanvas extends JScrollPane {
 				List<String> htmlRow = new ArrayList<String>();
 				htmlRow.add("[no intersection]");
 
-				for (Entry<String, Collection<PrimaryDocument>> row : xCheckSlices.entrySet()) {
+				for (Entry<String, Collection<PrimaryDocument>> row : xCheckSlices
+						.entrySet()) {
 					htmlRow.add(join(row.getValue()));
 				}
 
@@ -348,16 +428,40 @@ public class TabulationCanvas extends JScrollPane {
 
 		}, "Error calculating tabulation");
 	}
+	
+	public static String getLastRelevantTag(String code){
+		LinkedList<Code> codes = Lists.newLinkedList(CodedStringFactory.parse(
+				code).getAllCodes());
+
+		if (codes.size() == 0){
+			return "";
+		}
+		
+		String lastTag = codes.getLast().getTag();
+		try {
+			Integer.parseInt(lastTag);
+			codes.removeLast();
+		} catch (Exception e) {
+			// The last code is not a number
+		}
+		
+		if (codes.size() == 0)
+			return "";
+		
+		return codes.getLast().getTag();
+	}
 
 	private String join(Iterable<?> cell) {
-		return CStringUtils.join(Iterables.transform(cell, new Function<Object, String>() {
-			public String apply(Object o) {
-				if (o instanceof PrimaryDocument)
-					return ToHtmlHelper.toA((PrimaryDocument) o, null);
-				else
-					return ToHtmlHelper.toFilterA(joinSkipLevels, o.toString());
-			}
-		}), "<br>");
+		return CStringUtils.join(Iterables.transform(cell,
+				new Function<Object, String>() {
+					public String apply(Object o) {
+						if (o instanceof PrimaryDocument)
+							return ToHtmlHelper.toA((PrimaryDocument) o, null);
+						else
+							return ToHtmlHelper.toFilterA(joinSkipLevels, o
+									.toString());
+					}
+				}), "<br>");
 	}
 
 	Template tableTemplate;
@@ -371,14 +475,16 @@ public class TabulationCanvas extends JScrollPane {
 			Properties p = new Properties();
 
 			p.setProperty("resource.loader", "class, file");
-			p.setProperty("class.resource.loader.class",
-				"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+			p
+					.setProperty("class.resource.loader.class",
+							"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 			try {
 				Velocity.init(p);
 
 				context = new VelocityContext();
 
-				tableTemplate = Velocity.getTemplate("resources/templates/table.vm");
+				tableTemplate = Velocity
+						.getTemplate("resources/templates/table.vm");
 			} catch (Exception e) {
 				throw new DoNotShowToUserException(e);
 			}

@@ -14,19 +14,22 @@ public class TabulationSettings {
 	
 	boolean noIntersectY;
 
+	boolean removeEmptyRowsColumns;
+
 	public TabulationSettings(String xDim, String yDim, String groupBy, String filterBy, 
-		boolean noIntersectX, boolean noIntersectY) {
+		boolean noIntersectX, boolean noIntersectY, boolean removeEmptyRowsColumns) {
 		this.xDim = xDim;
 		this.yDim = yDim;
 		this.groupBy = groupBy;
 		this.filterBy = filterBy;
 		this.noIntersectX = noIntersectX;
 		this.noIntersectY = noIntersectY;
+		this.removeEmptyRowsColumns = removeEmptyRowsColumns;
 	}
 
 	public String toString() {
-		return String.format("X: %s     Y: %s     Group by: %s    Filter: %s    Show no intersect: %b %b", xDim, yDim, groupBy,
-			filterBy, noIntersectX, noIntersectY);
+		return String.format("X: %s     Y: %s     Group by: %s    Filter: %s    Show no intersect: %b %b    Remove Empty Columns: %b", xDim, yDim, groupBy,
+			filterBy, noIntersectX, noIntersectY, removeEmptyRowsColumns);
 	}
 
 	@Override
@@ -38,6 +41,7 @@ public class TabulationSettings {
 		result = prime * result + ((groupBy == null) ? 0 : groupBy.hashCode());
 		result = prime * result + (noIntersectX ? 1231 : 1237);
 		result = prime * result + (noIntersectY ? 1231 : 1237);
+		result = prime * result + (removeEmptyRowsColumns ? 1231 : 1237);
 		result = prime * result + ((xDim == null) ? 0 : xDim.hashCode());
 		result = prime * result + ((yDim == null) ? 0 : yDim.hashCode());
 		return result;
@@ -52,12 +56,6 @@ public class TabulationSettings {
 		if (getClass() != obj.getClass())
 			return false;
 		TabulationSettings other = (TabulationSettings) obj;
-		
-		if (noIntersectX != other.noIntersectX)
-			return false;
-		if (noIntersectY != other.noIntersectY)
-			return false;
-		
 		if (filterBy == null) {
 			if (other.filterBy != null)
 				return false;
@@ -68,7 +66,12 @@ public class TabulationSettings {
 				return false;
 		} else if (!groupBy.equals(other.groupBy))
 			return false;
-
+		if (noIntersectX != other.noIntersectX)
+			return false;
+		if (noIntersectY != other.noIntersectY)
+			return false;
+		if (removeEmptyRowsColumns != other.removeEmptyRowsColumns)
+			return false;
 		if (xDim == null) {
 			if (other.xDim != null)
 				return false;
