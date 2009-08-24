@@ -87,6 +87,7 @@ public enum FileVersion {
 			}
 		}
 
+		@SuppressWarnings("all")
 		public void save(ProjectData project, Writer out) {
 
 			/*
@@ -157,6 +158,7 @@ public enum FileVersion {
 			}
 		}
 
+		@SuppressWarnings("all")
 		@Deprecated
 		public void save(ProjectData project, Writer out) {
 			
@@ -232,6 +234,7 @@ public enum FileVersion {
 			}
 		}
 
+		@SuppressWarnings("all")
 		@Deprecated
 		public void save(ProjectData project, Writer out) {
 			
