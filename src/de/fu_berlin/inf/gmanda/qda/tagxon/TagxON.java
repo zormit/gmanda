@@ -170,7 +170,7 @@ public class TagxON {
 
 			// Store for checking later!
 			String oldValue = null;
-			assert (oldValue = toString(true, false)) == oldValue;
+			assert alwaysTrue(oldValue = toString(true, false));
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(getTag()).append(": ");
@@ -184,6 +184,10 @@ public class TagxON {
 			}
 
 			return sb.toString();
+		}
+
+		private boolean alwaysTrue(String string) {
+			return true;
 		}
 
 		public List<? extends Code> getProperties() {
