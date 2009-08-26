@@ -1,23 +1,25 @@
 
 #macro( writeSection $section)
-  \subsection{$section.title}
-    \label{def:$section.code}
+  \\${section.sectionMacro}{$section.title}\label{$section.label}
 	
     #if ($section.definition)
       \textbf{Def.:} $section.definition
     #end
  
-    \begin{itemize} 
-      #foreach ($item in $section.items)
-        \phantomsection
-        \item \emph{$item.title} \label{def:$item.code} {\small(\texttt{\hyphenchar\font45\relax $item.codeHyp})}\\
-        $item.definition
-      #end
-    \end{itemize} 
+    #if ($section.items.size() > 0)
+      \begin{itemize} 
+        #foreach ($item in $section.items)
+          \phantomsection
+          \item \emph{$item.title} \label{def:$item.code} {\small(\texttt{\hyphenchar\font45\relax $item.codeHyp})}\\
+          $item.definition
+        #end
+      \end{itemize} 
+    #end
+    
+    #foreach ($subSection in $section.sections)
+      #writeSection($subSection)
+    #end
 #end
-
-\section{Glossary}
-\label{sec:glossary}
 
 #foreach ($section in $sections)
   #writeSection($section)

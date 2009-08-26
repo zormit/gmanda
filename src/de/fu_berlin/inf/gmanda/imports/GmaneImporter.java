@@ -20,6 +20,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import de.fu_berlin.inf.gmanda.gui.preferences.CacheDirectoryProperty;
@@ -29,6 +30,8 @@ import de.fu_berlin.inf.gmanda.util.tree.ChildrenableTreeWalker;
 
 public class GmaneImporter {
 
+	private static final Logger log = Logger.getLogger(GmaneImporter.class);
+	
 	public static class ImportSettings {
 
 		/**
@@ -72,6 +75,11 @@ public class GmaneImporter {
 		 * The directory from/to which message bodies will be read/written.
 		 */
 		public String cacheDirectory;
+		
+		/**
+		 * Whether the importer should expect messages IDs in the data
+		 */
+		public boolean useIDsFromEmails;
 
 		public boolean isInDateRange(DateTime sentDate) {
 
@@ -116,6 +124,10 @@ public class GmaneImporter {
 				if (rangeEnd == -1) {
 					rangeEnd = fetcher.getEstimatedEndEmail(progress, listName, rangeEnd, null);
 				}
+				
+				// Emails from a GmaneFetcher should have IDs
+				useIDsFromEmails = true;
+				
 			} finally {
 				progress.done();
 			}
@@ -190,18 +202,17 @@ public class GmaneImporter {
 	public static void fillMetaData(Properties meta, Message message, String listName, int id) {
 
 		try {
-			String subject = message.getSubject();
+			String subject = MyMimeUtils.getSubject(message);
 			String from = MyMimeUtils.getFrom(message);
 			String to = MyMimeUtils.getRecipients(message, Message.RecipientType.TO);
 			String cc = MyMimeUtils.getRecipients(message, Message.RecipientType.CC);
 			String bcc = MyMimeUtils.getRecipients(message, Message.RecipientType.BCC);
-			String date = (message.getSentDate() != null ? new DateTime(message.getSentDate())
-				.toString() : "unknown");
+			String date = MyMimeUtils.getDate(message);
 			String list = getMailingList(message);
 
 			// Store Metadata
 			meta.put("id", Integer.toString(id));
-			meta.put("subject", message.getSubject());
+			meta.put("subject", from);
 			meta.put("from", from);
 			meta.put("date", date);
 			meta.put("title", id + " - " + subject);
@@ -220,11 +231,9 @@ public class GmaneImporter {
 				meta.put("list", list);
 			}
 		} catch (Exception e) {
-			System.err.println(String.format("Error in Mail with ID '%d' while parsing metadata",
-				id));
-			e.printStackTrace(System.err);
+			log.error(String.format("Error in Mail with ID '%d' while parsing metadata",
+				id), e);
 		}
-
 	}
 
 	public static Pattern referencePattern = Pattern.compile("<.*?>");
@@ -284,12 +293,17 @@ public class GmaneImporter {
 
 			PrimaryDocumentData child = new PrimaryDocumentData();
 
-			int id = getId(message);
+			int id;
+			if (settings.useIDsFromEmails){
+				id = getId(message);
 
-			if (id == -1) {
+				if (id == -1) {
+					id = previousId + 1;
+					log.warn(String.format(
+							"  Could not find ID in message with estimated ID '%d'", id));
+				}
+			} else {
 				id = previousId + 1;
-				System.err.println(String.format(
-					"  Could not find ID in message with estimated ID '%d'", id));
 			}
 
 			previousId = id;
@@ -310,8 +324,7 @@ public class GmaneImporter {
 				pw.write(messageBody);
 				pw.close();
 			} catch (FileNotFoundException e) {
-				System.err
-					.println("  " + child.filename + " could not save body:" + e.getMessage());
+				log.error("  " + child.filename + " could not save body:" + e.getMessage(), e);
 			}
 
 			// Filter
@@ -326,8 +339,9 @@ public class GmaneImporter {
 			String[] mids = message.getHeader("Message-ID");
 
 			if (mids == null || mids.length == 0 || mids[0].trim().length() == 0) {
-				System.out.println(Arrays.toString(mids));
-				throw new RuntimeException();
+				log.error("No message ID found: " + Arrays.toString(mids));
+				mids = new String[]{ String.valueOf((long)(Math.random() * Integer.MAX_VALUE)) + String.valueOf((long)(Math.random() * Integer.MAX_VALUE)) };
+				log.error("Generated MID: " + Arrays.toString(mids));
 			}
 
 			String mid = mids[0];
@@ -364,7 +378,7 @@ public class GmaneImporter {
 				continue;
 
 			if (refs.length != 1 || refs[0].trim().length() == 0) {
-				System.err.println("  " + child.filename + " reference integrity failed");
+				log.error("  " + child.filename + " reference integrity failed");
 			}
 
 			// Get last reference
@@ -381,7 +395,7 @@ public class GmaneImporter {
 					parents.put(child, parent);
 					parent.children.add(child);
 				} else {
-					System.err.println("  " + child.filename + " parent/child integrity failed");
+					log.error("  " + child.filename + " parent/child integrity failed");
 				}
 			}
 		}

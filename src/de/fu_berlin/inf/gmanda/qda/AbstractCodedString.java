@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 import de.fu_berlin.inf.gmanda.util.tree.TreeMaker;
 import de.fu_berlin.inf.gmanda.util.tree.TreeStructure;
 import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
@@ -88,16 +90,50 @@ public abstract class AbstractCodedString implements CodedString {
 	}
 	
 	public static Collection<? extends Code> getProperties(Collection<? extends Code> codes, String propName){
-		
+		List<Code> result = new LinkedList<Code>();
+		for (Code c : codes){
+			result.addAll(getProperties(c, propName));
+		}
+		return result;
+	}
+
+	public static List<Code> getProperties(Code c, String propName) {
 		List<Code> result = new LinkedList<Code>();
 		
-		for (Code c : codes){
-			for (Code sub : c.getProperties()){
-				if (sub.getTag().equals(propName)){
-					result.add(sub);
-				}
+		for (Code sub : c.getProperties()){
+			if (sub.getTag().equals(propName)){
+				result.add(sub);
 			}
 		}
+		return result;
+	}
+
+	/**
+	 * Returns the first property in the given code matching the given name, or null.
+	 */
+	public static Code getFirstProperty(Code c, String propertyName){
+		for (Code prop : getProperties(c, propertyName)){
+			return prop;
+		}
+		return null;
+	}
+	
+	public static String getFirstPropertyValueClean(Code c, String propertyName, String defaultValue){
+		Code c2 = getFirstProperty(c, propertyName);
+	
+		if (c2 == null)
+			return defaultValue;
+		
+		String result = c2.getValue();
+		
+		if (result == null || result.trim().length() == 0)
+			return defaultValue;
+		
+		result = StringUtils.strip(result, ",. \r\n\f\t'\"");
+		
+		if (result == null || result.trim().length() == 0)
+			return defaultValue;
+		
 		return result;
 	}
 

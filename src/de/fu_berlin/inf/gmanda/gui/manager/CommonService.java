@@ -54,6 +54,8 @@ public class CommonService {
 						messageToUserOnError + ":\n" + e.getErrorMessage());
 				} catch (Exception e){
 					e.printStackTrace();
+					JOptionPane.showMessageDialog(windowProxy.getAsFrameOrNull(),
+							messageToUserOnError + ":\n" + e.getMessage());
 				}
 			}
 		};

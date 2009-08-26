@@ -6,17 +6,21 @@ package de.fu_berlin.inf.gmanda.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
+
+import org.apache.commons.io.FilenameUtils;
 
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
 import de.fu_berlin.inf.gmanda.gui.dialogs.ImportFromGmaneDialog;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
+import de.fu_berlin.inf.gmanda.gui.misc.MBoxFileChooser;
 import de.fu_berlin.inf.gmanda.imports.GmaneImporter;
-import de.fu_berlin.inf.gmanda.imports.GmaneMboxFetcher;
 import de.fu_berlin.inf.gmanda.imports.GmaneImporter.ImportSettings;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocumentData;
@@ -24,24 +28,27 @@ import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.progress.NestableProgressMonitor;
 
-public class LoadGmaneListAction extends AbstractAction {
+public class ImportFromMboxAction extends AbstractAction {
 
 	ProjectProxy projectProxy;
 
 	GmaneImporter importer;
 
-	GmaneMboxFetcher fetcher;
-
 	CommonService cs;
-
-	public LoadGmaneListAction(ProjectProxy projectProxy, GmaneImporter importer, CommonService cs,
-		GmaneMboxFetcher fetcher) {
-		super("Add Emails from a Gmane Mailing List...");
+	
+	MBoxFileChooser fileChooser;
+	
+	public ImportFromMboxAction(
+			ProjectProxy projectProxy, 
+			GmaneImporter importer, 
+			CommonService cs,
+			MBoxFileChooser fileChooser) {
+		super("Import Emails from an MBox archive");
 
 		this.projectProxy = projectProxy;
 		this.importer = importer;
 		this.cs = cs;
-		this.fetcher = fetcher;
+		this.fileChooser = fileChooser;
 
 		this.projectProxy.addAndNotify(new VariableProxyListener<Project>() {
 			public void setVariable(Project newValue) {
@@ -53,7 +60,9 @@ public class LoadGmaneListAction extends AbstractAction {
 		putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_G));
 	}
 
-	ImportFromGmaneDialog dialog;
+	ImportFromGmaneDialog importDialog;
+
+	JFileChooser fc;
 
 	public void actionPerformed(ActionEvent arg0) {
 
@@ -67,31 +76,30 @@ public class LoadGmaneListAction extends AbstractAction {
 
 	public void loadEmails() {
 
-		Project p = projectProxy.getVariable();
+		Project project = projectProxy.getVariable();
 
-		if (p == null)
+		if (project == null)
+			return;
+		
+		File mboxFile = fileChooser.getOpenFile();
+		if (mboxFile == null)
 			return;
 
-		if (dialog == null) {
-			dialog = new ImportFromGmaneDialog(cs.getForegroundWindowOrNull(), true);
+		if (importDialog == null) {
+			importDialog = new ImportFromGmaneDialog(cs.getForegroundWindowOrNull(), true);
 		}
+		importDialog.setListName(FilenameUtils.getBaseName(mboxFile.getName()));
 
-		dialog.setVisible(true);
+		importDialog.setVisible(true);
 
-		if (dialog.getReturnStatus() == ImportFromGmaneDialog.RET_OK) {
-			String input = dialog.getListName();
+		if (importDialog.getReturnStatus() == ImportFromGmaneDialog.RET_OK) {
+			String input = importDialog.getListName();
 
 			if (input == null || input.trim().length() == 0)
 				return;
 
-			if (!input.startsWith("gmane."))
-				input = "gmane." + input;
-
-			if (input.endsWith(".mbox"))
-				input = input.substring(0, input.length() - ".mbox".length());
-
 			NestableProgressMonitor pm = new NestableProgressMonitor(
-				cs.getForegroundWindowOrNull(), "Fetching '" + input + "' from Gmane...");
+				cs.getForegroundWindowOrNull(), "Importing from mbox file '" + mboxFile.getName() + "...");
 
 			pm.setScale(100);
 			pm.start();
@@ -100,38 +108,29 @@ public class LoadGmaneListAction extends AbstractAction {
 				// Fetch from Gmane to temporary mbox file
 				ImportSettings settings = new ImportSettings();
 				settings.listName = input;
-				settings.mboxFile = null; // Fetch to temporary file
+				settings.mboxFile = mboxFile;
 
-				switch (dialog.getFetchType()) {
+				switch (importDialog.getFetchType()) {
 				case BYDATE: {
-					settings.startDate = dialog.getStartDate();
-					settings.endDate = dialog.getEndDate();
-					
-					settings.rangeStart = fetcher.getEstimatedStartEmail(pm.getSub(5), input,
-						dialog.getStartDate());
-					settings.rangeEnd = fetcher.getEstimatedEndEmail(pm.getSub(5), input,
-						settings.rangeStart, dialog.getEndDate());
+					settings.startDate = importDialog.getStartDate();
+					settings.endDate = importDialog.getEndDate();
 					break;
 				}
 				case BYID: {
-					settings.rangeStart = dialog.getStartId();
-					settings.rangeEnd = dialog.getEndId();
+					settings.rangeStart = importDialog.getStartId();
+					settings.rangeEnd = importDialog.getEndId();
 					break;
 				}
 				default:
 					settings.rangeStart = -1;
 					settings.rangeEnd = -1;
 				}
-
-				fetcher.fetch(pm.getSub(45), settings);
-
+				settings.useIDsFromEmails = false;
+				
 				// Read mbox file
-				List<PrimaryDocumentData> imported = importer.importPrimaryDocuments(pm.getSub(45),
-					settings);
+				List<PrimaryDocumentData> imported = importer.importPrimaryDocuments(pm, settings);
 
-				p.addRootPDDs(imported);
-
-				settings.mboxFile.delete();
+				project.addRootPDDs(imported);
 
 			} catch (Exception e) {
 				throw new ReportToUserException(e);

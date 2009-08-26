@@ -18,6 +18,8 @@
  */
 package de.fu_berlin.inf.gmanda;
 
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.helpers.LogLog;
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoBuilder;
 import org.picocontainer.injectors.AnnotatedFieldInjection;
@@ -26,6 +28,7 @@ import org.picocontainer.injectors.ConstructorInjection;
 import org.picocontainer.injectors.AbstractInjector.UnsatisfiableDependenciesException;
 
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
+import de.fu_berlin.inf.gmanda.exports.VelocitySupport;
 import de.fu_berlin.inf.gmanda.gui.CodeAsTextView;
 import de.fu_berlin.inf.gmanda.gui.CodeBox;
 import de.fu_berlin.inf.gmanda.gui.CodeBoxView;
@@ -57,6 +60,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.FetchGmaneListToFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FormatCodeAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ForwardSelectionAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FullscreenTextViewAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ImportFromMboxAction;
 import de.fu_berlin.inf.gmanda.gui.actions.InsertDateAction;
 import de.fu_berlin.inf.gmanda.gui.actions.InsertSessionLogTemplateAction;
 import de.fu_berlin.inf.gmanda.gui.actions.InsertSubCodeTemplateAction;
@@ -70,6 +74,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.RefetchAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchListAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchRecursiveAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ReindexWithLuceneAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ReindexWithLuceneTreeAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RenameCodesAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ResetFilterAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RewindSelectionAction;
@@ -102,6 +107,7 @@ import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaInfoBox;
 import de.fu_berlin.inf.gmanda.gui.misc.LaTeXDirectoryChooser;
 import de.fu_berlin.inf.gmanda.gui.misc.LockManager;
+import de.fu_berlin.inf.gmanda.gui.misc.MBoxFileChooser;
 import de.fu_berlin.inf.gmanda.gui.misc.PrimaryDocumentCellRenderer;
 import de.fu_berlin.inf.gmanda.gui.misc.ProjectFileChooser;
 import de.fu_berlin.inf.gmanda.gui.misc.SVGScreenshotTaker;
@@ -174,7 +180,9 @@ public class GmandaMain {
 		
 		// Only start a DotGraphMonitor if asserts are enabled (aka debug mode)
 		assert (dotMonitor = new DotGraphMonitor()) != null;
-
+		
+		initializeLogging();
+		
 		PicoBuilder picoBuilder = new PicoBuilder(new CompositeInjection(
 				new ConstructorInjection(), new AnnotatedFieldInjection()))
 				.withCaching().withLifecycle();
@@ -289,6 +297,8 @@ public class GmandaMain {
 			.addComponent(ComputeThreadStatisticsAction.class)
 			.addComponent(ComputeEmailStatisticsAction.class)
 			.addComponent(SocialNetworkThreadAction.class)
+			.addComponent(ImportFromMboxAction.class)
+			.addComponent(ReindexWithLuceneTreeAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)
@@ -312,6 +322,7 @@ public class GmandaMain {
 			.addComponent(GmaneMboxFetcher.class)
 			.addComponent(GmaneFacade.class)
 			.addComponent(DotFileFileChooser.class)
+			.addComponent(MBoxFileChooser.class)
 			// Properties
 			.addComponent(ScrollOnShowProperty.class)
 			.addComponent(PrimaryDocumentDirectoryProperty.class)
@@ -340,12 +351,22 @@ public class GmandaMain {
 			.addComponent(SelectionViewManager.class)
 			.addComponent(TrailManager.class)
 			.addComponent(GmandaHyperlinkListener.class)
-			.addComponent(SVGScreenshotTaker.class);
+			.addComponent(SVGScreenshotTaker.class)
+			.addComponent(VelocitySupport.class);
 		
 			if (dotMonitor != null){
 				container.addComponent(DotGraphMonitor.class, dotMonitor);
 			}
 		
+	}
+
+	protected void initializeLogging() {
+		try {
+            PropertyConfigurator.configureAndWatch("log4j.properties",
+                60 * 1000);
+        } catch (SecurityException e) {
+            LogLog.error("Could not start logging:", e);
+        }
 	}
 
 	public void startApplication() {

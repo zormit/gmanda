@@ -3,14 +3,11 @@ package de.fu_berlin.inf.gmanda.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,27 +17,26 @@ import javax.swing.Action;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 import org.picocontainer.annotations.Inject;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
-import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
+import de.fu_berlin.inf.gmanda.exports.VelocitySupport;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.misc.LaTeXDirectoryChooser;
 import de.fu_berlin.inf.gmanda.gui.preferences.DebugModeProperty;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
+import de.fu_berlin.inf.gmanda.qda.AbstractCodedString;
 import de.fu_berlin.inf.gmanda.qda.Code;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
-import de.fu_berlin.inf.gmanda.util.VelocityWhitespaceRepair;
 import de.fu_berlin.inf.gmanda.util.gui.EnableComponentBridge;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
+import de.fu_berlin.inf.gmanda.util.tree.Childrenable;
+import de.fu_berlin.inf.gmanda.util.tree.ChildrenableTreeWalker;
 
 public class ExportCitationsToLatexAction extends AbstractAction {
 
@@ -52,6 +48,11 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 	@Inject
 	DebugModeProperty debugMode;
+	
+	@Inject
+	VelocitySupport velocity;
+	
+	public static final String DEFINITION_MACRO_NAME = "dref";
 
 	ProjectProxy proxy;
 
@@ -73,16 +74,12 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		return s;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<String> getCitationList(File dir) {
 
 		List<String> result = new ArrayList<String>();
 
-		for (File tex : dir.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".tex"); // &&
-				// !name.equals("glossary.tex");
-			}
-		})) {
+		for (File tex : (Collection<File>)FileUtils.listFiles(dir, new String[]{"tex"}, true)){
 
 			String input;
 			try {
@@ -92,7 +89,7 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 			}
 
 			Pattern p = Pattern
-					.compile("\\\\dref\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}\\s*\\{((?:\\w|\\s|\\/|[@\\-.?!'\\(\\)])+?)\\}");
+					.compile("\\\\"+ DEFINITION_MACRO_NAME + "\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}\\s*\\{((?:\\w|\\s|\\/|[@\\-.?!'\\(\\)])+?)\\}");
 
 			Matcher m = p.matcher(input);
 
@@ -125,7 +122,7 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 				shortCode = code;
 			}
 
-			Section item = new Section(shortCode, code);
+			Section item = new Section(section, shortCode, code, null);
 
 			item.initializeDefinition(p);
 
@@ -155,64 +152,10 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 				try {
 					List<String> citations = getCitationList(openDir);
 
-					List<Section> categories = new ArrayList<Section>();
-
-					categories.add(new Section("Innovations", "innovation"));
-					categories.add(new Section("Episodes", "episode"));
-					categories.add(new Section("Projects", "project"));
-					categories.add(new Section("Activities", "activity"));
-					categories.add(new Section("Concepts", "concept"));
-					categories.add(new Section("Episode Outcomes", "outcome"));
-
-					Section uncategorized = new Section("Uncategorized Codes",
-							null);
-					uncategorized.definition = ""; // Set to non-null so that it
-					// is not queried for a
-					// definition
-
-					Multimap<Section, String> citationsByCategory = new TreeMultimap<Section, String>();
-
-					nextCitation: for (String citation : citations) {
-
-						for (Section section : categories) {
-
-							Code c = CodedStringFactory.parseOne(section.code
-									+ ".*");
-
-							if (c
-									.matches(CodedStringFactory
-											.parseOne(citation))) {
-								citationsByCategory.put(section, citation);
-								continue nextCitation;
-							}
-						}
-						citationsByCategory.put(uncategorized, citation);
+					for (Code c : p.getCodeModel().getAllCodesDeep("export")) {
+						export(c, p, openDir, citations);
 					}
 
-					List<Section> sections = new ArrayList<Section>();
-
-					for (Entry<Section, Collection<String>> entry : citationsByCategory
-							.asMap().entrySet()) {
-
-						sections.add(buildSection(p, entry.getKey(), entry
-								.getValue()));
-					}
-
-					uncategorized.definition = null; // Set to null again, so no
-					// definition is
-					// generated in the
-					// LaTeX output
-					uncategorized.code = "uncategorized";
-
-					// Run template engine
-					String glossary = runVelocity(sections);
-
-					try {
-						FileUtils.writeStringToFile(new File(openDir,
-								"glossary.tex"), glossary);
-					} catch (IOException e) {
-						throw new ReportToUserException(e);
-					}
 				} catch (Exception e) {
 					throw new ReportToUserException(e);
 				} finally {
@@ -222,11 +165,17 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		}, "Error exporting statistics");
 	}
 
-	public class Section implements Comparable<Section> {
+	public class Section implements Comparable<Section>, Childrenable<Section> {
 
-		public Section(String title, String code) {
+		public Section(Section parent, String title, String code, String label) {
 			this.title = title;
 			this.code = code;
+			this.label = label;
+			this.parent = parent;
+		}
+		
+		public Section getParent(){
+			return parent;
 		}
 
 		public String getTitle() {
@@ -235,6 +184,34 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 		public String getCode() {
 			return code;
+		}
+		
+		public String getLabel() {
+			if (label == null){
+				return "def:" + getCode();
+			} else {
+				return label;
+			}
+		}
+		
+		public int getSectionDepth(){
+			int i = 0;
+			Section current = this.getParent();
+			while (current != null){
+				current = current.getParent();
+				i++;
+			}
+			return i;
+		}
+		
+		public String getSectionMacro(){
+			switch (getSectionDepth()){
+			case 0: return "section";
+			case 1: return "subsection";
+			case 2: return "subsubsection";
+			case 3: return "paragraph";
+			default: return "subparagraph";
+			}
 		}
 
 		public String getCodeHyp() {
@@ -250,8 +227,7 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		}
 
 		public List<Section> getItems() {
-			// This method only exists for namings sake
-			return sections;
+			return items;
 		}
 
 		public void initializeDefinition(Project p) {
@@ -302,71 +278,113 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 			}
 		}
 
+		Section parent;
+		
 		String title;
 
 		String code;
 
+		String label;
+		
 		String definition;
 
 		List<Section> sections = new LinkedList<Section>();
+		
+		List<Section> items = new LinkedList<Section>();
 
 		public int compareTo(Section o) {
 			return this.title.compareTo(o.title);
 		}
+
+		@Override
+		public Collection<Section> getChildren() {
+			return getSections();
+		}
 	}
 
-	Template latexTemplate;
+	private void export(Code exportInstructions, Project p, File openDir,
+			List<String> citations) {
 
-	VelocityContext context;
+		List<Section> categoriesNested = new ArrayList<Section>();
 
-	public String runVelocity(List<Section> sections) {
-
-		if (context == null) {
-
-			Properties p = new Properties();
-
-			if (debugMode.getValue()) {
-				// Enable auto reload
-				p.setProperty("resource.loader", "file");
-				p.setProperty("file.resource.loader.cache", "false");
-				p.setProperty("velocimacro.library.autoreload", "true");
-			} else {
-				p.setProperty("resource.loader", "class, file");
-				p
-						.setProperty("class.resource.loader.class",
-								"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-			}
-
-			try {
-				Velocity.init(p);
-
-				context = new VelocityContext();
-
-				FileUtils.writeStringToFile(new File(
-						"resources/templates/glossaryWhitespace.vm"),
-						new VelocityWhitespaceRepair().fixWhitespace(FileUtils
-								.readFileToString(new File(
-										"resources/templates/glossary.vm"))));
-
-				latexTemplate = Velocity
-						.getTemplate("resources/templates/glossaryWhitespace.vm");
-
-			} catch (Exception e) {
-				throw new DoNotShowToUserException(e);
-			}
+		for (Code subCode : exportInstructions.getProperties("section")) {
+			categoriesNested.add(buildCategories(null, subCode));
 		}
 
-		context.put("sections", sections);
+		Section uncategorized = null;
 
-		StringWriter writer = new StringWriter();
+		List<Section> categories = new ArrayList<Section>();
+		for (Section s : new ChildrenableTreeWalker<Section>(categoriesNested)) {
+			if ("-".equals(s.code)) {
+				uncategorized = s;
+			}
+			categories.add(s);
+		}
+
+		if (uncategorized == null) {
+			uncategorized = new Section(null, "Uncategorized Codes", null, "sec:uncategorized");
+		}
+
+		/**
+		 * // Set to non-null so that it // is not queried for a // definition
+		 */
+		uncategorized.definition = "";
+
+		Multimap<Section, String> citationsByCategory = new TreeMultimap<Section, String>();
+
+		nextCitation: for (String citation : citations) {
+
+			for (Section section : categories) {
+
+				if (section.code == null || "-".equals(section.code))
+					continue;
+				
+				Code c = CodedStringFactory.parseOne(section.code + ".*");
+
+				if (c.matches(CodedStringFactory.parseOne(citation))) {
+					citationsByCategory.put(section, citation);
+					continue nextCitation;
+				}
+			}
+			citationsByCategory.put(uncategorized, citation);
+		}
+
+		for (Entry<Section, Collection<String>> entry : citationsByCategory
+				.asMap().entrySet()) {
+
+			buildSection(p, entry.getKey(), entry.getValue());
+		}
+
+		/*
+		 * Set to null again, so no definition is generated in the LaTeX output
+		 */
+		uncategorized.definition = null;
+		uncategorized.code = "uncategorized";
+
+		// Run template engine
+		String glossary = velocity.run("sections", categoriesNested, "glossary");
+
+		String filename = AbstractCodedString.getFirstPropertyValueClean(exportInstructions, "file", "glossary.tex");
 		try {
-			latexTemplate.merge(context, writer);
+			FileUtils.writeStringToFile(new File(openDir, filename),
+					glossary);
+		} catch (IOException e) {
+			throw new ReportToUserException(e);
+		}
+	}
+	
+	private Section buildCategories(Section parent, Code c) {
 
-			writer.close();
-		} catch (Exception e) {
-			throw new DoNotShowToUserException(e);
+		String title = AbstractCodedString.getFirstPropertyValueClean(c, "title", "unknown");
+		String code = AbstractCodedString.getFirstPropertyValueClean(c, "code", null);
+		String label = AbstractCodedString.getFirstPropertyValueClean(c, "label", null);
+		
+		Section newSection = new Section(parent, title, code, label);
+
+		for (Code subCode : c.getProperties("section")) {
+			newSection.getSections().add(buildCategories(newSection, subCode));
 		}
 
-		return writer.toString();
+		return newSection;
 	}
 }

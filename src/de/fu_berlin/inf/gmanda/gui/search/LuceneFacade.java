@@ -88,7 +88,7 @@ public class LuceneFacade {
 			}
 		});
 		this.ps = ps;
-
+		
 		analyzer = new StandardAnalyzer();
 
 		File pdL = cacheDirectory.getValue();

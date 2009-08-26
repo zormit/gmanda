@@ -1,4 +1,38 @@
 
+2008-08-25
+
+   * [FEATURE] Import mbox files 
+   * [FIX] Made MBox import more robust to incorrect dates and header fields
+   * [FEATURE] Added action to popup in document tree for reindexing 
+               selected lists using Lucene
+   * [FIX] Directory chooser finally remembers its location correctly
+   * [FEATURE] LaTeX-Export is now more versatile and does not depend on hard coded sections. 
+     To define an export profile use the following anywhere:
+     
+export: {
+  file: "09-appendix/01-glossary.tex",
+  
+  section: {
+    title: "Innovations",
+    code: "innovation"
+  },
+  section: {
+    title: "Glossary",
+    label: "sec:glossary",
+    section: {
+      title: "Activities",
+      code: "activity"
+    },
+    section: {
+      title: "Uncategorized Codes",
+      code: "-"
+    }
+  }
+}
+
+Uncategorized codes includes all codes which were cited by your LaTeX code 
+using \dref but did not fit in the given explicit categories
+
 2009-08-24
 
    * [FEATURE] Tabulation view cannot remove all completely empty rows and columns

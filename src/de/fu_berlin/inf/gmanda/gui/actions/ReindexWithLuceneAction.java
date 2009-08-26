@@ -10,9 +10,8 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
+import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.search.LuceneFacade;
-import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
@@ -23,12 +22,15 @@ public class ReindexWithLuceneAction extends AbstractAction {
 
 	LuceneFacade lucene;
 
-	public ReindexWithLuceneAction(ProjectProxy project, ForegroundWindowProxy windowProxy,
-		PrimaryDocumentTree tree, LuceneFacade lucene) {
+	CommonService commonService;
+
+	public ReindexWithLuceneAction(ProjectProxy project, LuceneFacade lucene,
+			CommonService cs) {
 		super("Update Lucene search index...");
 
 		this.project = project;
 		this.lucene = lucene;
+		this.commonService = cs;
 
 		project.add(new VariableProxyListener<Project>() {
 			public void setVariable(Project newValue) {
@@ -40,11 +42,12 @@ public class ReindexWithLuceneAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		new Thread(new Runnable() {
+
+		commonService.run(new Runnable() {
 			public void run() {
 				lucene.reindex(project.getVariable());
 			}
-		}).start();
+		}, "Indexing using Lucene failed");
 	}
 
 };

@@ -14,7 +14,6 @@ import javax.swing.tree.TreePath;
 
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
-import de.fu_berlin.inf.gmanda.gui.misc.StorageFileChooser;
 import de.fu_berlin.inf.gmanda.imports.GmaneImporter;
 import de.fu_berlin.inf.gmanda.imports.GmaneMboxFetcher;
 import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
@@ -33,21 +32,18 @@ public class RefetchListAction extends AbstractAction {
 
 	CommonService commonService;
 	
-	StorageFileChooser storage;
-	
 	GmaneMboxFetcher fetcher;
 	
 	GmaneImporter importer;
 
 	public RefetchListAction(ProjectProxy project, ForegroundWindowProxy windowProxy,
 		PrimaryDocumentTree tree, CommonService progress,
-		StorageFileChooser storage, GmaneMboxFetcher fetcher, GmaneImporter importer) {
+		GmaneMboxFetcher fetcher, GmaneImporter importer) {
 		super("Refetch List...");
 		this.tree = tree;
 		this.windowProxy = windowProxy;
 		this.commonService = progress;
 		this.projectProxy = project;
-		this.storage = storage;
 		this.fetcher = fetcher;
 		this.importer = importer;
 		

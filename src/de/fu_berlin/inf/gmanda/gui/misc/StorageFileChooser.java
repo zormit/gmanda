@@ -6,7 +6,7 @@ import de.fu_berlin.inf.gmanda.util.Configuration;
 public class StorageFileChooser extends ConfigurationAwareDirectoryChooser {
 	
 	public StorageFileChooser(Configuration configuration, ForegroundWindowProxy proxy){
-		super(configuration, proxy, "StorageLocation");
+		super(configuration, proxy, "StorageLocation", "Select the folder where GmanDA should its email data");
 	}
 	
 }

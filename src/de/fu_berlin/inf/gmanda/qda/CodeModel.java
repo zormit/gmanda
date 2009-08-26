@@ -212,6 +212,20 @@ public class CodeModel {
 		return result;
 	}
 
+	public List<Code> getAllCodesDeep(String code){
+		return getAllCodesDeep(getPrimaryDocuments(code), code);
+	}
+	
+	public List<Code> getAllCodesDeep(Iterable<PrimaryDocument> it, String code){
+		List<Code> result = new ArrayList<Code>();
+		for (PrimaryDocument pd : it) {
+			for (Code c : pd.getCode().getAllDeep(code)) {
+				result.add(c);
+			}
+		}
+		return result;
+	}
+	
 	public Multimap<PrimaryDocument, Code> getValues(Iterable<PrimaryDocument> it, String code,
 		String property) {
 		Multimap<PrimaryDocument, Code> result = new TreeMultimap<PrimaryDocument, Code>();

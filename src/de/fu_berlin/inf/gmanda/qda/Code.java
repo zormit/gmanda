@@ -31,8 +31,6 @@ public interface Code {
 	public boolean hasValue();
 	
 	/**
-	 * Returns true, if this Code has a value.
-	 * 
 	 * For instance for a code 
 	 * 
 	 * concept.confusion: { value: "Hello", desc: "Good" }
@@ -64,7 +62,7 @@ public interface Code {
 	 * 
 	 * <pre>
 	 * hello.world matches hello.world
-	 * '*' matches everything
+	 * '*' and '.*' match everything
 	 * hello.* matches hello.world and hello
 	 * hello matches hello but not hello.world
 	 * hello.world matches hello.world but not hello

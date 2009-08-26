@@ -5,6 +5,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 
 import de.fu_berlin.inf.gmanda.gui.actions.FetchGmaneListToFileAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ImportFromMboxAction;
 import de.fu_berlin.inf.gmanda.gui.actions.JumpToIdAction;
 import de.fu_berlin.inf.gmanda.gui.actions.LoadGmaneListAction;
 import de.fu_berlin.inf.gmanda.gui.actions.LoadPrimaryDocumentAction;
@@ -17,7 +18,8 @@ public class PrimaryDocumentMenu extends JMenu {
 		LoadGmaneListAction loadGmane, 
 		ResetFilterAction reset, 
 		FetchGmaneListToFileAction fetchGmane,
-		MakeAllAvailableAction makeAvailable) {
+		MakeAllAvailableAction makeAvailable,
+		ImportFromMboxAction mboxAction) {
 		super("Documents");
 
 		add(new JMenuItem(id));
@@ -25,6 +27,7 @@ public class PrimaryDocumentMenu extends JMenu {
 		add(new JSeparator());
 		add(new JMenuItem(load));
 		add(new JMenuItem(loadGmane));
+		add(new JMenuItem(mboxAction));
 		add(new JMenuItem(makeAvailable));
 	}
 }

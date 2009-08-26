@@ -305,4 +305,8 @@ public class ImportFromGmaneDialog extends javax.swing.JDialog {
 	public int getEndId() {
 		return Integer.parseInt(tEndId.getText());
 	}
+	
+	public void setListName(String listName){
+		tListName.setText(listName);
+	}
 }

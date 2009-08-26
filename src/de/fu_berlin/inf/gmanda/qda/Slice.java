@@ -9,8 +9,6 @@ import de.fu_berlin.inf.gmanda.util.CMultimap;
  */
 public interface Slice<T> {
 	
-	
-	
 	/**
 	 * Returns the documents currently presented by this slice
 	 * @return
@@ -23,7 +21,7 @@ public interface Slice<T> {
 	public Slice<T> select(Code code);
 		 
 	/**
-	 * Returns a subset of the this slice, by filtering all documents 
+	 * Returns a subset of this slice, by filtering all documents 
 	 * that do not contain the given code
 	 * at the currently selected level
 	 */

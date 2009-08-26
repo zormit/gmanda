@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,7 +11,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
 
 import javax.swing.AbstractAction;
@@ -20,17 +18,13 @@ import javax.swing.Action;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 import org.picocontainer.annotations.Inject;
 
-import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
+import de.fu_berlin.inf.gmanda.exports.VelocitySupport;
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.misc.DotFileFileChooser;
-import de.fu_berlin.inf.gmanda.gui.preferences.DebugModeProperty;
 import de.fu_berlin.inf.gmanda.imports.GmaneFacade;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
@@ -39,7 +33,6 @@ import de.fu_berlin.inf.gmanda.util.CMultimap;
 import de.fu_berlin.inf.gmanda.util.CUtils;
 import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
-import de.fu_berlin.inf.gmanda.util.VelocityWhitespaceRepair;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 
 /**
@@ -61,9 +54,9 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 	@Inject
 	DotFileFileChooser dotFileChooser;
-
+	
 	@Inject
-	DebugModeProperty debugMode;
+	VelocitySupport velocitySupport;
 
 	public SocialNetworkThreadAction(ProjectProxy project) {
 		super("Print Social Network to Dot-File...");
@@ -107,7 +100,7 @@ public class SocialNetworkThreadAction extends AbstractAction {
 							progress);
 
 					// Run template engine
-					String dotString = runVelocity(data, dotFile.getName()
+					String dotString = velocitySupport.run(data, dotFile.getName()
 							.endsWith(".dot") ? "graphDOT" : "graphML");
 
 					try {
@@ -127,57 +120,9 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 	}
 
-	Template latexTemplate;
+	
 
-	public String runVelocity(Map<String, Object> data, String velocityFile) {
-
-		Properties p = new Properties();
-
-		if (debugMode.getValue()) {
-			// Enable auto reload
-			p.setProperty("resource.loader", "file");
-			p.setProperty("file.resource.loader.cache", "false");
-			p.setProperty("velocimacro.library.autoreload", "true");
-		} else {
-			p.setProperty("resource.loader", "class, file");
-			p
-					.setProperty("class.resource.loader.class",
-							"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-		}
-
-		VelocityEngine engine;
-		VelocityContext context;
-		try {
-
-			engine = new VelocityEngine(p);
-			engine.init();
-
-			context = new VelocityContext(data);
-
-			FileUtils.writeStringToFile(new File("resources/templates/"
-					+ velocityFile + "Whitespace.vm"),
-					new VelocityWhitespaceRepair().fixWhitespace(FileUtils
-							.readFileToString(new File("resources/templates/"
-									+ velocityFile + ".vm"))));
-
-			latexTemplate = engine.getTemplate("resources/templates/"
-					+ velocityFile + "Whitespace.vm");
-
-		} catch (Exception e) {
-			throw new DoNotShowToUserException(e);
-		}
-
-		StringWriter writer = new StringWriter();
-		try {
-			latexTemplate.merge(context, writer);
-
-			writer.close();
-		} catch (Exception e) {
-			throw new DoNotShowToUserException(e);
-		}
-
-		return writer.toString();
-	}
+	
 
 	public static class Author implements Comparable<Author> {
 		int emailsWritten;

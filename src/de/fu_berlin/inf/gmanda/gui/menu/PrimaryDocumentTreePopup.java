@@ -16,6 +16,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchListAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchRecursiveAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ReindexWithLuceneTreeAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SocialNetworkThreadAction;
 
 public class PrimaryDocumentTreePopup extends JPopupMenu  {
@@ -28,11 +29,13 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 		DeletePrimaryDocumentAction delete,
 		ComputeThreadStatisticsAction thread,
 		ComputeEmailStatisticsAction email,
-		SocialNetworkThreadAction network) {
+		SocialNetworkThreadAction network,
+		ReindexWithLuceneTreeAction lucene) {
 
 		add(refetch);
 		add(refetchRecursive);
 		add(refetchList);
+		add(lucene);
 		add(new JSeparator());
 		add(thread);
 		add(email);

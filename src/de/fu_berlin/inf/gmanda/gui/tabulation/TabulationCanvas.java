@@ -2,7 +2,6 @@ package de.fu_berlin.inf.gmanda.gui.tabulation;
 
 import java.awt.Dimension;
 import java.awt.Font;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
@@ -21,9 +19,6 @@ import javax.swing.JTextPane;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 import org.picocontainer.annotations.Inject;
 
 import com.google.common.base.Function;
@@ -32,7 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
-import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
+import de.fu_berlin.inf.gmanda.exports.VelocitySupport;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
@@ -53,6 +48,9 @@ public class TabulationCanvas extends JScrollPane {
 
 	@Inject
 	CommonService commonService;
+	
+	@Inject
+	VelocitySupport velocity;
 
 	JTextPane pane = new JTextPane();
 
@@ -332,7 +330,7 @@ public class TabulationCanvas extends JScrollPane {
 						}
 					}
 
-					String text = runVelocity(table);
+					String text = velocity.run("rows", table, "table");
 
 					pane.setText(text);
 				} catch (RuntimeException e) {
@@ -421,9 +419,9 @@ public class TabulationCanvas extends JScrollPane {
 
 				table.add(htmlRow);
 
-				String s = runVelocity(table);
+				String text = velocity.run("rows", table, "table");
 
-				pane.setText(s);
+				pane.setText(text);
 			}
 
 		}, "Error calculating tabulation");
@@ -464,49 +462,5 @@ public class TabulationCanvas extends JScrollPane {
 				}), "<br>");
 	}
 
-	Template tableTemplate;
-
-	VelocityContext context;
-
-	public void initVelocity() {
-
-		if (context == null) {
-
-			Properties p = new Properties();
-
-			p.setProperty("resource.loader", "class, file");
-			p
-					.setProperty("class.resource.loader.class",
-							"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-			try {
-				Velocity.init(p);
-
-				context = new VelocityContext();
-
-				tableTemplate = Velocity
-						.getTemplate("resources/templates/table.vm");
-			} catch (Exception e) {
-				throw new DoNotShowToUserException(e);
-			}
-		}
-	}
-
-	public String runVelocity(List<List<String>> table) {
-
-		initVelocity();
-
-		context.put("rows", table);
-
-		StringWriter writer = new StringWriter();
-		try {
-			tableTemplate.merge(context, writer);
-
-			writer.close();
-		} catch (Exception e) {
-			throw new DoNotShowToUserException(e);
-		}
-
-		return writer.toString();
-	}
 
 }
