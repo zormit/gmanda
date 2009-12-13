@@ -1,0 +1,6 @@
+#foreach ($author in $authors)
+    $author.nameNoSpace
+#end
+#foreach ($edge in $edges)
+    $edge.authorNoSpace $edge.replyNoSpace $edge.weight
+#end

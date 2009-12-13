@@ -9,8 +9,12 @@ public class DotFileFileChooser extends ConfigurationAwareFileChooser {
 
 	public DotFileFileChooser(Configuration configuration) {
 		super(configuration, "DotFileLocation", new ExtensionDescription()
-				.append("Graphviz Dot *.dot", ".dot").append(
-						"GraphML *.graphml", ".graphml"));
+				.append("Graphviz Dot *.dot", ".dot")
+				.append("GraphML *.graphml", ".graphml")
+				.append("Edge format *.edge", ".edge")
+				.append("Prefuse Graph Format *.xml", ".xml")
+						
+		);
 	}
 
 }

@@ -13,6 +13,7 @@ import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
 import de.fu_berlin.inf.gmanda.gui.actions.ComputeEmailStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ComputeThreadStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ExportMessageIDHyperLinks;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchListAction;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchRecursiveAction;
@@ -30,7 +31,8 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 		ComputeThreadStatisticsAction thread,
 		ComputeEmailStatisticsAction email,
 		SocialNetworkThreadAction network,
-		ReindexWithLuceneTreeAction lucene) {
+		ReindexWithLuceneTreeAction lucene,
+		ExportMessageIDHyperLinks latexID) {
 
 		add(refetch);
 		add(refetchRecursive);
@@ -40,6 +42,7 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 		add(thread);
 		add(email);
 		add(network);
+		add(latexID);
 		add(new JSeparator());
 		add(delete);
 

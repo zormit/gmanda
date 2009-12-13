@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 
@@ -327,6 +328,18 @@ public class MyMimeUtils {
 
 	public static String getSubject(Message message) throws MessagingException {
 		return unknown(message.getSubject());
+	}
+
+	public static String getMessageID(Message message) throws MessagingException {
+		
+		String[] mids = message.getHeader("Message-ID");
+
+		if (mids == null || mids.length == 0 || mids[0].trim().length() == 0) {
+			log.error("No message ID found: " + Arrays.toString(mids));
+			mids = new String[]{ String.valueOf((long)(Math.random() * Integer.MAX_VALUE)) + String.valueOf((long)(Math.random() * Integer.MAX_VALUE)) };
+			log.error("Generated MID: " + Arrays.toString(mids));
+		}
+		return mids[0];
 	}
 
 }

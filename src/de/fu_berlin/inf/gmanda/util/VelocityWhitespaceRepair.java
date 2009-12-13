@@ -34,7 +34,7 @@ public class VelocityWhitespaceRepair {
 
 	}
 
-	String fixWhitespaceInternal(StringTokenizer st, int depth) {
+	protected String fixWhitespaceInternal(StringTokenizer st, int depth) {
 
 		List<String> indentedLines = new ArrayList<String>();
 
@@ -74,7 +74,12 @@ public class VelocityWhitespaceRepair {
 		for (String eachLine : indentedLines) {
 
 			for (String split : eachLine.split("\\n")) {
-				if (StringUtils.stripStart(split, " ").startsWith("#")) {
+				
+				String startOfLine = StringUtils.stripStart(split, " "); 
+				if (startOfLine.startsWith("#if")
+						|| startOfLine.startsWith("#macro")
+						|| startOfLine.startsWith("#foreach")
+						|| startOfLine.startsWith("#end")) {
 					joiner.append(StringUtils.stripStart(split, " "));
 				} else if (split.trim().length() == 0) {
 					joiner.append("");

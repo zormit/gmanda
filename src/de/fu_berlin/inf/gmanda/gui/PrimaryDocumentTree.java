@@ -39,6 +39,9 @@ import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.HashMapUtils;
 import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
+import de.fu_berlin.inf.gmanda.util.tree.TreeMaker;
+import de.fu_berlin.inf.gmanda.util.tree.TreeStructure;
+import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
 
 /**
  * A JTree component that displays a project and all associated primary
@@ -49,25 +52,50 @@ import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
  */
 public class PrimaryDocumentTree extends JTree {
 
-	
+	public class TreeModelMaker implements TreeMaker<PrimaryDocument> {
+
+		protected TreeModelImpl treeModel;
+
+		public TreeModelMaker(TreeModelImpl treeModel) {
+			this.treeModel = treeModel;
+		}
+
+		@Override
+		public TreeStructure<PrimaryDocument> toStructure(
+				final PrimaryDocument t) {
+			return new TreeStructure<PrimaryDocument>() {
+				@Override
+				public Iterable<PrimaryDocument> getChildren() {
+					return treeModel.getChildren(t);
+				}
+
+				@Override
+				public PrimaryDocument get() {
+					return t;
+				}
+			};
+		}
+
+	}
+
 	/**
-	 * Scenario 1: 
-	 *   * If the user clicks, this will be called and must update the selectionproxy value.
-	 *   
-	 * Scenario 2:
-	 *   * If somewhere in the program the selection is udpated, we need to set our treepath accordingly
-	 *     and do not want to set the selection (because we are receiving the change).	 * 
+	 * Scenario 1: * If the user clicks, this will be called and must update the
+	 * selectionproxy value.
+	 * 
+	 * Scenario 2: * If somewhere in the program the selection is udpated, we
+	 * need to set our treepath accordingly and do not want to set the selection
+	 * (because we are receiving the change). *
 	 * 
 	 */
 	public class TreeSelectionImpl implements TreeSelectionListener {
 
-		public boolean receiving = true; 
-		
+		public boolean receiving = true;
+
 		public void valueChanged(TreeSelectionEvent arg0) {
 
 			if (!receiving)
 				return;
-			
+
 			TreePath path = arg0.getPath();
 
 			if (path != null) {
@@ -83,8 +111,9 @@ public class PrimaryDocumentTree extends JTree {
 			}
 		}
 	}
-	
-	public static List<PrimaryDocument> filterChildren(List<PrimaryDocument> list) {
+
+	public static List<PrimaryDocument> filterChildren(
+			List<PrimaryDocument> list) {
 		List<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
 
 		// Filter all PDs whose parent is in the list as well
@@ -97,7 +126,7 @@ public class PrimaryDocumentTree extends JTree {
 				pd = pd.getParent();
 			}
 			result.add(c);
-			
+
 		}
 		return result;
 	}
@@ -107,34 +136,35 @@ public class PrimaryDocumentTree extends JTree {
 		List<PrimaryDocument> rootFilterList = null;
 
 		int rootFilterPosition = -1;
-		
+
 		Set<TreeModelListener> listeners = new HashSet<TreeModelListener>();
-		
+
 		FilterKind filterKind;
 
 		List<PrimaryDocument> lists;
-		
+
 		HashMap<PrimaryDocument, List<PrimaryDocument>> threads;
-		
+
 		public void updateFilter() {
-			
+
 			if (project == null)
 				return;
-			
+
 			Filter filter = filterProxy.getVariable();
 
 			filterKind = filterKindProxy.getVariable();
-			
+
 			if (filter == null)
 				rootFilterList = null;
-			else 
-				rootFilterList = new ArrayList<PrimaryDocument>(filter.filterResult);
-			
+			else
+				rootFilterList = new ArrayList<PrimaryDocument>(
+						filter.filterResult);
+
 			rootFilterPosition = -1;
 
 			TreePath currentSelection = getSelectionPath();
 
-			if (rootFilterList != null){
+			if (rootFilterList != null) {
 
 				switch (filterKind) {
 				case SINGLE: // nothing to do
@@ -142,7 +172,7 @@ public class PrimaryDocumentTree extends JTree {
 				case ROOT:
 					rootFilterList = filterChildren(rootFilterList);
 					break;
-				case THREAD: 
+				case THREAD:
 					rootFilterList = filterChildren(rootFilterList);
 
 					lists = new LinkedList<PrimaryDocument>();
@@ -163,31 +193,34 @@ public class PrimaryDocumentTree extends JTree {
 							HashMapUtils.putList(threads, parent, child, true);
 						}
 					}
-					Collections.sort(lists, PrimaryDocument.getProjectSensitiveComparator(project));
-					for (List<PrimaryDocument> list : threads.values()){
+					Collections.sort(lists, PrimaryDocument
+							.getProjectSensitiveComparator(project));
+					for (List<PrimaryDocument> list : threads.values()) {
 						Collections.sort(list);
 					}
 					break;
 				}
 			}
-			
+
 			if (rootFilterList != null)
-				Collections.sort(rootFilterList, PrimaryDocument.getProjectSensitiveComparator(project));
+				Collections.sort(rootFilterList, PrimaryDocument
+						.getProjectSensitiveComparator(project));
 
 			// Notify all tree model listeners
-			TreeModelEvent event = new TreeModelEvent(project, buildTreePath(project));
+			TreeModelEvent event = new TreeModelEvent(project,
+					buildTreePath(project));
 
 			for (TreeModelListener listener : listeners) {
 				listener.treeStructureChanged(event);
 			}
-			
+
 			// Update selection
 			if (rootFilterList != null && rootFilterList.size() > 0) {
 
-				for (PrimaryDocument pd : filterProxy.getVariable().filterResult){
+				for (PrimaryDocument pd : filterProxy.getVariable().filterResult) {
 					expand(pd);
 				}
-							
+
 				// First check the old selection...
 				if (currentSelection != null) {
 					Object o = currentSelection.getLastPathComponent();
@@ -195,16 +228,16 @@ public class PrimaryDocumentTree extends JTree {
 					if (o instanceof PrimaryDocument) {
 						PrimaryDocument pd = (PrimaryDocument) o;
 
-						switch(filterKind){
-						case SINGLE: 
-							if (rootFilterList.contains(pd)){
+						switch (filterKind) {
+						case SINGLE:
+							if (rootFilterList.contains(pd)) {
 								selectionProxy.setVariable(pd);
 								return;
 							}
 							break;
 						case ROOT:
 							while (pd != null) {
-								
+
 								if (rootFilterList.contains(pd)) {
 									selectionProxy.setVariable(o);
 									return;
@@ -212,9 +245,9 @@ public class PrimaryDocumentTree extends JTree {
 								pd = pd.getParent();
 							}
 							break;
-						case THREAD: 
-							if (pd.getParent() == null){
-								if (lists.contains(pd)){
+						case THREAD:
+							if (pd.getParent() == null) {
+								if (lists.contains(pd)) {
 									selectionProxy.setVariable(pd);
 									return;
 								}
@@ -225,9 +258,10 @@ public class PrimaryDocumentTree extends JTree {
 									child = parent;
 									parent = parent.getParent();
 								}
-								if (lists.contains(parent)){
-									if (threads.containsKey(parent) && 
-										threads.get(parent).contains(child)){
+								if (lists.contains(parent)) {
+									if (threads.containsKey(parent)
+											&& threads.get(parent).contains(
+													child)) {
 										selectionProxy.setVariable(pd);
 										return;
 									}
@@ -249,32 +283,35 @@ public class PrimaryDocumentTree extends JTree {
 				 * selection.
 				 */
 				if (currentSelection != null
-					&& (rootFilterList == null || rootFilterList.size() > 0))
-					selectionProxy.setVariable(currentSelection.getLastPathComponent());
+						&& (rootFilterList == null || rootFilterList.size() > 0))
+					selectionProxy.setVariable(currentSelection
+							.getLastPathComponent());
 			}
 		}
-		
-		public void nextFilterItem(){
+
+		public void nextFilterItem() {
 			if (rootFilterList == null)
 				return;
-			
-			if (rootFilterPosition < 0 || rootFilterPosition + 1 >= rootFilterList.size())
+
+			if (rootFilterPosition < 0
+					|| rootFilterPosition + 1 >= rootFilterList.size())
 				rootFilterPosition = 0;
-			else 
+			else
 				rootFilterPosition++;
-			
+
 			selectionProxy.setVariable(rootFilterList.get(rootFilterPosition));
 		}
-		
-		public void previousFilterItem(){
+
+		public void previousFilterItem() {
 			if (rootFilterList == null)
 				return;
-			
-			if (rootFilterPosition <= 0 || rootFilterPosition - 1 >= rootFilterList.size())
+
+			if (rootFilterPosition <= 0
+					|| rootFilterPosition - 1 >= rootFilterList.size())
 				rootFilterPosition = rootFilterList.size() - 1;
-			else 
+			else
 				rootFilterPosition--;
-			
+
 			selectionProxy.setVariable(rootFilterList.get(rootFilterPosition));
 		}
 
@@ -301,36 +338,40 @@ public class PrimaryDocumentTree extends JTree {
 			return null;
 		}
 
-		public Object getChild(Object node, int i) {
+		public List<PrimaryDocument> getChildren(Object node) {
 			if (node instanceof Project) {
 				if (rootFilterList == null)
-					return ((Project) node).getPrimaryDocuments().get(i);
+					return ((Project) node).getPrimaryDocuments();
 
 				// Do Filtering
 				if (filterKind != FilterKind.THREAD)
-					return rootFilterList.get(i);
+					return rootFilterList;
 				else
-					return lists.get(i);
+					return lists;
 			}
 			if (node instanceof PrimaryDocument) {
 
 				PrimaryDocument pd = (PrimaryDocument) node;
 
 				if (rootFilterList == null)
-					return pd.getChildren().get(i);
+					return pd.getChildren();
 
 				switch (filterKind) {
 				case SINGLE:
 					throw new RuntimeException();
 				case ROOT:
-					return pd.getChildren().get(i);
+					return pd.getChildren();
 				case THREAD:
 					if (threads.containsKey(pd))
-						return threads.get(pd).get(i);
-					return pd.getChildren().get(i);
+						return threads.get(pd);
+					return pd.getChildren();
 				}
 			}
 			throw new RuntimeException();
+		}
+
+		public Object getChild(Object node, int i) {
+			return getChildren(node).get(i);
 		}
 
 		public int getChildCount(Object node) {
@@ -362,7 +403,8 @@ public class PrimaryDocumentTree extends JTree {
 					return pd.getChildren().size();
 				}
 			}
-			throw new RuntimeException("Only primary documents and projects can be tree nodes.");
+			throw new RuntimeException(
+					"Only primary documents and projects can be tree nodes.");
 		}
 
 		public boolean isLeaf(Object node) {
@@ -398,7 +440,8 @@ public class PrimaryDocumentTree extends JTree {
 					return pd.getChildren().indexOf(i);
 				}
 			}
-			throw new RuntimeException("Only project and primary documents can be nodes.");
+			throw new RuntimeException(
+					"Only project and primary documents can be nodes.");
 		}
 
 		public TreePath buildTreePath(Object node) {
@@ -417,24 +460,28 @@ public class PrimaryDocumentTree extends JTree {
 
 				while (pd != null) {
 					nodes.add(0, pd);
-					if (rootFilterList != null && filterKind != FilterKind.THREAD && rootFilterList.contains(pd))
+					if (rootFilterList != null
+							&& filterKind != FilterKind.THREAD
+							&& rootFilterList.contains(pd))
 						break;
 					pd = pd.getParent();
 				}
 
-				// Check whether the path is really valid with the current filter
+				// Check whether the path is really valid with the current
+				// filter
 				if (!assertTreePath(getRoot(), nodes, getModel(), node))
 					return null;
-				
+
 				nodes.add(0, project);
 			}
-			
+
 			return new TreePath(nodes.toArray());
 		}
-		
-		private boolean assertTreePath(Object root, List<Object> nodes, TreeModel model, Object node) {
+
+		private boolean assertTreePath(Object root, List<Object> nodes,
+				TreeModel model, Object node) {
 			Object parent = root;
-			for (Object o : nodes){
+			for (Object o : nodes) {
 				int i = model.getIndexOfChild(parent, o);
 				if (i == -1)
 					return false;
@@ -457,7 +504,7 @@ public class PrimaryDocumentTree extends JTree {
 					listener.treeNodesChanged(event);
 				}
 			}
-			
+
 		}
 
 		public void addTreeModelListener(TreeModelListener arg0) {
@@ -491,13 +538,14 @@ public class PrimaryDocumentTree extends JTree {
 	TreeModelImpl treeModel;
 
 	ForegroundWindowProxy windowProxy;
-	
+
 	GmaneFacade gmane;
 
-	public PrimaryDocumentTree(ProjectProxy projectProxy, SelectionProxy selectionProxy,
-		FilterTextProxy filterTextProxy, FilterProxy filterProxy, FilterKindProxy filterKindProxy,
-		ForegroundWindowProxy windowProxy, GmaneFacade gmane,
-		PrimaryDocumentCellRenderer cellRenderer) {
+	public PrimaryDocumentTree(ProjectProxy projectProxy,
+			SelectionProxy selectionProxy, FilterTextProxy filterTextProxy,
+			FilterProxy filterProxy, FilterKindProxy filterKindProxy,
+			ForegroundWindowProxy windowProxy, GmaneFacade gmane,
+			PrimaryDocumentCellRenderer cellRenderer) {
 		super();
 		this.projectProxy = projectProxy;
 		this.selectionProxy = selectionProxy;
@@ -516,8 +564,10 @@ public class PrimaryDocumentTree extends JTree {
 		newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
 		newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
 
-		setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, newForwardKeys);
-		setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
+		setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
+				newForwardKeys);
+		setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,
+				null);
 
 		selectionListener = new TreeSelectionImpl();
 		treeModel = new TreeModelImpl();
@@ -555,7 +605,8 @@ public class PrimaryDocumentTree extends JTree {
 			public void setVariable(Project newGame) {
 				if (project != null) {
 					project.getLocalChangeNotifier().remove(localListener);
-					project.getNonLocalChangeNotifier().remove(nonLocalListener);
+					project.getNonLocalChangeNotifier()
+							.remove(nonLocalListener);
 				}
 				project = newGame;
 
@@ -572,52 +623,56 @@ public class PrimaryDocumentTree extends JTree {
 				}
 			}
 		});
-	
-		selectionProxy.add(new VariableProxyListener<Object>(){
+
+		selectionProxy.add(new VariableProxyListener<Object>() {
 			public void setVariable(Object toFokus) {
 
 				if (toFokus == null)
 					return;
-				
+
 				TreePath path;
 
 				if (!(toFokus instanceof TreePath))
 					path = treeModel.buildTreePath(toFokus);
 				else
 					path = (TreePath) toFokus;
-				
+
 				if (path == null)
 					return;
-				
+
 				selectionListener.receiving = false;
 				setSelectionPath(path);
 				selectionListener.receiving = true;
-				scrollPathToVisible(path);			
-				
+				scrollPathToVisible(path);
+
 			}
 		});
 	}
-	
+
 	public void expand(Object toFokus) {
 		TreePath path;
 		if (!(toFokus instanceof TreePath))
 			path = treeModel.buildTreePath(toFokus);
 		else
 			path = (TreePath) toFokus;
-		
+
 		if (getModel().isLeaf(path.getLastPathComponent()))
 			path = path.getParentPath();
-		
+
 		expandPath(path);
 	}
-	
+
 	public void nextFilterItem() {
 		treeModel.nextFilterItem();
-		
+
 	}
 
 	public void previousFilterItem() {
 		treeModel.previousFilterItem();
+	}
+
+	public TreeWalker<PrimaryDocument> getTreeWalker(PrimaryDocument root) {
+		return new TreeWalker<PrimaryDocument>(root, new TreeModelMaker(treeModel));
 	}
 
 }

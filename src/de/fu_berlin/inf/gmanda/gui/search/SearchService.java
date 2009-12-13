@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.picocontainer.annotations.Inject;
 
 import com.google.common.base.Nullable;
@@ -39,8 +41,18 @@ import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
  *   from: "Bogdan",
  *   OR from: "Aleksandr"
  * }
+ * 
+ * for Date based filtering use:
+ * 
+ * date: <2007-04-01T12:00:00
+ * 
+ * or 
+ * 
+ * date: >2007-05-01
  */
 public class SearchService {
+	
+	private static final Logger log = Logger.getLogger(SearchService.class);
 
 	@Inject
 	LuceneFacade luceneFacade;
@@ -159,6 +171,60 @@ public class SearchService {
 			nextSearchString = nextSearchString.substring(1);
 		}
 
+		if ("date".equals(nextSearchString) && c.getValue() != null){
+			
+			String searchString = c.getValue().trim();
+			
+			if (searchString.startsWith("<") || searchString.startsWith(">")) {
+				operation = searchString.charAt(0);
+				searchString = searchString.substring(1);
+			}
+			
+			DateTime compareAgainst;
+			try {
+				compareAgainst = new DateTime(searchString);
+			} catch (IllegalArgumentException e) {
+				log.error("Could not parse DateTime");
+				return Collections.emptyList();
+			}
+			
+			LinkedList<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
+
+			int n = 0;
+			int i = 0;
+			
+			for (PrimaryDocument doc : PrimaryDocument.getTreeWalker(project.getPrimaryDocuments())) {
+				
+				n++;
+				
+				String date = doc.getMetaData("date");
+				if (date != null){
+					DateTime time;
+					try {
+						time = new DateTime(date);
+					} catch (IllegalArgumentException e) {
+						continue;
+					}
+					if (operation == '<'){
+						if (time.isBefore(compareAgainst)){
+							result.add(doc);
+							i++;
+						}
+					}
+					if (operation == '>'){
+						if (time.isAfter(compareAgainst)){
+							result.add(doc);
+							i++;
+						}
+					}
+					
+				}
+			}
+			System.out.println(n + " " + i);
+			return result;
+			
+		} else 
+		
 		// Search using Lucene if code is "search"
 		if ("search".equals(nextSearchString) && c.getValue() != null
 			&& c.getValue().trim().length() > 1) {

@@ -56,6 +56,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExecuteTrailAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExitAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExportCitationsToLatexAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ExportMessageIDHyperLinks;
 import de.fu_berlin.inf.gmanda.gui.actions.FetchGmaneListToFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FormatCodeAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ForwardSelectionAction;
@@ -299,6 +300,7 @@ public class GmandaMain {
 			.addComponent(SocialNetworkThreadAction.class)
 			.addComponent(ImportFromMboxAction.class)
 			.addComponent(ReindexWithLuceneTreeAction.class)
+			.addComponent(ExportMessageIDHyperLinks.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)

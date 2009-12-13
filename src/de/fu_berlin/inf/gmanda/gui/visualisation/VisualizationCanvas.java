@@ -333,7 +333,7 @@ public class VisualizationCanvas extends PScrollPane {
 
 		for (Pair<String, List<PrimaryDocument>> p : tracks) {
 			for (PrimaryDocument pd : p.v) {
-				DateTime d = PrimaryDocumentDot.getDate(pd);
+				DateTime d = pd.getDate();
 				if (d == null)
 					continue;
 				start = Math.min(start, d.getMillis());

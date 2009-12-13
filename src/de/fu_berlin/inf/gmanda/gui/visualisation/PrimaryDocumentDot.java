@@ -19,17 +19,6 @@ public class PrimaryDocumentDot extends PNode implements Comparable<PrimaryDocum
 
 	DateTime date;
 
-	static DateTime getDate(PrimaryDocument pd) {
-		if (pd.getMetaData().containsKey("date")) {
-			try {
-				return new DateTime(pd.getMetaData("date"));
-			} catch (IllegalArgumentException e) {
-				return null;
-			}
-		}
-		return null;
-	}
-
 	PPath circle;
 
 	public void setSelected(boolean selected) {
@@ -51,7 +40,7 @@ public class PrimaryDocumentDot extends PNode implements Comparable<PrimaryDocum
 		super();
 		this.pd = pd;
 
-		date = getDate(pd);
+		date = pd.getDate();
 
 		Point2D[] points = new Point2D[] { new Point2D.Double(0.0f, 7.0f),
 			new Point2D.Double(-5.0f, 7.0f), new Point2D.Double(0.0f, 0.0f),

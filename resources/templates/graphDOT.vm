@@ -1,9 +1,10 @@
 #macro( writeAuthor $author)
-  {node [width=$author.weight,height=$author.weight,fixedsize=true,shape=circle,style=filled,color=$author.color,label="$author.multiLineName"] "$author.name"};
+  {node [width=$author.weight,height=$author.weight,fixedsize=true,shape=circle,style=filled,color="$author.color",label="$author.multiLineName"] "$author.id"};
 #end
 
 graph G {
   fontname="Sans";
+  compound=true;
   subgraph cluster0 {
     style=rounded;
     style=filled;
@@ -18,6 +19,6 @@ graph G {
     #writeAuthor($author)
   #end
   #foreach ($edge in $edges)
-    "$edge.author" -- "$edge.reply" [weight=$edge.weight,penwidth=$edge.weight];
+    "$edge.fromID" -- "$edge.toID" [weight=$edge.weight,penwidth=$edge.weight];
   #end
 }

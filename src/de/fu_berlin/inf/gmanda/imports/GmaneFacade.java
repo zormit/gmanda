@@ -464,7 +464,7 @@ public class GmaneFacade {
 		}
 	}
 
-	public void printThreadStatistics(PrimaryDocument root, IProgress pm) {
+	public void printThreadStatistics(TreeWalker<PrimaryDocument> treeWalker, IProgress pm) {
 
 		pm.setScale(100);
 		pm.start();
@@ -472,25 +472,31 @@ public class GmaneFacade {
 		try {
 
 			int numberOfPds = 0;
+			int numberOfThreads = 0;
 			CMultimap<String, PrimaryDocument> authors = new CMultimap<String, PrimaryDocument>();
+			
+			PrimaryDocument root = treeWalker.iterator().next();
 
 			{ // Determine number of PDs
-				for (@SuppressWarnings("unused")
-				PrimaryDocument pd : PrimaryDocument.getTreeWalker(root)) {
+				for (PrimaryDocument pd : treeWalker) {
 					numberOfPds++;
+					if (root.equals(pd.getParent())){
+						numberOfThreads++;
+					}
 				}
 
 				pm.work(5);
 			}
 
 			System.out.println("# of PDs: " + numberOfPds);
+			System.out.println("# of immediate Children of Root (threads if list): " + numberOfThreads);
 
 			{ // Build author map
 				IProgress pToFetch = pm.getSub(85);
 				pToFetch.setScale(numberOfPds);
 				pToFetch.start();
 
-				for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(root)) {
+				for (PrimaryDocument pd : treeWalker) {
 					String author = pd.getMetaData("from");
 
 					if (author == null) {

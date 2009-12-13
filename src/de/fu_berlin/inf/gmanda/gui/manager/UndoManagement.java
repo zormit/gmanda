@@ -177,6 +177,14 @@ public class UndoManagement {
 				break askForFile;
 		}
 
+		if (!file.exists()){
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				// This will cause an exception later
+			}
+		}
+		
 		// Try to get lock, this will throw an exception if a lock could not be
 		// gotten.
 		LockHandle lock = lockManager.getLock(file);

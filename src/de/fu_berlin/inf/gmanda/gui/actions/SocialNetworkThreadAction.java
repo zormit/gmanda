@@ -5,9 +5,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +20,9 @@ import org.picocontainer.annotations.Inject;
 
 import de.fu_berlin.inf.gmanda.exceptions.ReportToUserException;
 import de.fu_berlin.inf.gmanda.exports.VelocitySupport;
+import de.fu_berlin.inf.gmanda.graph.Graph;
+import de.fu_berlin.inf.gmanda.graph.Graph.Author;
+import de.fu_berlin.inf.gmanda.graph.Graph.Edge;
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.misc.DotFileFileChooser;
@@ -29,6 +30,7 @@ import de.fu_berlin.inf.gmanda.imports.GmaneFacade;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.AutoHashMap;
 import de.fu_berlin.inf.gmanda.util.CMultimap;
 import de.fu_berlin.inf.gmanda.util.CUtils;
 import de.fu_berlin.inf.gmanda.util.Pair;
@@ -54,7 +56,7 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 	@Inject
 	DotFileFileChooser dotFileChooser;
-	
+
 	@Inject
 	VelocitySupport velocitySupport;
 
@@ -99,13 +101,30 @@ public class SocialNetworkThreadAction extends AbstractAction {
 					Map<String, Object> data = computeSocialNetwork(pd,
 							progress);
 
+					String type = null;
+					if (dotFile.getName().endsWith(".dot")) {
+						type = "graphDOT";
+					}
+					if (dotFile.getName().endsWith(".graphml")) {
+						type = "graphML";
+					}
+					if (dotFile.getName().endsWith(".edge")) {
+						type = "edge";
+					}
+					if (dotFile.getName().endsWith(".xml")) {
+						type = "prefuse";
+					}
+
+					if (type == null) {
+						throw new ReportToUserException(
+								new NullPointerException());
+					}
+
 					// Run template engine
-					String dotString = velocitySupport.run(data, dotFile.getName()
-							.endsWith(".dot") ? "graphDOT" : "graphML");
+					String result = velocitySupport.run(data, type);
 
 					try {
-						FileUtils.writeStringToFile(dotFile, dotString,
-								"latin1");
+						FileUtils.writeStringToFile(dotFile, result, "latin1");
 					} catch (IOException e) {
 						throw new ReportToUserException(e);
 					}
@@ -120,117 +139,13 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 	}
 
-	
-
-	
-
-	public static class Author implements Comparable<Author> {
-		int emailsWritten;
-		String name;
-
-		boolean project = false;
-
-		public Author(String name) {
-			this.setName(name);
-		}
-
-		public void setEmailsWritten(int emailsWritten) {
-			this.emailsWritten = emailsWritten;
-		}
-
-		public int getEmailsWritten() {
-			return emailsWritten;
-		}
-
-		public String getMultiLineName() {
-			return getName().replaceAll("\\s+", "\\\\n");
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public double getWeight() {
-			return Math.sqrt(emailsWritten) / 2.0;
-		}
-
-		public String getColor() {
-			return "blue";
-		}
-
-		@Override
-		public int compareTo(Author arg0) {
-			return this.emailsWritten - arg0.emailsWritten;
-		}
-	}
-
-	public static class Edge {
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result
-					+ ((author == null) ? 0 : author.hashCode());
-			result = prime * result + ((reply == null) ? 0 : reply.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (!(obj instanceof Edge))
-				return false;
-			Edge other = (Edge) obj;
-			if (author == null) {
-				if (other.author != null)
-					return false;
-			} else if (!author.equals(other.author))
-				return false;
-			if (reply == null) {
-				if (other.reply != null)
-					return false;
-			} else if (!reply.equals(other.reply))
-				return false;
-			return true;
-		}
-
-		public Edge(String p, String v, int size) {
-			this.author = p;
-			this.reply = v;
-			this.weight = size;
-		}
-
-		String author;
-
-		String reply;
-
-		int weight;
-
-		public String getAuthor() {
-			return author;
-		}
-
-		public String getReply() {
-			return reply;
-		}
-
-		public int getWeight() {
-			return weight;
-		}
-	}
-
 	public class ProjectToPlot {
 
-		public String name;
+		String name;
 
 		List<Author> members;
+
+		int clusterID;
 
 		public String getName() {
 			return name;
@@ -238,6 +153,10 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 		public List<Author> getMembers() {
 			return members;
+		}
+
+		public int getClusterID() {
+			return clusterID;
 		}
 	}
 
@@ -249,10 +168,8 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 		try {
 
-			Comparator<Pair<String, String>> pComp = Pair.pvCompare();
-
-			CMultimap<Pair<String, String>, PrimaryDocument> conversations = new CMultimap<Pair<String, String>, PrimaryDocument>(
-					pComp);
+			Map<Pair<Author, Author>, List<PrimaryDocument>> conversations = AutoHashMap
+					.getListHashMap();
 
 			HashMap<String, Author> authors = new HashMap<String, Author>();
 
@@ -261,48 +178,42 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 			System.out.println("# of PDs: " + numberOfPds);
 
+			Graph g = new Graph();
+
 			{ // Build author map
 				IProgress pToFetch = pm.getSub(75);
 				pToFetch.setScale(numberOfPds);
 				pToFetch.start();
 
 				for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(root)) {
-					String authorsName = pd.getMetaData("from");
 
-					if (authorsName == null) {
+					Author author = getAuthor(pd, authors, g);
+					if (author == null)
 						continue;
-					}
 
-					authorsName = CUtils.cleanAuthor(authorsName);
-
-					Author author = authors.get(authorsName);
-					if (author == null) {
-						author = new Author(authorsName);
-						authors.put(authorsName, author);
-					}
-					author.emailsWritten++;
+					author.add(pd);
 
 					PrimaryDocument parent = pd.getParent();
-					String parentAuthor;
-					if (parent == null) {
+					if (parent == null)
 						continue;
-					} else {
-						parentAuthor = parent.getMetaData("from");
 
-						if (parentAuthor == null) {
-							continue;
-						}
-						parentAuthor = CUtils.cleanAuthor(parentAuthor);
+					Author parentAuthor = getAuthor(parent, authors, g);
+					if (parentAuthor == null)
+						continue;
+
+					boolean undirected = true;
+					if (undirected
+							&& parentAuthor.getName().compareTo(
+									author.getName()) < 0) {
+						conversations.get(
+								new Pair<Author, Author>(author, parentAuthor))
+								.add(pd);
+					} else {
+						conversations.get(
+								new Pair<Author, Author>(parentAuthor, author))
+								.add(pd);
 					}
 
-					// if (parentAuthor.compareTo(authorsName) < 0){
-					// String s = authorsName;
-					// authorsName = parentAuthor;
-					// parentAuthor = s;
-					// }
-
-					conversations.put(new Pair<String, String>(parentAuthor,
-							authorsName), pd);
 					pToFetch.work(1);
 				}
 				pToFetch.done();
@@ -311,22 +222,15 @@ public class SocialNetworkThreadAction extends AbstractAction {
 			List<Author> plainAuthors = new ArrayList<Author>(authors.values());
 			Collections.sort(plainAuthors);
 			Collections.reverse(plainAuthors);
-			List<Author> projectMembers = new ArrayList<Author>();
 
-			a: for (Author a : plainAuthors) {
-				for (Author b : projectMembers) {
-					if (!(conversations.containsKey(new Pair<String, String>(
-							a.name, b.name)) && conversations
-							.containsKey(new Pair<String, String>(b.name,
-									a.name)))) {
-						continue a;
-					}
-				}
-				projectMembers.add(a);
-				a.project = true;
-			}
-
-			System.out.println("# of Authors: " + conversations.size());
+			List<Author> projectMembers = getProjectMembersFromMonthActivity(
+					plainAuthors, 0.666);
+			/*
+			 * List<Author> projectMembers = getProjectMembersAsClique(
+			 * conversations, plainAuthors);
+			 */
+			System.out.println("# of Authors: " + plainAuthors.size());
+			System.out.println("# of Edges: " + conversations.size());
 
 			List<Edge> edges = new ArrayList<Edge>(conversations.size());
 
@@ -335,17 +239,20 @@ public class SocialNetworkThreadAction extends AbstractAction {
 				pToFetch.setScale(conversations.size());
 				pToFetch.start();
 
-				for (Entry<Pair<String, String>, Collection<PrimaryDocument>> entry : conversations
+				for (Entry<Pair<Author, Author>, List<PrimaryDocument>> entry : conversations
 						.entrySet()) {
 
-					edges.add(new Edge(entry.getKey().p, entry.getKey().v,
+					edges.add(g.new Edge(entry.getKey().p, entry.getKey().v,
 							entry.getValue().size()));
 					pToFetch.work(1);
 				}
 				pToFetch.done();
 			}
 
-			boolean collapseEdges = false;
+			// cluster(edges, authors);
+
+			Author cluster0 = g.new Author("cluster0");
+			boolean collapseEdges = true;
 			if (collapseEdges == true) {
 
 				List<Edge> collapsedEdges = new ArrayList<Edge>(edges.size());
@@ -353,8 +260,8 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 				for (Edge e : edges) {
 
-					Author one = authors.get(e.author);
-					Author two = authors.get(e.reply);
+					Author one = e.author;
+					Author two = e.reply;
 
 					if (one.project) {
 						if (two.project) {
@@ -362,21 +269,37 @@ public class SocialNetworkThreadAction extends AbstractAction {
 						} else {
 							Edge e2 = collapsing.get(two);
 							if (e2 == null) {
-								e2 = new Edge("cluster0", two.name, 0);
+								e2 = g.new Edge(cluster0, two, 0);
 								collapsing.put(two, e2);
 								collapsedEdges.add(e2);
 							}
 							e2.weight += e.weight;
+
+							Edge e1 = collapsing.get(one);
+							if (e1 == null) {
+								e1 = g.new Edge(one, cluster0, 0);
+								collapsing.put(one, e1);
+								collapsedEdges.add(e1);
+							}
+							e1.weight += e.weight;
 						}
 					} else {
 						if (two.project) {
 							Edge e2 = collapsing.get(one);
 							if (e2 == null) {
-								e2 = new Edge(one.name, "cluster0", 0);
+								e2 = g.new Edge(one, cluster0, 0);
 								collapsing.put(one, e2);
 								collapsedEdges.add(e2);
 							}
 							e2.weight += e.weight;
+
+							Edge e1 = collapsing.get(two);
+							if (e1 == null) {
+								e1 = g.new Edge(cluster0, two, 0);
+								collapsing.put(two, e1);
+								collapsedEdges.add(e1);
+							}
+							e1.weight += e.weight;
 						} else {
 							collapsedEdges.add(e);
 						}
@@ -387,6 +310,9 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 			ProjectToPlot project = new ProjectToPlot();
 			project.name = root.getMetaData("list");
+			if ("gmane.comp.db.axion.devel".equals(project.name)){
+				project.name = "gmane.comp.lang.uml.argouml.devel";
+			}
 			project.members = projectMembers;
 
 			HashMap<String, Object> result = new HashMap<String, Object>();
@@ -399,5 +325,132 @@ public class SocialNetworkThreadAction extends AbstractAction {
 			pm.done();
 		}
 	}
+
+	private Author getAuthor(PrimaryDocument pd,
+			HashMap<String, Author> authors, Graph g) {
+
+		String authorsName = pd.getMetaData("from");
+
+		if (authorsName == null)
+			return null;
+
+		authorsName = CUtils.cleanAuthor(authorsName);
+		String authorsNameLookup = authorsName.replaceAll("\\s", "")
+				.toLowerCase();
+
+		Author author = authors.get(authorsNameLookup);
+		if (author == null) {
+			author = g.new Author(authorsName);
+			authors.put(authorsNameLookup, author);
+		}
+		return author;
+	}
+
+	public List<Author> getProjectMembersAsClique(
+			CMultimap<Pair<String, String>, PrimaryDocument> conversations,
+			List<Author> plainAuthors) {
+
+		List<Author> projectMembers = new ArrayList<Author>();
+
+		a: for (Author a : plainAuthors) {
+			for (Author b : projectMembers) {
+				if (!(conversations.containsKey(new Pair<String, String>(
+						a.name, b.name)) && conversations
+						.containsKey(new Pair<String, String>(b.name, a.name)))) {
+					continue a;
+				}
+			}
+			projectMembers.add(a);
+			a.project = true;
+		}
+		return projectMembers;
+	}
+
+	/**
+	 * Extracts project members based on a threshold of the percentage of weeks
+	 * that member was active posting in the project.
+	 * 
+	 * @param threshold
+	 *            0.0 - 1.0
+	 */
+	public List<Author> getProjectMembersFromWeekActivity(
+			List<Author> plainAuthors, double threshold) {
+
+		List<Author> projectMembers = new ArrayList<Author>();
+
+		for (Author a : plainAuthors) {
+			if (a.weeks.getNonZeroBins() / 53.0 > threshold) {
+				projectMembers.add(a);
+				a.project = true;
+			}
+		}
+		return projectMembers;
+	}
+
+	/**
+	 * Extracts project members based on a threshold of the percentage of months
+	 * that member was active posting in the project.
+	 * 
+	 * @param threshold
+	 *            0.0 - 1.0
+	 */
+	public List<Author> getProjectMembersFromMonthActivity(
+			List<Author> plainAuthors, double threshold) {
+
+		List<Author> projectMembers = new ArrayList<Author>();
+
+		for (Author a : plainAuthors) {
+			if (a.months.getNonZeroBins() / 13.0 > threshold) {
+				projectMembers.add(a);
+				a.project = true;
+			}
+		}
+		return projectMembers;
+	}
+
+	// private void cluster(List<Edge> edges, HashMap<String, Author> authors) {
+	//		
+	// int n = authors.size();
+	//		
+	//		
+	//		
+	//		
+	// int[][] a = new int[n][n];
+	//		
+	//		
+	// double q = 0.0;
+	//		
+	// EdgeWeightedGraph graph, bestGraph;
+	//		
+	// while (true){
+	//			
+	// CMultimap<Double, Edge> betweenness = graph.edgeBetweenness();
+	//			
+	// // Stop if no more edges in the graph
+	// if (betweenness.size() == 0)
+	// break;
+	//			
+	// // Remove the edges from the graph
+	// for (Edge e : betweenness.lastEntry().getValue()){
+	// graph = graph.remove(e);
+	// }
+	//
+	// // Find best modularity
+	// double newQ = graph.getModularity();
+	// if (newQ > q){
+	// bestGraph = graph;
+	// q = newQ;
+	// }
+	// }
+	//		
+	//		
+	//		
+	//		
+	//		
+	//		
+	//		
+	//		
+	//		
+	// }
 
 }

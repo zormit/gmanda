@@ -16,6 +16,7 @@ import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
+import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
 
 public class ComputeThreadStatisticsAction extends AbstractAction {
 
@@ -56,8 +57,10 @@ public class ComputeThreadStatisticsAction extends AbstractAction {
 					return;
 
 				PrimaryDocument pd = (PrimaryDocument) o;
+				
+				TreeWalker<PrimaryDocument> tw = tree.getTreeWalker(pd);
 
-				facade.printThreadStatistics(pd, commonService
+				facade.printThreadStatistics(tw, commonService
 					.getProgressBar("Calculate Project Statistics"));
 			}
 		}, "Error in computing thread statistics:");

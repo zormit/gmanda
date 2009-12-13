@@ -1,5 +1,11 @@
 
-2008-08-25
+2009-12-13
+
+   * [FEATURE] Many new export options for Social Network Graphs
+   * [FEATURE] Export LaTeX hyperlinks for documents based on message IDs
+   * [FIX] Improved Velocity Whitespace Repair for improved indentation in exported files
+
+2009-08-25
 
    * [FEATURE] Import mbox files 
    * [FIX] Made MBox import more robust to incorrect dates and header fields
