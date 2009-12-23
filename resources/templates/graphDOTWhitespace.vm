@@ -1,9 +1,8 @@
 #macro( writeAuthor $author)
-{node [width=$author.weight,height=$author.weight,fixedsize=true,shape=circle,style=filled,color="$author.color",label="$author.multiLineName"] "$author.id"};
+{node [width=$author.weight,height=$author.weight,fixedsize=true,tooltip="$author.name wrote $author.emailsWritten e-mails and was active $author.numberOfActiveMonths months.",shape=circle,style=filled,color="$author.color",label="$author.multiLineName"] "$author.id"};
 #end
 graph G {
   fontname="Sans";
-  compound=true;
   subgraph cluster0 {
     style=rounded;
     style=filled;
@@ -18,6 +17,6 @@ graph G {
   #writeAuthor($author)
 #end
 #foreach ($edge in $edges)
-  "$edge.fromID" -- "$edge.toID" [weight=$edge.weight,penwidth=$edge.weight];
+  "$edge.fromID" -- "$edge.toID" [weight=$edge.weight,penwidth=$edge.weight,tooltip="Mailing-list participants $edge.from.name and $edge.to.name wrote $edge.emailsWritten e-mails in reply to each other"];
 #end
 }

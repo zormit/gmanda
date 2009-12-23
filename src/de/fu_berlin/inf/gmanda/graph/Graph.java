@@ -1,5 +1,7 @@
 package de.fu_berlin.inf.gmanda.graph;
 
+import java.util.HashMap;
+
 import org.joda.time.DateTime;
 
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
@@ -14,12 +16,30 @@ public class Graph {
 
 	public Coloration coloration = Coloration.MONTH;
 
+	public HashMap<Integer, Author> nodes = new HashMap<Integer, Author>();
+
 	public class IntegerHistogram {
 
-		public int[] bins;
+		protected int[] bins;
 
-		public IntegerHistogram(int numberOfBins) {
-			bins = new int[numberOfBins];
+		protected int min;
+		protected int max;
+
+		protected int underflows = 0;
+		protected int overflows = 0;
+
+		public IntegerHistogram(int from, int to) {
+			if (to < from)
+				throw new IllegalArgumentException();
+
+			this.min = from;
+			this.max = to;
+
+			bins = new int[getNumberOfBins()];
+		}
+
+		public int getNumberOfBins() {
+			return max - min + 1;
 		}
 
 		public int getNonZeroBins() {
@@ -33,12 +53,22 @@ public class Graph {
 		}
 
 		public void add(int bin) {
-			bins[bin]++;
+			if (bin < min) {
+				underflows++;
+				return;
+			}
+			if (max < bin) {
+				overflows++;
+				return;
+			}
+			bins[bin - min]++;
 		}
 	}
 
 	public class Author implements Comparable<Author> {
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see java.lang.Object#hashCode()
 		 */
 		@Override
@@ -50,7 +80,9 @@ public class Graph {
 			return result;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override
@@ -77,11 +109,13 @@ public class Graph {
 		public int id;
 
 		public boolean project = false;
-		public IntegerHistogram weeks = new IntegerHistogram(53);
-		public IntegerHistogram months = new IntegerHistogram(13);
+		public IntegerHistogram weeks = new IntegerHistogram(1, 52);
+		public IntegerHistogram months = new IntegerHistogram(1, 12);
 
 		public Author(String name) {
 			id = nextId++;
+			Graph.this.nodes.put(id, this);
+
 			this.setName(name);
 		}
 
@@ -91,6 +125,14 @@ public class Graph {
 
 		public int getEmailsWritten() {
 			return emailsWritten;
+		}
+
+		public int getNumberOfActiveMonths() {
+			return months.getNonZeroBins();
+		}
+
+		public int getNumberOfActiveWeeks() {
+			return weeks.getNonZeroBins();
 		}
 
 		public String getMultiLineName() {
@@ -171,8 +213,8 @@ public class Graph {
 		private Graph getOuterType() {
 			return Graph.this;
 		}
-		
-		public String toString(){
+
+		public String toString() {
 			return name;
 		}
 	}
@@ -225,26 +267,36 @@ public class Graph {
 		public String getAuthor() {
 			return author.getName();
 		}
-		
-		public Author getFrom(){
+
+		public Author getFrom() {
 			return author;
 		}
-		
-		public Author getTo(){
+
+		public Author getTo() {
 			return reply;
 		}
-		
-		public String getFromID(){
-			if ("cluster0".equals(author.name)){
-				return "cluster0"; 
+
+		public Author getOtherEnd(Author author) {
+			if (this.author.equals(author)) {
+				return reply;
+			}
+			if (this.reply.equals(author)) {
+				return this.author;
+			}
+			return null;
+		}
+
+		public String getFromID() {
+			if ("cluster0".equals(author.name)) {
+				return "cluster0";
 			} else {
 				return "" + author.id;
 			}
 		}
-		
-		public String getToID(){
-			if ("cluster0".equals(reply.name)){
-				return "cluster0"; 
+
+		public String getToID() {
+			if ("cluster0".equals(reply.name)) {
+				return "cluster0";
 			} else {
 				return "" + reply.id;
 			}
@@ -260,6 +312,10 @@ public class Graph {
 
 		public String getReply() {
 			return reply.getName();
+		}
+
+		public int getEmailsWritten() {
+			return weight;
 		}
 
 		public int getWeight() {
