@@ -1,3 +1,0 @@
-#foreach ($edge in $edges)
-$edge.from.id	$edge.to.id	$edge.weight
-#end
