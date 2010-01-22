@@ -112,6 +112,17 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 		return null;
 	}
 
+	public String getShortListGuess() {
+
+		String listGuess = getListGuess();
+		if (listGuess == null)
+			return null;
+
+		return listGuess
+				.replaceAll("(gmane|\\.comp|\\.devel|\\.education)", "")
+				.replaceAll("(^\\.|\\.$)", "");
+	}
+
 	SoftReference<String> text = new SoftReference<String>(null);
 
 	/**
@@ -416,13 +427,41 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 		return result;
 	}
 
+	/**
+	 * The mailing-list is the root of the parent-child hierarchy.
+	 */
 	public PrimaryDocument getMailingList() {
-		if (getParent() == null)
+		if (isMailingList())
 			return this;
 
 		return getParent().getMailingList();
 	}
 
+	/**
+	 * Returns true if and only if this primary document has no parent.
+	 */
+	public boolean isMailingList() {
+		return getParent() == null;
+	}
+
+	/**
+	 * Returns true if and only if the parent of this mail is the mailing-list
+	 */
+	public boolean isThreadStart() {
+		if (getParent() == null)
+			return false;
+
+		return getParent().isMailingList();
+	}
+
+	/**
+	 * Returns the PrimaryDocument that represents the start of the thread.
+	 * 
+	 * Caution: The PD returned by this method has a parent (the mailing-list)
+	 * 
+	 * If this method is called on the mailing-list itself, then this is
+	 * returned.
+	 */
 	public PrimaryDocument getThreadStart() {
 
 		if (getParent() == null)

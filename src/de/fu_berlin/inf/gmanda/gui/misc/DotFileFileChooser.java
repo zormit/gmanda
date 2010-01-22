@@ -1,6 +1,6 @@
 package de.fu_berlin.inf.gmanda.gui.misc;
 
-import de.fu_berlin.inf.gmanda.gui.actions.SocialNetworkThreadAction.SNAFileType;
+import de.fu_berlin.inf.gmanda.gui.graph.SocialNetworkModule.SNAFileType;
 import de.fu_berlin.inf.gmanda.util.Configuration;
 
 /**

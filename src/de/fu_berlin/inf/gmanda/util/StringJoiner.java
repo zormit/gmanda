@@ -17,6 +17,11 @@ public class StringJoiner implements Appendable, CharSequence {
 		return sb.toString();
 	}
 	
+	public StringJoiner appendNoJoin(CharSequence arg0){
+		sb.append(arg0);
+		return this;
+	}
+	
 	public StringJoiner append(CharSequence arg0) {
 		if (tail){
 			sb.append(delimiter);

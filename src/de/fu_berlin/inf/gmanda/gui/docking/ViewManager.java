@@ -46,7 +46,7 @@ public class ViewManager {
 	
 	CloseAction closeAction;
 
-	BiMap<DockableView, Dockable> dockables = new HashBiMap<DockableView, Dockable>();
+	BiMap<DockableView, Dockable> dockables = HashBiMap.create();
 
 	public ViewManager(DockableView[] views) {
 		dockSituation = new PredefinedDockSituation();

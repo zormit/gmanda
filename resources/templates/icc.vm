@@ -1,0 +1,13 @@
+#macro( writeNode $node)
+  {node [width=$node.weight,height=$node.weight,fixedsize=true,tooltip="Cluster $node.name wrote $node.emailsWritten e-mails",shape=circle,style=filled,label="$node.multiLineName"] "$node.id"};
+#end
+
+digraph G {
+  fontname="Sans";
+  #foreach ($node in $nodes)
+    #writeNode($node)
+  #end
+  #foreach ($edge in $edges)
+    "$edge.fromID" -> "$edge.toID" [penwidth=$edge.weight,tooltip="Emails written by Cluster $edge.from.name to Cluster ${edge.to.name}: $edge.emailsWritten"];
+  #end
+}

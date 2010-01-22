@@ -16,7 +16,7 @@ public class TestMultimap {
 	@Test
 	public void testMultimap(){
 		
-		Multimap<String, String> test = new HashMultimap<String, String>();
+		Multimap<String, String> test = HashMultimap.create();
 		
 		test.put("hallo", "1");
 		test.put("hallo", "2");

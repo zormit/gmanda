@@ -23,3 +23,7 @@ Google Collections (google-collect-*.jar)
 args4J (args4j-*.jar)                                        MIT
 
 Eclipse Icons (resource/icons/*.png)                         EPL 1.0
+
+ColorBrewer Color                                            Custom:
+    This product includes color specifications and designs developed by
+    Cynthia Brewer (http://colorbrewer.org/)

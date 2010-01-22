@@ -1,22 +1,26 @@
 package de.fu_berlin.inf.gmanda.graph;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.colorbrewer.ColorBrewerPalettes;
 import org.joda.time.DateTime;
 
+import de.fu_berlin.inf.gmanda.gui.graph.ExportSettings;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 
 public class Graph {
 
-	public enum Coloration {
-		MONTH, WEEK, FIXED;
-	}
+	protected ExportSettings settings;
 
+	public Graph(ExportSettings settings){
+		this.settings = settings;
+	}
+	
 	public int nextId = 0;
 
-	public Coloration coloration = Coloration.MONTH;
-
-	public HashMap<Integer, Author> nodes = new HashMap<Integer, Author>();
+	public HashMap<Integer, Node> nodes = new HashMap<Integer, Node>();
 
 	public class IntegerHistogram {
 
@@ -65,7 +69,63 @@ public class Graph {
 		}
 	}
 
-	public class Author implements Comparable<Author> {
+	/**
+	 * A cluster is a set of authors that we are grouped together.
+	 * 
+	 * Any author can only be part of at most one cluster
+	 */
+	public class Cluster {
+
+		protected String name;
+
+		protected String color;
+
+		public String getName() {
+			return name;
+		}
+		
+		public String toString(){
+			return name;
+		}
+
+		protected Set<Node> authors = new HashSet<Node>();
+
+		public Cluster(String name, String color) {
+			this.name = name;
+			this.color = color;
+		}
+
+		public String getColor() {
+			return color;
+		}
+
+		public Set<Node> getAuthors() {
+			return authors;
+		}
+		
+		public int getThreadsStarted(){
+			int result = 0;
+			for (Node a : getAuthors()){
+				result += a.threadsStarted;
+			}
+			return result;
+		}
+
+		public void add(Node a) {
+			if (a.cluster == this)
+				return;
+
+			if (a.cluster != null)
+				throw new IllegalArgumentException(
+						"Only one cluster per node allowed");
+
+			authors.add(a);
+			a.cluster = this;
+		}
+
+	}
+
+	public class Node implements Comparable<Node> {
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -93,7 +153,7 @@ public class Graph {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Author other = (Author) obj;
+			Node other = (Node) obj;
 			if (!getOuterType().equals(other.getOuterType()))
 				return false;
 			if (name == null) {
@@ -109,10 +169,15 @@ public class Graph {
 		public int id;
 
 		public boolean project = false;
+
+		public Cluster cluster;
+
 		public IntegerHistogram weeks = new IntegerHistogram(1, 52);
 		public IntegerHistogram months = new IntegerHistogram(1, 12);
 
-		public Author(String name) {
+		public int threadsStarted = 0;
+
+		public Node(String name) {
 			id = nextId++;
 			Graph.this.nodes.put(id, this);
 
@@ -158,38 +223,29 @@ public class Graph {
 		public double getWeight() {
 			return Math.sqrt(emailsWritten) / 2.0;
 		}
-
-		public String getColorFromInt(int i, int max) {
-
-			int color = i / (max / 4);
-
-			switch (color) {
-			case 0:
-				return "#ffffb2";
-			case 1:
-				return "#fecc5c";
-			case 2:
-				return "#fd8c3c";
-			case 3:
-			default:
-				return "#e31a1c";
-			}
-		}
-
-		public String getColor() {
-			switch (coloration) {
+		
+		public String getColor(String[] palette){
+			switch (settings.getColoration()) {
 			case MONTH:
-				return getColorFromInt(months.getNonZeroBins(), 12);
+				return ColorBrewerPalettes.getColorFromInt(palette, months.getNonZeroBins(), 12);
 			case WEEK:
-				return getColorFromInt(weeks.getNonZeroBins(), 52);
+				return ColorBrewerPalettes.getColorFromInt(palette, weeks.getNonZeroBins(), 52);
 			case FIXED:
 			default:
-				return "#0000ff";
+				return palette[palette.length - 1];// "#0000ff";
 			}
+		}
+			
+		public String getFontColor() {
+			return getColor(settings.getFontColorPalette()); 
+		}
+		
+		public String getColor() {
+			return getColor(settings.getColorPalette()); 
 		}
 
 		@Override
-		public int compareTo(Author arg0) {
+		public int compareTo(Node arg0) {
 			return this.emailsWritten - arg0.emailsWritten;
 		}
 
@@ -217,6 +273,10 @@ public class Graph {
 		public String toString() {
 			return name;
 		}
+
+		public Cluster getCluster() {
+			return cluster;
+		}
 	}
 
 	public class Edge {
@@ -224,9 +284,8 @@ public class Graph {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result
-					+ ((author == null) ? 0 : author.hashCode());
-			result = prime * result + ((reply == null) ? 0 : reply.hashCode());
+			result = prime * result + ((from == null) ? 0 : from.hashCode());
+			result = prime * result + ((to == null) ? 0 : to.hashCode());
 			return result;
 		}
 
@@ -239,66 +298,74 @@ public class Graph {
 			if (!(obj instanceof Edge))
 				return false;
 			Edge other = (Edge) obj;
-			if (author == null) {
-				if (other.author != null)
+			if (from == null) {
+				if (other.from != null)
 					return false;
-			} else if (!author.equals(other.author))
+			} else if (!from.equals(other.from))
 				return false;
-			if (reply == null) {
-				if (other.reply != null)
+			if (to == null) {
+				if (other.to != null)
 					return false;
-			} else if (!reply.equals(other.reply))
+			} else if (!to.equals(other.to))
 				return false;
 			return true;
 		}
 
-		public Edge(Author author, Author reply, int size) {
-			this.author = author;
-			this.reply = reply;
+		/**
+		 * Creates a directed edge from the given node "from" to the given node
+		 * "to"
+		 */
+		public Edge(Node from, Node to, int size) {
+			this.from = from;
+			this.to = to;
 			this.weight = size;
 		}
 
-		public Author author;
+		public Node from;
 
-		public Author reply;
+		public Node to;
 
 		public int weight;
 
 		public String getAuthor() {
-			return author.getName();
+			return from.getName();
 		}
 
-		public Author getFrom() {
-			return author;
+		public String getReply() {
+			return to.getName();
 		}
 
-		public Author getTo() {
-			return reply;
+		public Node getFrom() {
+			return from;
 		}
 
-		public Author getOtherEnd(Author author) {
-			if (this.author.equals(author)) {
-				return reply;
+		public Node getTo() {
+			return to;
+		}
+
+		public Node getOtherEnd(Node author) {
+			if (this.from.equals(author)) {
+				return to;
 			}
-			if (this.reply.equals(author)) {
-				return this.author;
+			if (this.to.equals(author)) {
+				return this.from;
 			}
 			return null;
 		}
 
 		public String getFromID() {
-			if ("cluster0".equals(author.name)) {
+			if ("cluster0".equals(from.name)) {
 				return "cluster0";
 			} else {
-				return "" + author.id;
+				return "" + from.id;
 			}
 		}
 
 		public String getToID() {
-			if ("cluster0".equals(reply.name)) {
+			if ("cluster0".equals(to.name)) {
 				return "cluster0";
 			} else {
-				return "" + reply.id;
+				return "" + to.id;
 			}
 		}
 
@@ -308,10 +375,6 @@ public class Graph {
 
 		public String getReplyNoSpace() {
 			return getReply().replaceAll("\\s+", "_");
-		}
-
-		public String getReply() {
-			return reply.getName();
 		}
 
 		public int getEmailsWritten() {

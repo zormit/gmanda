@@ -15,14 +15,13 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.picocontainer.annotations.Inject;
 
-import com.google.common.base.Nullable;
-
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.proxies.SearchStringProxy;
 import de.fu_berlin.inf.gmanda.qda.Code;
 import de.fu_berlin.inf.gmanda.qda.CodedStringFactory;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.Nullable;
 import de.fu_berlin.inf.gmanda.util.StringJoiner;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;

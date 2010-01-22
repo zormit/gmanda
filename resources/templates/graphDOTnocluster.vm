@@ -5,19 +5,8 @@
 graph G {
   outputmode=edgesfirst;
   fontname="Sans";
-  
-  #foreach($members in $communities)
-    
-    subgraph cluster$velocityCount {
-      style=rounded;
-      style=filled;
-      color=grey;
-      fontsize=40;
-      label="$project.name - $velocityCount";
-      #foreach ($member in $members)
-        #writeAuthor($member)
-      #end
-    }
+  #foreach ($author in $authors)
+    #writeAuthor($author)
   #end
   #foreach ($edge in $edges)
     "$edge.fromID" -- "$edge.toID" [weight=$edge.weight,penwidth=$edge.weight,tooltip="Mailing-list participants $edge.from.name and $edge.to.name wrote $edge.emailsWritten e-mails in reply to each other"];

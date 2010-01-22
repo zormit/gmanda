@@ -1,8 +1,9 @@
 #macro( writeAuthor $author)
-  {node [width=$author.weight,height=$author.weight,fixedsize=true,tooltip="$author.name wrote $author.emailsWritten e-mails and was active $author.numberOfActiveMonths months.",shape=circle,style=filled,color="$author.color",label="$author.multiLineName"] "$author.id"};
+  {node [width=$author.weight,height=$author.weight,fixedsize=true,tooltip="$author.name wrote $author.emailsWritten e-mails and was active $author.numberOfActiveMonths months.",shape=circle,style=filled,fillcolor="$author.color",fontcolor="$author.fontColor",color="$author.cluster.color", label="$author.multiLineName"] "$author.id"};
 #end
 
 graph G {
+  outputmode=edgesfirst;
   fontname="Sans";
   subgraph cluster0 {
     style=rounded;

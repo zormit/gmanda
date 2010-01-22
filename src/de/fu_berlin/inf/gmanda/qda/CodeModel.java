@@ -15,6 +15,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
 import de.fu_berlin.inf.gmanda.util.Pair;
@@ -228,7 +229,7 @@ public class CodeModel {
 	
 	public Multimap<PrimaryDocument, Code> getValues(Iterable<PrimaryDocument> it, String code,
 		String property) {
-		Multimap<PrimaryDocument, Code> result = new TreeMultimap<PrimaryDocument, Code>();
+		TreeMultimap<PrimaryDocument, Code> result = TreeMultimap.create(Ordering.natural(), Ordering.usingToString());
 		for (PrimaryDocument pd : it) {
 			for (Code c : pd.getCode().getAllDeep(code)) {
 				result.putAll(pd, c.getProperties(property));

@@ -89,9 +89,9 @@ public class TabulationCanvas extends JScrollPane {
 		return s.slice();
 	}
 
-	public <T> Multimap<String, T> preprocess(String dim, Slice<T> all) {
+	public <T extends Comparable<T>> Multimap<String, T> preprocess(String dim, Slice<T> all) {
 
-		Multimap<String, T> result = new TreeMultimap<String, T>();
+		Multimap<String, T> result = TreeMultimap.create();
 
 		if (dim == null || dim.trim().length() == 0) {
 			return result;

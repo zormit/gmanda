@@ -330,7 +330,7 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		 */
 		uncategorized.definition = "";
 
-		Multimap<Section, String> citationsByCategory = new TreeMultimap<Section, String>();
+		Multimap<Section, String> citationsByCategory = TreeMultimap.create();
 
 		nextCitation: for (String citation : citations) {
 

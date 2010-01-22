@@ -87,11 +87,13 @@ import de.fu_berlin.inf.gmanda.gui.actions.ShowPreferencesAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SocialNetworkThreadAction;
 import de.fu_berlin.inf.gmanda.gui.actions.SplitTrailAction;
 import de.fu_berlin.inf.gmanda.gui.actions.VisualizationScreenshotAction;
+import de.fu_berlin.inf.gmanda.gui.actions.tools.ExportSocialNetworksAction;
 import de.fu_berlin.inf.gmanda.gui.docking.DefaultPerspective;
 import de.fu_berlin.inf.gmanda.gui.docking.DockablePerspectiveMenu;
 import de.fu_berlin.inf.gmanda.gui.docking.DockableViewMenu;
 import de.fu_berlin.inf.gmanda.gui.docking.ViewManager;
 import de.fu_berlin.inf.gmanda.gui.docking.VisualizationPerspective;
+import de.fu_berlin.inf.gmanda.gui.graph.SocialNetworkModule;
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
 import de.fu_berlin.inf.gmanda.gui.manager.TitleManager;
 import de.fu_berlin.inf.gmanda.gui.manager.UndoManagement;
@@ -301,6 +303,7 @@ public class GmandaMain {
 			.addComponent(ImportFromMboxAction.class)
 			.addComponent(ReindexWithLuceneTreeAction.class)
 			.addComponent(ExportMessageIDHyperLinks.class)
+			.addComponent(ExportSocialNetworksAction.class)
 			// Menus
 			.addComponent(MainWindowMenuBar.class)
 			.addComponent(FileMenu.class)
@@ -354,7 +357,8 @@ public class GmandaMain {
 			.addComponent(TrailManager.class)
 			.addComponent(GmandaHyperlinkListener.class)
 			.addComponent(SVGScreenshotTaker.class)
-			.addComponent(VelocitySupport.class);
+			.addComponent(VelocitySupport.class)
+			.addComponent(SocialNetworkModule.class);
 		
 			if (dotMonitor != null){
 				container.addComponent(DotGraphMonitor.class, dotMonitor);
