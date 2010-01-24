@@ -3,6 +3,7 @@
 #end
 
 digraph G {
+  outputorder="edgesfirst";
   fontname="Sans";
   #foreach ($node in $nodes)
     #writeNode($node)

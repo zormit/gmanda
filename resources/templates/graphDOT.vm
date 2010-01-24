@@ -3,7 +3,7 @@
 #end
 
 graph G {
-  outputmode=edgesfirst;
+  outputorder="edgesfirst";
   fontname="Sans";
   subgraph cluster0 {
     style=rounded;
