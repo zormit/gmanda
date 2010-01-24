@@ -28,7 +28,7 @@ import de.fu_berlin.inf.gmanda.util.progress.IProgress.ProgressStyle;
  * Action to export all Social Networks in a Single Patch
  */
 public class ExportSocialNetworksAction extends AbstractAction {
-	
+
 	@Inject
 	CommonService commonService;
 
@@ -37,12 +37,12 @@ public class ExportSocialNetworksAction extends AbstractAction {
 
 	@Inject
 	SocialNetworkModule socialNetworkModule;
-	
+
 	@Inject
 	DotFileFileChooser dotFileChooser;
-	
+
 	ProjectProxy proxy;
-	
+
 	public ExportSocialNetworksAction(ProjectProxy proxy) {
 		super("Export Social Networks Batch Operation");
 
@@ -60,23 +60,24 @@ public class ExportSocialNetworksAction extends AbstractAction {
 			public void run() {
 
 				IProgress progress = commonService
-				.getProgressBar("Calculate Project Statistics");
+						.getProgressBar("Calculate Project Statistics");
 				try {
 					Project project = proxy.getVariable();
-					
+
 					if (project == null)
 						return;
 
 					File dotFile = dotFileChooser.getSaveFile();
 					progress.setScale(70);
 					progress.start();
-					
+
 					if (dotFile == null)
 						return;
-					
-					
-					String prefix = FilenameUtils.getBaseName(dotFile.getName());
-					String extension = FilenameUtils.getExtension(dotFile.getName());
+
+					String prefix = FilenameUtils
+							.getBaseName(dotFile.getName());
+					String extension = FilenameUtils.getExtension(dotFile
+							.getName());
 					File directory = dotFile.getParentFile();
 
 					SNAFileType type = dotFileChooser.getSelectedFileType();
@@ -85,24 +86,10 @@ public class ExportSocialNetworksAction extends AbstractAction {
 						throw new NullPointerException(
 								"Must choose a file type for SNA Export");
 					}
-					
-					
-//					IProgress subProgress = progress.getSub(70, ProgressStyle.ROTATING);
-//					subProgress.setScale(120);
-//					for (int periphery : new int[]{1,2,3}){
-//						for (int core : new int[]{4,5,6,7,8,9,10,11,12}){
-//							for (PrimaryDocument pd : project.getPrimaryDocuments()){
-//								socialNetworkModule.createNetwork(pd, type, type.getDefaultSettings().setClusterBuilder(new MonthClusterBuilder(periphery,core)), 
-//										new File(directory, prefix + periphery + "-" + core + "-" + pd.getShortListGuess() + "." + extension), subProgress.getSub(1));
-//							}
-//						}
-//					}
-					
-					for (PrimaryDocument pd : project.getPrimaryDocuments()){
-						socialNetworkModule.createNetwork(pd, type, type.getDefaultSettings().setClusterBuilder(new MonthClusterBuilder(2, 8)), 
-								new File(directory, prefix + "2-8-" + pd.getShortListGuess() + "." + extension), progress.getSub(70));
-					}
-					
+
+					computerSNAs(progress, project, prefix, extension,
+							directory, type);
+
 				} catch (Exception e) {
 					throw new ReportToUserException(e);
 				} finally {
@@ -112,6 +99,43 @@ public class ExportSocialNetworksAction extends AbstractAction {
 			}
 		}, "Error in computing social networks");
 	}
-	
+
+	protected void computerSNAs(IProgress progress, Project project,
+			String prefix, String extension, File directory, SNAFileType type) {
+		IProgress subProgress = progress.getSub(70, ProgressStyle.ROTATING);
+		subProgress.setScale(120);
+
+		for (int periphery : new int[] { 2 }) {
+			for (int core : new int[] { 8 }) {
+
+				for (PrimaryDocument pd : project.getPrimaryDocuments()) {
+					if (pd.getShortListGuess() == null)
+						continue;
+
+					File targetFile = new File(directory, prefix + periphery
+							+ "-" + core + "-"
+							+ pd.getShortListGuess().replaceAll("\\.", "-")
+							+ "." + extension);
+
+					socialNetworkModule.createNetwork(pd, type, type
+							.getDefaultSettings().setClusterBuilder(
+									new MonthClusterBuilder(periphery, core)),
+							targetFile, subProgress.getSub(1));
+
+					// // Max Edge NO Aggregate
+					// socialNetworkModule.createNetwork(pd, type, type
+					// .getDefaultSettings().setClusterBuilder(
+					// new MaxEdgePeripheryBuilder(periphery, core)),
+					// targetFile, subProgress.getSub(1));
+
+					// // Max Edge Aggregate!
+					// socialNetworkModule.createNetwork(pd, type, type
+					// .getDefaultSettings().setClusterBuilder(
+					// new MaxEdgeAggregatePeripheryBuilder(periphery, core)),
+					// targetFile, subProgress.getSub(1));
+				}
+			}
+		}
+	}
 
 }

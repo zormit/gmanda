@@ -121,7 +121,7 @@ import de.fu_berlin.inf.gmanda.gui.preferences.CodedColorProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.DebugModePreferenceUI;
 import de.fu_berlin.inf.gmanda.gui.preferences.DebugModeProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.MatchColorProperty;
-import de.fu_berlin.inf.gmanda.gui.preferences.PreferenceWindow;
+import de.fu_berlin.inf.gmanda.gui.preferences.GmandaPreferenceWindow;
 import de.fu_berlin.inf.gmanda.gui.preferences.PrimaryDocumentDirectoryProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.ScrollOnShowPreferenceUI;
 import de.fu_berlin.inf.gmanda.gui.preferences.ScrollOnShowProperty;
@@ -339,7 +339,7 @@ public class GmandaMain {
 			.addComponent(CodedColorProperty.class)
 			.addComponent(DebugModeProperty.class)
 			// Preference UI
-			.addComponent(PreferenceWindow.class)
+			.addComponent(GmandaPreferenceWindow.class)
 			.addComponent(ScrollOnShowPreferenceUI.class)
 			.addComponent(DebugModePreferenceUI.class)
 			// Converters

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -18,6 +19,7 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.picocontainer.annotations.Inject;
 
@@ -31,6 +33,7 @@ import de.fu_berlin.inf.gmanda.graph.Graph;
 import de.fu_berlin.inf.gmanda.graph.Graph.Cluster;
 import de.fu_berlin.inf.gmanda.graph.Graph.Edge;
 import de.fu_berlin.inf.gmanda.graph.Graph.Node;
+import de.fu_berlin.inf.gmanda.gui.graph.ExportSettings.ExportSetting;
 import de.fu_berlin.inf.gmanda.gui.misc.ExtensionDescriptor;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.util.AutoHashMap;
@@ -48,8 +51,9 @@ public class SocialNetworkModule {
 	public enum SNAFileType implements ExtensionDescriptor {
 
 		DOT("graphDOT", "Graphviz Dot with Core Cluster *.dot", ".dot") {
-			ExportSettings defaultSettings = new DefaultExportSettings(true, true,
-					false, true);
+			ExportSettings defaultSettings = new DefaultExportSettings(
+					ExportSetting.SELFLOOPS, ExportSetting.CLUSTER,
+					ExportSetting.UNDIRECTED);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -58,8 +62,8 @@ public class SocialNetworkModule {
 		},
 		DOTNOCLUSTER("graphDOTnocluster",
 				"Graphviz Dot without Core Cluster *.dot", ".dot") {
-			ExportSettings defaultSettings = new DefaultExportSettings(false, true,
-					false, true);
+			ExportSettings defaultSettings = new DefaultExportSettings(
+					ExportSetting.SELFLOOPS, ExportSetting.UNDIRECTED);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -68,8 +72,8 @@ public class SocialNetworkModule {
 		},
 		COMMUNITYDOT("graphDOTcommunity",
 				"Graphviz Dot Community Assignment *.dot", ".dot") {
-			ExportSettings defaultSettings = new DefaultExportSettings(false, true,
-					false, false);
+			ExportSettings defaultSettings = new DefaultExportSettings(
+					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -77,8 +81,8 @@ public class SocialNetworkModule {
 			}
 		},
 		GRAPHML("graphML", "GraphML *.graphml", ".graphml") {
-			ExportSettings defaultSettings = new DefaultExportSettings(false, true,
-					false, true);
+			ExportSettings defaultSettings = new DefaultExportSettings(
+					ExportSetting.UNDIRECTED);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -86,8 +90,8 @@ public class SocialNetworkModule {
 			}
 		},
 		EDGE("edge", "Edge format *.edge", ".edge") {
-			ExportSettings defaultSettings = new DefaultExportSettings(false, true,
-					false, false);
+			ExportSettings defaultSettings = new DefaultExportSettings(
+					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -95,8 +99,8 @@ public class SocialNetworkModule {
 			}
 		},
 		PREFUSE("prefuse", "Prefuse Graph Format *.xml", ".xml") {
-			ExportSettings defaultSettings = new DefaultExportSettings(false, true,
-					false, true);
+			ExportSettings defaultSettings = new DefaultExportSettings(
+					ExportSetting.UNDIRECTED);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -104,8 +108,8 @@ public class SocialNetworkModule {
 			}
 		},
 		TAB("tab", "Tabbed format *.tab", ".tab") {
-			ExportSettings defaultSettings = new DefaultExportSettings(false, true,
-					true, false);
+			ExportSettings defaultSettings = new DefaultExportSettings(
+					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -113,7 +117,10 @@ public class SocialNetworkModule {
 			}
 		},
 		ICC("icc", "GraphViz Dot Inter Cluster Graph *.dot", ".dot") {
-			ExportSettings defaultSettings = new ExportSettings(true, true, false, true, true, Coloration.FIXED, null, null, new MonthClusterBuilder(1,9));
+			ExportSettings defaultSettings = new ExportSettings(EnumSet.of(
+					ExportSetting.SELFLOOPS, ExportSetting.INTERCLUSTERGRAPH,
+					ExportSetting.CLUSTER), Coloration.FIXED, null, null,
+					new MonthClusterBuilder(1, 9));
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -219,6 +226,13 @@ public class SocialNetworkModule {
 						continue;
 					}
 
+					boolean countOnlyFirstAnswer = false;
+					if (countOnlyFirstAnswer) {
+						if (!parent.isThreadStart()
+								|| parent.getChildren().indexOf(pd) != 0)
+							continue; // Only count first answers
+					}
+
 					Node parentAuthor = getAuthor(parent, authors, g);
 					if (parentAuthor == null)
 						continue;
@@ -267,21 +281,20 @@ public class SocialNetworkModule {
 				}
 				pToFetch.done();
 			}
-			
+
 			// Check whether the number add up!
-			if (!settings.isUndirected() && settings.includeSelfLoops){
-				
-				for (Node node : plainAuthors){
-					int result = 0;
-					for (Edge e : edges){
-						if (e.from == node)
-							result += e.weight;
-					}
-					if (node.emailsWritten - node.threadsStarted != result)
-						throw new IllegalArgumentException("Something is wrong!");
-				}
+			if (!settings.isUndirected() && settings.isIncludeSelfLoops()) {
+
+				// for (Node node : plainAuthors){
+				// int result = 0;
+				// for (Edge e : edges){
+				// if (e.from == node)
+				// result += e.weight;
+				// }
+				// if (node.emailsWritten - node.threadsStarted != result)
+				// throw new IllegalArgumentException("Something is wrong!");
+				// }
 			}
-			
 
 			// Build Clusters
 			List<Cluster> clusters = settings.getClusterBuilder().getClusters(
@@ -297,9 +310,9 @@ public class SocialNetworkModule {
 				throw new ReportToUserException(e3);
 			}
 
-			HashMap<String, Object> icc = printInterClusterCommunication(settings, root,
-					plainAuthors, edges, targetFile);
-			if (settings.interClusterGraph) {
+			HashMap<String, Object> icc = printInterClusterCommunication(
+					settings, root, plainAuthors, edges, targetFile);
+			if (settings.isInterClusterGraph()) {
 				return icc;
 			}
 
@@ -417,8 +430,9 @@ public class SocialNetworkModule {
 		}
 	}
 
-	protected HashMap<String, Object> printInterClusterCommunication(ExportSettings settings,
-			PrimaryDocument root, List<Node> plainAuthors, List<Edge> edges, File targetFile) {
+	protected HashMap<String, Object> printInterClusterCommunication(
+			ExportSettings settings, PrimaryDocument root,
+			List<Node> plainAuthors, List<Edge> edges, File targetFile) {
 
 		final AutoHashMap<Cluster, AutoHashMap<Cluster, Integer>> interClusterCommunication = new AutoHashMap<Cluster, AutoHashMap<Cluster, Integer>>(
 				new Supplier<AutoHashMap<Cluster, Integer>>() {
@@ -429,78 +443,75 @@ public class SocialNetworkModule {
 				});
 
 		Set<Cluster> clusters = new TreeSet<Cluster>(Ordering.usingToString());
-		
+
 		for (Edge e : edges) {
 
 			Cluster clusterOne = e.from.getCluster();
 			clusters.add(clusterOne);
 			Cluster clusterTwo = e.to.getCluster();
 			clusters.add(clusterTwo);
-			
+
 			interClusterCommunication.get(clusterOne).put(
 					clusterTwo,
 					interClusterCommunication.get(clusterOne).get(clusterTwo)
 							+ e.weight);
 		}
-		
-		List<Function<Cluster, String>> columns = new ArrayList<Function<Cluster,String>>();
+
+		List<Function<Cluster, String>> columns = new ArrayList<Function<Cluster, String>>();
 		List<String> columnTitles = new ArrayList<String>();
-		
-		for (final Cluster cluster : clusters){
+
+		for (final Cluster cluster : clusters) {
 			columnTitles.add(cluster.getName());
-			columns.add(
-					new Function<Cluster, String>(){
-					@Override
-					public String apply(Cluster from) {
-						return interClusterCommunication.get(cluster).get(from).toString();
-					}
-				});
-		};
-		
+			columns.add(new Function<Cluster, String>() {
+				@Override
+				public String apply(Cluster from) {
+					return interClusterCommunication.get(cluster).get(from)
+							.toString();
+				}
+			});
+		}
+		;
+
 		columnTitles.add("threadsStarted");
-		columns.add(
-				new Function<Cluster, String>(){
-				@Override
-				public String apply(Cluster from) {
-					return String.valueOf(from.getThreadsStarted());
-				}
-			});
-		
+		columns.add(new Function<Cluster, String>() {
+			@Override
+			public String apply(Cluster from) {
+				return String.valueOf(from.getThreadsStarted());
+			}
+		});
+
 		columnTitles.add("size");
-		columns.add(
-				new Function<Cluster, String>(){
-				@Override
-				public String apply(Cluster from) {
-					return String.valueOf(from.getAuthors().size());
-				}
-			});
-		
+		columns.add(new Function<Cluster, String>() {
+			@Override
+			public String apply(Cluster from) {
+				return String.valueOf(from.getAuthors().size());
+			}
+		});
+
 		columnTitles.add("emailsTotal");
-		columns.add(
-				new Function<Cluster, String>(){
-				@Override
-				public String apply(Cluster from) {
-					int result = 0;
-					for (Node author : from.getAuthors()){
-						result += author.emailsWritten;
-					}
-					return String.valueOf(result);
+		columns.add(new Function<Cluster, String>() {
+			@Override
+			public String apply(Cluster from) {
+				int result = 0;
+				for (Node author : from.getAuthors()) {
+					result += author.emailsWritten;
 				}
-			});
-		
+				return String.valueOf(result);
+			}
+		});
+
 		columnTitles.add("repliesTotal");
-		columns.add(
-				new Function<Cluster, String>(){
-				@Override
-				public String apply(Cluster from) {
-					int result = 0;
-					for (Node author : from.getAuthors()){
-						result += author.emailsWritten - author.threadsStarted;
-					}
-					return String.valueOf(result);
+		columns.add(new Function<Cluster, String>() {
+			@Override
+			public String apply(Cluster from) {
+				int result = 0;
+				for (Node author : from.getAuthors()) {
+					result += author.emailsWritten - author.threadsStarted;
 				}
-			});
-		
+				return String.valueOf(result);
+			}
+		});
+
 		// Print ICC to Console
 		StringJoiner joiner = new StringJoiner("\t");
 		joiner.append(root.getShortListGuess());
@@ -508,20 +519,24 @@ public class SocialNetworkModule {
 			joiner.append(two);
 		}
 		joiner.appendNoJoin("\n");
+
 		for (Cluster one : clusters) {
-			joiner.appendNoJoin(StringUtils.leftPad(one.getName(), 15));
+			joiner.appendNoJoin(StringUtils.rightPad(one.getName(), 15));
 			for (Function<Cluster, String> column : columns) {
 				joiner.append(column.apply(one));
 			}
 			joiner.appendNoJoin("\n");
 		}
 		System.out.println(joiner.toString());
-		
-		try {
-			FileUtils.writeStringToFile(new File(targetFile.getPath() + ".txt"), joiner.toString());
-		} catch (IOException e) {
-			throw new ReportToUserException(e);
-		}
+
+		if (settings.isInterClusterGraph())
+			try {
+				FileUtils.writeStringToFile(new File(FilenameUtils
+						.removeExtension(targetFile.getPath())
+						+ ".txt"), joiner.toString());
+			} catch (IOException e) {
+				throw new ReportToUserException(e);
+			}
 
 		// Build Graph in case we create ICC Dot Graphs
 		Graph iccGraph = new Graph(settings);
@@ -530,25 +545,27 @@ public class SocialNetworkModule {
 
 		Node threadStartNode = iccGraph.new Node("Threads Started");
 		iccNodes.add(threadStartNode);
-		
+
 		Map<Cluster, Node> authors = new HashMap<Cluster, Node>();
+
 		for (Cluster one : clusters) {
 			Node author = iccGraph.new Node(one.getName());
 			iccNodes.add(author);
 			authors.put(one, author);
-			
+
 			int threadStarts = one.getThreadsStarted();
 			author.emailsWritten += threadStarts;
-			
+
 			// Add virtually!
 			threadStartNode.emailsWritten += threadStarts;
-			
-			iccEdges.add(iccGraph.new Edge(author, threadStartNode, threadStarts));
+
+			iccEdges.add(iccGraph.new Edge(author, threadStartNode,
+					threadStarts));
 		}
-		
+
 		for (Cluster one : clusters) {
 			for (Cluster two : clusters) {
-				
+
 				int emailsWritten = interClusterCommunication.get(one).get(two);
 				if (emailsWritten == 0)
 					continue;
@@ -586,15 +603,21 @@ public class SocialNetworkModule {
 			return null;
 
 		authorsName = CUtils.cleanAuthor(authorsName);
-		String[] nameParts = authorsName.toLowerCase().split("\\s");
+		// Normalize to lower case and remove initials
+		String[] nameParts = authorsName.toLowerCase().replaceAll(
+				"(^|\\s)\\w\\.?(\\s|$)", " ").split("\\s");
+		// Sort
 		Arrays.sort(nameParts);
 		String authorsNameLookup = StringUtils.join(nameParts);
+		if (authorsNameLookup.length() <= 1)
+			authorsNameLookup = authorsName;
 
 		Node author = authors.get(authorsNameLookup);
 		if (author == null) {
 			author = g.new Node(authorsName);
 			authors.put(authorsNameLookup, author);
 		}
+		author.addName(authorsName);
 		return author;
 	}
 
@@ -709,13 +732,14 @@ public class SocialNetworkModule {
 		return projectMembers;
 	}
 
-	public void createNetwork(PrimaryDocument pd, SNAFileType type, ExportSettings settings,
-			File targetFile, IProgress progress) {
+	public void createNetwork(PrimaryDocument pd, SNAFileType type,
+			ExportSettings settings, File targetFile, IProgress progress) {
 
 		if (settings == null)
 			settings = type.getDefaultSettings();
-		
-		Map<String, Object> data = computeSocialNetwork(pd, settings, targetFile, progress);
+
+		Map<String, Object> data = computeSocialNetwork(pd, settings,
+				targetFile, progress);
 
 		// Run template engine
 		String result = velocitySupport.run(data, type.getVelocityFileName());

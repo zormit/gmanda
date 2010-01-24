@@ -21,33 +21,28 @@ package de.fu_berlin.inf.gmanda.gui.graph;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Predicates;
+
 import de.fu_berlin.inf.gmanda.graph.Graph;
 import de.fu_berlin.inf.gmanda.graph.Graph.Cluster;
 import de.fu_berlin.inf.gmanda.graph.Graph.Edge;
 import de.fu_berlin.inf.gmanda.graph.Graph.Node;
 
-public class MonthClusterBuilder implements ClusterBuilder {
+/**
+ * ClusterBuilder which builds a periphery by a maximum number of edges to other
+ * people, but counting all edges to core members (as identified by Node.project
+ * == node) as a single one.
+ */
+public class MaxEdgeAggregatePeripheryBuilder implements ClusterBuilder {
 
 	protected int coreMinMonths;
 
-	protected int peripheryMaxMonths;
+	protected int maxNumberOfPeripheryEdges;
 
-	/**
-	 * Will assign clusters, by looking at the month participated.
-	 * 
-	 * Participants with x <= peripheryMaxMonths will be assigned periphery
-	 * 
-	 * Participants with coreMinMonths <= x will be assigned core
-	 * 
-	 * All others will be co-developers.
-	 */
-	public MonthClusterBuilder(int peripheryMaxMonths, int coreMinMonths) {
-		this.peripheryMaxMonths = peripheryMaxMonths;
+	public MaxEdgeAggregatePeripheryBuilder(int maxNumberOfPeripheryEdges,
+			int coreMinMonths) {
+		this.maxNumberOfPeripheryEdges = maxNumberOfPeripheryEdges;
 		this.coreMinMonths = coreMinMonths;
-
-		if (peripheryMaxMonths < 0 || peripheryMaxMonths > coreMinMonths
-				|| coreMinMonths > 12)
-			throw new IllegalArgumentException();
 	}
 
 	@Override
@@ -55,15 +50,17 @@ public class MonthClusterBuilder implements ClusterBuilder {
 
 		Cluster core = new CoreClusterBuilder(new MinMonthPredicate(
 				coreMinMonths)).getCluster(g, nodes, edges);
-		
-		Cluster periphery = new DefaultClusterBuilder(new MaxMonthPredicate(
-				peripheryMaxMonths), "periphery", "#00FF00").getCluster(g,
-				nodes, edges);
+
+		Cluster periphery = new DefaultClusterBuilder(Predicates.and(
+				new UnclusteredPredicate(), new MaxEdgeAggregatePredicate(
+						edges, maxNumberOfPeripheryEdges)), "periphery",
+				"#00FF00").getCluster(g, nodes, edges);
 
 		Cluster coDevelopers = new DefaultClusterBuilder(
 				new UnclusteredPredicate(), "coDevelopers", "#FF0000")
 				.getCluster(g, nodes, edges);
 
 		return Arrays.asList(core, coDevelopers, periphery);
+
 	}
 }

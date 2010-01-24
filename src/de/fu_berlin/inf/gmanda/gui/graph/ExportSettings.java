@@ -18,20 +18,21 @@
  */
 package de.fu_berlin.inf.gmanda.gui.graph;
 
+import java.util.EnumSet;
 
 public class ExportSettings {
 
-	public ExportSettings(boolean selfLoops, boolean cluster,
-			boolean undirected, boolean onlyGiantComponent,
-			boolean interClusterGraph, Coloration coloration,
-			String[] colorPalette, String[] fontColorPalette,
-			ClusterBuilder clusterBuilder) {
+	public enum ExportSetting {
+		SELFLOOPS, CLUSTER, UNDIRECTED, ONLYGIANTCOMPONENT, INTERCLUSTERGRAPH;
+	}
 
-		this.includeSelfLoops = selfLoops;
-		this.cluster = cluster;
-		this.undirected = undirected;
-		this.onlyGiantComponent = onlyGiantComponent;
-		this.interClusterGraph = interClusterGraph;
+	EnumSet<ExportSetting> exportSetting;
+
+	public ExportSettings(EnumSet<ExportSetting> exportSetting,
+			Coloration coloration, String[] colorPalette,
+			String[] fontColorPalette, ClusterBuilder clusterBuilder) {
+
+		this.exportSetting = exportSetting;
 		this.coloration = coloration;
 		this.colorPalette = colorPalette;
 		this.fontColorPalette = fontColorPalette;
@@ -39,21 +40,10 @@ public class ExportSettings {
 	}
 
 	public ExportSettings(ExportSettings copy) {
-		this(copy.includeSelfLoops, copy.cluster, copy.undirected,
-				copy.onlyGiantComponent, copy.interClusterGraph,
+		this(EnumSet.copyOf(copy.exportSetting),
 				copy.coloration, copy.colorPalette, copy.fontColorPalette,
 				copy.clusterBuilder);
 	}
-
-	protected boolean includeSelfLoops;
-
-	protected boolean cluster;
-	
-	protected boolean undirected;
-
-	protected boolean onlyGiantComponent;
-
-	protected boolean interClusterGraph;
 
 	protected Coloration coloration;
 
@@ -63,14 +53,20 @@ public class ExportSettings {
 
 	protected ClusterBuilder clusterBuilder;
 
-
 	public boolean isIncludeSelfLoops() {
-		return includeSelfLoops;
+		return exportSetting.contains(ExportSetting.SELFLOOPS);
 	}
 
 	public ExportSettings setIncludeSelfLoops(boolean includeSelfLoops) {
+		return copyAndSet(ExportSetting.SELFLOOPS, includeSelfLoops);
+	}
+
+	private ExportSettings copyAndSet(ExportSetting setting, boolean set) {
 		ExportSettings copy = new ExportSettings(this);
-		copy.includeSelfLoops = includeSelfLoops;
+		if (set) 
+			copy.exportSetting.add(setting);
+		else 
+			copy.exportSetting.remove(setting);
 		return copy;
 	}
 
@@ -115,41 +111,34 @@ public class ExportSettings {
 	}
 
 	public ExportSettings setCluster(boolean cluster) {
-		ExportSettings copy = new ExportSettings(this);
-		copy.cluster = cluster;
-		return copy;
+		return copyAndSet(ExportSetting.CLUSTER, cluster);
 	}
 
 	public ExportSettings setUndirected(boolean undirected) {
-		ExportSettings copy = new ExportSettings(this);
-		copy.undirected = undirected;
-		return copy;
+		return copyAndSet(ExportSetting.UNDIRECTED, undirected);
 	}
 
-	public void setOnlyGiantComponent(boolean onlyGiantComponent) {
-		this.onlyGiantComponent = onlyGiantComponent;
+	public ExportSettings setOnlyGiantComponent(boolean onlyGiantComponent) {
+		return copyAndSet(ExportSetting.ONLYGIANTCOMPONENT, onlyGiantComponent);
 	}
 
 	public ExportSettings setInterClusterGraph(boolean interClusterGraph) {
-		ExportSettings copy = new ExportSettings(this);
-		copy.interClusterGraph = interClusterGraph;
-		return copy;
+		return copyAndSet(ExportSetting.INTERCLUSTERGRAPH, interClusterGraph);
 	}
 
-
 	public boolean isInterClusterGraph() {
-		return interClusterGraph;
+		return exportSetting.contains(ExportSetting.INTERCLUSTERGRAPH);
 	}
 
 	public boolean isUndirected() {
-		return undirected;
+		return exportSetting.contains(ExportSetting.UNDIRECTED);
 	}
 
 	public boolean isCluster() {
-		return cluster;
+		return exportSetting.contains(ExportSetting.CLUSTER);
 	}
 
 	public boolean isOnlyGiantComponent() {
-		return onlyGiantComponent;
+		return exportSetting.contains(ExportSetting.ONLYGIANTCOMPONENT);
 	}
 }

@@ -13,16 +13,17 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.picocontainer.annotations.Inject;
-
 import de.fu_berlin.inf.gmanda.gui.manager.CommonService;
-import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
 
-public class PreferenceWindow extends JFrame {
+/**
+ * A simple frame which shows all the given preference UIs below each other
+ */
+public class PreferenceUIFrame extends JFrame {
 
-	@Inject
-	CommonService commonService;
+	protected CommonService commonService;
 	
+	protected List<PreferenceUI<?>> preferenceUIs;
+
 	public void showPreferences(){
 		setLocationRelativeTo(commonService.getForegroundWindowOrNull());
 
@@ -42,14 +43,13 @@ public class PreferenceWindow extends JFrame {
 		setVisible(false);
 	}
 	
-	List<PreferenceUI<?>> preferenceUIs;
-	
-	@SuppressWarnings("unchecked")
-	public PreferenceWindow(List<PreferenceUI> preferenceUIs, 
-		ForegroundWindowProxy foreground) {
-		super("Preferences");
+	public PreferenceUIFrame(String windowTitle, 
+			List<PreferenceUI<?>> preferenceUIs, 
+			CommonService commonService) {
+		super(windowTitle);
 		
-		this.preferenceUIs = (List)preferenceUIs;
+		this.commonService = commonService;
+		this.preferenceUIs = preferenceUIs;
 
 		setPreferredSize(new Dimension(600, 400));
 		

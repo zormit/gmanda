@@ -14,10 +14,10 @@ public class Graph {
 
 	protected ExportSettings settings;
 
-	public Graph(ExportSettings settings){
+	public Graph(ExportSettings settings) {
 		this.settings = settings;
 	}
-	
+
 	public int nextId = 0;
 
 	public HashMap<Integer, Node> nodes = new HashMap<Integer, Node>();
@@ -83,8 +83,8 @@ public class Graph {
 		public String getName() {
 			return name;
 		}
-		
-		public String toString(){
+
+		public String toString() {
 			return name;
 		}
 
@@ -102,10 +102,10 @@ public class Graph {
 		public Set<Node> getAuthors() {
 			return authors;
 		}
-		
-		public int getThreadsStarted(){
+
+		public int getThreadsStarted() {
 			int result = 0;
-			for (Node a : getAuthors()){
+			for (Node a : getAuthors()) {
 				result += a.threadsStarted;
 			}
 			return result;
@@ -177,11 +177,17 @@ public class Graph {
 
 		public int threadsStarted = 0;
 
+		/**
+		 * Contains all variations of the name of this author
+		 */
+		public Set<String> names = new HashSet<String>();
+
 		public Node(String name) {
 			id = nextId++;
 			Graph.this.nodes.put(id, this);
 
 			this.setName(name);
+			names.add(name);
 		}
 
 		public void setEmailsWritten(int emailsWritten) {
@@ -223,25 +229,27 @@ public class Graph {
 		public double getWeight() {
 			return Math.sqrt(emailsWritten) / 2.0;
 		}
-		
-		public String getColor(String[] palette){
+
+		public String getColor(String[] palette) {
 			switch (settings.getColoration()) {
 			case MONTH:
-				return ColorBrewerPalettes.getColorFromInt(palette, months.getNonZeroBins(), 12);
+				return ColorBrewerPalettes.getColorFromInt(palette, months
+						.getNonZeroBins(), 12);
 			case WEEK:
-				return ColorBrewerPalettes.getColorFromInt(palette, weeks.getNonZeroBins(), 52);
+				return ColorBrewerPalettes.getColorFromInt(palette, weeks
+						.getNonZeroBins(), 52);
 			case FIXED:
 			default:
 				return palette[palette.length - 1];// "#0000ff";
 			}
 		}
-			
+
 		public String getFontColor() {
-			return getColor(settings.getFontColorPalette()); 
+			return getColor(settings.getFontColorPalette());
 		}
-		
+
 		public String getColor() {
-			return getColor(settings.getColorPalette()); 
+			return getColor(settings.getColorPalette());
 		}
 
 		@Override
@@ -276,6 +284,14 @@ public class Graph {
 
 		public Cluster getCluster() {
 			return cluster;
+		}
+
+		public void addName(String authorsName) {
+			if (!names.contains(authorsName)) {
+				System.out.println("New Name for Author '" + name + "': "
+						+ authorsName);
+				names.add(authorsName);
+			}
 		}
 	}
 
