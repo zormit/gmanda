@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -24,7 +25,6 @@ import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.Nullable;
 import de.fu_berlin.inf.gmanda.util.StringJoiner;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
-import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
 
 /**
  * Service to search within all primary documents those that either contain a
@@ -70,9 +70,9 @@ public class SearchService {
 		if (pBar == null)
 			pBar = commonService.getProgressBar("Filtering");
 		
-		IProgress subProgress = pBar.getSub(50);
+		IProgress subProgress = pBar.getSub(100);
 
-		List<PrimaryDocument> newFilterList;
+		TreeSet<PrimaryDocument> newFilterList;
 
 		try {
 			subProgress.setScale(CollectionUtils.size(codesIterable.iterator()));
@@ -81,19 +81,18 @@ public class SearchService {
 			Iterator<? extends Code> codes = codesIterable.iterator();
 
 			if (!codes.hasNext()) {
-				TreeWalker<PrimaryDocument> walker = PrimaryDocument.getTreeWalker(project.getPrimaryDocuments());
-				newFilterList = new ArrayList<PrimaryDocument>(CollectionUtils.size(walker.iterator()));
-				CollectionUtils.addAll(newFilterList, walker.iterator());
+				newFilterList = new TreeSet<PrimaryDocument>();
+				CollectionUtils.addAll(newFilterList, PrimaryDocument.getTreeWalker(project.getPrimaryDocuments()).iterator());
 			} else {
 				Code c = codes.next();
 				String nextSearchString = c.getTag();
-
+				
 				if (nextSearchString.startsWith("^") || nextSearchString.startsWith("-")) {
-					newFilterList = new LinkedList<PrimaryDocument>(project.getCodeModel()
-						.getPrimaryDocuments());
+					newFilterList = new TreeSet<PrimaryDocument>();
+					CollectionUtils.addAll(newFilterList, PrimaryDocument.getTreeWalker(project.getPrimaryDocuments()).iterator());
 					newFilterList.removeAll(getSetFromSearchString(c, project));
 				} else {
-					newFilterList = new LinkedList<PrimaryDocument>(getSetFromSearchString(c,
+					newFilterList = new TreeSet<PrimaryDocument>(getSetFromSearchString(c,
 						project));
 				}
 
@@ -134,13 +133,7 @@ public class SearchService {
 		if (pBar.isCanceled())
 			return null;
 
-		Collections.sort(newFilterList);
-
-		pBar.work(25);
-		if (pBar.isCanceled())
-			return null;
-
-		return newFilterList;
+		return new ArrayList<PrimaryDocument>(newFilterList);
 	}
 	
 	public static String cleanStringForSearch(String s){
