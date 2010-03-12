@@ -10,6 +10,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import de.fu_berlin.inf.gmanda.gui.misc.ConfigurationAwareFileChooser;
+import de.fu_berlin.inf.gmanda.gui.misc.ExtensionDescriptor;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
 import de.fu_berlin.inf.gmanda.qda.Project;
@@ -31,7 +32,7 @@ public class CreateDSVFileAction extends AbstractAction {
 
 	Configuration configuration;
 	
-	ConfigurationAwareFileChooser chooser;
+	ConfigurationAwareFileChooser<ExtensionDescriptor> chooser;
 
 	public CreateDSVFileAction(Configuration configuration, ProjectProxy projectProxy) {
 		super("Create DSV File...");
@@ -56,7 +57,7 @@ public class CreateDSVFileAction extends AbstractAction {
 		Project project = projectProxy.getVariable();
 
 		if (chooser == null)
-			chooser = new ConfigurationAwareFileChooser(configuration, "DSVLocation", ".dsv", "Delimiter separated value file *.dsv");
+			chooser = new ConfigurationAwareFileChooser<ExtensionDescriptor>(configuration, "DSVLocation", ".dsv", "Delimiter separated value file *.dsv");
 		
 		File target = chooser.getSaveFile();
 		
