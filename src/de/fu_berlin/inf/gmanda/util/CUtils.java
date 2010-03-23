@@ -6,6 +6,9 @@ import java.util.LinkedList;
 
 public class CUtils {
 
+	/**
+	 * Returns at most max elements from the beginning of the given iterable.
+	 */
 	public static <T> LinkedList<T> first(Iterable<T> it, int max) {
 
 		LinkedList<T> result = new LinkedList<T>();
