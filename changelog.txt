@@ -1,4 +1,9 @@
 
+2010-03-23
+  
+   * [FEATURE] Added counts to the tabulation canvas
+   * [FEATURE] Improved filtering in tabulation canvas to support search results
+
 2009-12-13
 
    * [FEATURE] Many new export options for Social Network Graphs
