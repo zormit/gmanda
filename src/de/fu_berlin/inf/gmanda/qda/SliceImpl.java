@@ -30,7 +30,11 @@ public class SliceImpl<T> implements Slice<T> {
 		CMultimap<PrimaryDocument, Code> initial = new CMultimap<PrimaryDocument, Code>();
 		
 		for (PrimaryDocument pd : primaryDocuments){
-			initial.putAll(pd, CodedStringFactory.parse(pd.getCodeAsString()).getAllCodesDeep());
+			CodedString c = CodedStringFactory.parse(pd.getCodeAsString());
+			if (c == null)
+				continue;
+			
+			initial.putAll(pd, c.getAllCodesDeep());
 		}	
 		return new SliceImpl<PrimaryDocument>(initial);
 	}
@@ -102,6 +106,10 @@ public class SliceImpl<T> implements Slice<T> {
 		if (by.trim().length() > 0){
 			byCode = CodedStringFactory.parseOne(by + ".*");
 		}
+		int additionalDepth = 0;
+		if (byCode != null){
+			additionalDepth = byCode.getTagLevels().size() - 1;
+		}
 		
 		SliceImpl<String> result = new SliceImpl<String>();
 		
@@ -114,7 +122,7 @@ public class SliceImpl<T> implements Slice<T> {
 				String tag = c.getTag();
 				
 				if (depth > 0){
-					depth += byCode.getTagLevels().size() - 1;
+					depth += additionalDepth;
 					tag = StringUtils.join(CUtils.first(CodedStringFactory.parseOne(tag).getTagLevels(), depth), ".");
 				}
 				
