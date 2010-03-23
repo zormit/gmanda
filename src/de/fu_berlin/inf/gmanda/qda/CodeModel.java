@@ -39,15 +39,17 @@ public class CodeModel {
 
 		this.project = project;
 
-		for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(project.getPrimaryDocuments())) {
+		for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(project
+				.getPrimaryDocuments())) {
 			add(pd);
 		}
 
-		project.getLocalChangeNotifier().add(new StateChangeListener<PrimaryDocument>() {
-			public void stateChangedNotification(PrimaryDocument t) {
-				update(t);
-			}
-		});
+		project.getLocalChangeNotifier().add(
+				new StateChangeListener<PrimaryDocument>() {
+					public void stateChangedNotification(PrimaryDocument t) {
+						update(t);
+					}
+				});
 	}
 
 	public PrimaryDocument getByFilename(String filename) {
@@ -63,11 +65,13 @@ public class CodeModel {
 		// Remove if existing
 		if (currentlyStoredCodes.containsKey(t)) {
 
-			for (String partialQualifiedCode : CodedStringFactory
-				.parse(currentlyStoredCodes.get(t)).getAllVariationsDeep()) {
+			for (String partialQualifiedCode : CodedStringFactory.parse(
+					currentlyStoredCodes.get(t)).getAllVariationsDeep()) {
 				if (codeMap.containsKey(partialQualifiedCode)) {
-					boolean removed = codeMap.get(partialQualifiedCode).remove(t);
-					if (removed && codeMap.get(partialQualifiedCode).size() == 0) {
+					boolean removed = codeMap.get(partialQualifiedCode).remove(
+							t);
+					if (removed
+							&& codeMap.get(partialQualifiedCode).size() == 0) {
 						internalList.remove(partialQualifiedCode);
 					}
 				}
@@ -83,15 +87,17 @@ public class CodeModel {
 			allDocs.put(t.filename, t);
 		}
 
-		if (t.getCodeAsString() != null && t.getCodeAsString().trim().length() > 0) {
+		if (t.getCodeAsString() != null
+				&& t.getCodeAsString().trim().length() > 0) {
 			// Add again
 			String codes = t.getCodeAsString();
 			currentlyStoredCodes.put(t, codes);
 
 			for (String partialQualifiedCode : CodedStringFactory.parse(codes)
-				.getAllVariationsDeep()) {
+					.getAllVariationsDeep()) {
 				if (!codeMap.containsKey(partialQualifiedCode)) {
-					codeMap.put(partialQualifiedCode, new LinkedList<PrimaryDocument>());
+					codeMap.put(partialQualifiedCode,
+							new LinkedList<PrimaryDocument>());
 				}
 				List<PrimaryDocument> list = codeMap.get(partialQualifiedCode);
 				if (!list.contains(t)) {
@@ -140,7 +146,8 @@ public class CodeModel {
 		// make copy to prevent concurrent modification
 		codes = new LinkedList<PrimaryDocument>(codes);
 
-		List<PrimaryDocument> result = new ArrayList<PrimaryDocument>(codes.size());
+		List<PrimaryDocument> result = new ArrayList<PrimaryDocument>(codes
+				.size());
 
 		for (PrimaryDocument codeable : codes) {
 			if (codeable.renameCodes(renameFrom, renameTo))
@@ -197,7 +204,8 @@ public class CodeModel {
 		return sortedList;
 	}
 
-	public List<PrimaryDocument> filter(Iterable<PrimaryDocument> pds, CodedString searchTerm) {
+	public List<PrimaryDocument> filter(Iterable<PrimaryDocument> pds,
+			CodedString searchTerm) {
 
 		List<PrimaryDocument> result = new LinkedList<PrimaryDocument>();
 
@@ -205,19 +213,19 @@ public class CodeModel {
 			if (pd.getCodeAsString() == null)
 				continue;
 
-			if (CodedStringFactory.parse(pd.getCodeAsString())
-				.containsAny(searchTerm.getAllCodes()))
+			if (CodedStringFactory.parse(pd.getCodeAsString()).containsAny(
+					searchTerm.getAllCodes()))
 				result.add(pd);
 		}
 
 		return result;
 	}
 
-	public List<Code> getAllCodesDeep(String code){
+	public List<Code> getAllCodesDeep(String code) {
 		return getAllCodesDeep(getPrimaryDocuments(code), code);
 	}
-	
-	public List<Code> getAllCodesDeep(Iterable<PrimaryDocument> it, String code){
+
+	public List<Code> getAllCodesDeep(Iterable<PrimaryDocument> it, String code) {
 		List<Code> result = new ArrayList<Code>();
 		for (PrimaryDocument pd : it) {
 			for (Code c : pd.getCode().getAllDeep(code)) {
@@ -226,10 +234,11 @@ public class CodeModel {
 		}
 		return result;
 	}
-	
-	public Multimap<PrimaryDocument, Code> getValues(Iterable<PrimaryDocument> it, String code,
-		String property) {
-		TreeMultimap<PrimaryDocument, Code> result = TreeMultimap.create(Ordering.natural(), Ordering.usingToString());
+
+	public Multimap<PrimaryDocument, Code> getValues(
+			Iterable<PrimaryDocument> it, String code, String property) {
+		TreeMultimap<PrimaryDocument, Code> result = TreeMultimap.create(
+				Ordering.natural(), Ordering.usingToString());
 		for (PrimaryDocument pd : it) {
 			for (Code c : pd.getCode().getAllDeep(code)) {
 				result.putAll(pd, c.getProperties(property));
@@ -238,7 +247,8 @@ public class CodeModel {
 		return result;
 	}
 
-	public Multimap<PrimaryDocument, Code> getValues(String code, String property) {
+	public Multimap<PrimaryDocument, Code> getValues(String code,
+			String property) {
 		return getValues(getPrimaryDocuments(code), code, property);
 	}
 
@@ -247,29 +257,32 @@ public class CodeModel {
 	 * partitioning of the set of documents according to the following rules for
 	 * partition codes:
 	 * 
-	 *   - null or "" will return a single partition including all 
+	 * - null or "" will return a single partition including all
 	 * 
-	 *   - "**" will return a partition for all codes (deep) found
-	 *   
-	 *   -
+	 * - "**" will return a partition for all codes (deep) found
+	 * 
+	 * -
 	 * 
 	 * @param pds
 	 * @param partitionCode
 	 * @return
 	 */
-	public List<Pair<String, List<PrimaryDocument>>> partition(List<PrimaryDocument> pds,
-		String partitionCode) {
-		
+	public List<Pair<String, List<PrimaryDocument>>> partition(
+			List<PrimaryDocument> pds, String partitionCode) {
+
 		if (partitionCode == null || partitionCode.trim().length() == 0) {
-			return new LinkedList<Pair<String, List<PrimaryDocument>>>(Collections
-				.singletonList(new Pair<String, List<PrimaryDocument>>("All codes", pds)));
+			return new LinkedList<Pair<String, List<PrimaryDocument>>>(
+					Collections
+							.singletonList(new Pair<String, List<PrimaryDocument>>(
+									"All codes", pds)));
 		}
 
 		List<Pair<String, PrimaryDocument>> list = new LinkedList<Pair<String, PrimaryDocument>>();
 
 		if (partitionCode.trim().equals("**")) {
 			for (PrimaryDocument pd : pds) {
-				for (String code : CodedStringFactory.parse(pd.getCodeAsString()).getAllDeep()) {
+				for (String code : CodedStringFactory.parse(
+						pd.getCodeAsString()).getAllDeep()) {
 					list.add(new Pair<String, PrimaryDocument>(code, pd));
 				}
 			}
@@ -284,13 +297,15 @@ public class CodeModel {
 				if (maxDepth == 0)
 					maxDepth = Integer.MAX_VALUE;
 				else
-					partitionCode = partitionCode.substring(0, partitionCode.indexOf(".*"));
+					partitionCode = partitionCode.substring(0, partitionCode
+							.indexOf(".*"));
 			}
 
 			if (partitionCode.trim().equals("*"))
 				partitionCode = "";
 
-			List<String> codes = project.getCodeModel().expand(partitionCode, maxDepth);
+			List<String> codes = project.getCodeModel().expand(partitionCode,
+					maxDepth);
 
 			if (codes.size() == 0) {
 				codes.add(partitionCode);
@@ -306,18 +321,19 @@ public class CodeModel {
 
 					for (String code : codes) {
 						if (c.containsAnyDeep(code + ".*")) {
-							list
-								.add(new Pair<String, PrimaryDocument>(
-									("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
-										+ code.substring(partitionCode.length())
-										: code), pd));
+							list.add(new Pair<String, PrimaryDocument>(
+									("<partition>".length() < partitionCode
+											.length() + 2 ? "<partition>"
+											+ code.substring(partitionCode
+													.length()) : code), pd));
 							containedInNone = false;
 						}
 					}
 					if (c.containsAnyDeep(partitionCode)) {
 						list.add(new Pair<String, PrimaryDocument>(
-							("<partition>".length() < partitionCode.length() + 2 ? "<partition>"
-								: partitionCode), pd));
+								("<partition>".length() < partitionCode
+										.length() + 2 ? "<partition>"
+										: partitionCode), pd));
 						containedInNone = false;
 					}
 				}
@@ -327,15 +343,25 @@ public class CodeModel {
 			}
 		}
 
-		List<Pair<String, List<PrimaryDocument>>> l = Pair.disjointPartition(list);
+		List<Pair<String, List<PrimaryDocument>>> l = Pair
+				.disjointPartition(list);
 
 		Collections.reverse(l);
 
 		return l;
 	}
 
+	/**
+	 * Returns a un-centered filter slice consisting of all documents
+	 * which contain the given code (as returned by getPrimaryDocuments(code))
+	 */
 	public Slice<PrimaryDocument> getInitialFilterSlice(String code) {
 		return SliceImpl.fromPDs(getPrimaryDocuments(code));
+	}
+
+	public Slice<PrimaryDocument> getInitialFilterSlice(
+			List<PrimaryDocument> documents) {
+		return SliceImpl.fromPDs(documents);
 	}
 
 }
