@@ -35,7 +35,7 @@ public class TagxON {
 				if (newCode != c)
 					changed = true;
 
-				tags.add(newCode);
+				result.tags.add(newCode);
 			}
 
 			if (changed)
