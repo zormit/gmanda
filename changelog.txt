@@ -1,4 +1,10 @@
 
+2010-03-31
+
+   * [FIX] File Selectors did not use the correct filters
+   * [FIX] Renaming codes did crash
+
+
 2010-03-23
   
    * [FEATURE] Added counts to the tabulation canvas

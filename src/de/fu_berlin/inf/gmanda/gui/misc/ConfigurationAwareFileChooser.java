@@ -48,7 +48,7 @@ public class ConfigurationAwareFileChooser<T extends ExtensionDescriptor> extend
 			String description) {
 
 		this(configuration, configurationPropertyName,
-				new ExtensionDescription().append(extension, description));
+				new ExtensionDescription().append(description, extension));
 	}
 
 	@SuppressWarnings("unchecked")

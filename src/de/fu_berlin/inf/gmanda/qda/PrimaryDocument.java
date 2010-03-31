@@ -480,7 +480,7 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 		CodedString newCodedString = codes.rename(renameFrom, renameTo);
 
 		if (codes != newCodedString) {
-			setCode(newCodedString.toString());
+			setCode(newCodedString.format());
 			return true;
 		} else {
 			return false;
