@@ -1,9 +1,79 @@
 
+2010-04-24
+
+   * [FEATURE] Improve export of Citations to LaTeX
+     using in particular new property "sectionDepths" by which the depth of \section{} etc. can be chosen
+     
+Example:
+
+export: {
+  file: "09-appendix/01-glossary.tex",
+  sectionDepths: "chapter,section,subsection,subsubsection,paragraph,subparagraph",
+  
+  section: {
+    title: "Episode Directory",
+    code: "episode"
+  },
+  section: {
+    title: "Projects studied",
+    code: "project"
+  },
+  section: {
+    title: "Innovations",
+    code: "innovation"
+  },
+  section: {
+    title: "Glossary",
+    label: "sec:glossary",
+    text:
+      "This glossary contains all codes and concepts referenced from the text
+      using hyperlinks with their associated definitions. The total list of
+      codes is naturally much larger because it also includes all those codes
+      which arose during conceptual development and which were later on
+      discarded or subsumed by richer concepts. % TODO Remove Def.: ",
+    
+    section: {
+      title: "Activities",
+      code: "activity"
+    },
+    section: {
+      title: "Concepts",
+      code: "concept"
+    },
+    section: {
+      title: "Compliance Enforcement Strategies",
+      code: "compliance enforcement"
+    },
+    section: {
+      title: "Episode Outcomes",
+      code: "outcome"
+    },
+    section: {
+      title: "Hosting Types",
+      code: "hosting type"
+    },
+    section: {
+      title: "Innovation Types",
+      code: "innovation type"
+    },
+    section: {
+      title: "Innovation Decision Types",
+      code: "innovation decision"
+    },
+    section: {
+      title: "Uncategorized Codes",
+      text:
+        "This section contains all codes which were not yet included in more
+        specific sections above. % TODO Remove Def.: ",
+      code: "-"
+    }
+  }
+}     
+
 2010-03-31
 
    * [FIX] File Selectors did not use the correct filters
    * [FIX] Renaming codes did crash
-
 
 2010-03-23
   
@@ -467,7 +537,7 @@ using \dref but did not fit in the given explicit categories
 
 2008-01-16:
 
-  * Support for fetching from Gmanda directly.
+  * Support for fetching from Gmane directly.
   * Improvements for the progress dialogs.
   * Improved Error reporting for fetching from Gmane.
   * Improved whitespace handling in CodeBox.
