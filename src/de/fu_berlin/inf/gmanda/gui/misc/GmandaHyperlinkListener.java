@@ -22,6 +22,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -47,6 +49,20 @@ public class GmandaHyperlinkListener implements HyperlinkListener {
 	
 	@Inject
 	CodeDetailProxy codeDetailProxy;
+
+	Set<JumpToExecutor> executors = new HashSet<JumpToExecutor>();
+
+	public interface JumpToExecutor {
+		public void jumpTo(String query);
+	}
+	
+	public void addExecutor(JumpToExecutor jumpToExecutor){
+		executors.add(jumpToExecutor);
+	}
+
+	public void removeExecutor(JumpToExecutor jumpToExecutor){
+		executors.remove(jumpToExecutor);
+	}
 	
 	/* (non-Javadoc)
 	 * @see javax.swing.event.HyperlinkListener#hyperlinkUpdate(javax.swing.event.HyperlinkEvent)
@@ -82,6 +98,9 @@ public class GmandaHyperlinkListener implements HyperlinkListener {
 							
 							if (!codeDetailProxy.getVariable().equals(query)){
 								codeDetailProxy.setVariable(query);
+							}
+							for (JumpToExecutor executor : executors){
+								executor.jumpTo(query);
 							}
 						}
 					}

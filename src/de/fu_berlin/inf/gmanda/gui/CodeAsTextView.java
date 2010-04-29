@@ -56,12 +56,12 @@ public class CodeAsTextView extends JScrollPane {
 	SelectionProxy selection;
 
 	public CodeAsTextView(ProjectProxy projectProxy, SelectionProxy selection,
-		CodeDetailProxy filterTextProxy, GmandaHyperlinkListener linkListener) {
+		CodeDetailProxy codeDetailProxy, GmandaHyperlinkListener linkListener) {
 		super();
 
 		this.selection = selection;
 		this.project = projectProxy;
-		this.codeDetailProxy = filterTextProxy;
+		this.codeDetailProxy = codeDetailProxy;
 
 		/**
 		 * Make links clickable
@@ -74,7 +74,7 @@ public class CodeAsTextView extends JScrollPane {
 			}
 		});
 
-		filterTextProxy.add(new DeferredVariableProxyListener<String>(
+		codeDetailProxy.add(new DeferredVariableProxyListener<String>(
 			new VariableProxyListener<String>() {
 				public void setVariable(String newValue) {
 					update();

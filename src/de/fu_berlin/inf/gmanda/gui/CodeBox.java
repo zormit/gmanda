@@ -17,7 +17,9 @@ import org.joda.time.DateTime;
 
 import de.fu_berlin.inf.gmanda.gui.actions.AutoIndentAction;
 import de.fu_berlin.inf.gmanda.gui.misc.CodeCompleter;
+import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener;
 import de.fu_berlin.inf.gmanda.gui.misc.GmandaInfoBox;
+import de.fu_berlin.inf.gmanda.gui.misc.GmandaHyperlinkListener.JumpToExecutor;
 import de.fu_berlin.inf.gmanda.proxies.CodeDetailProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.proxies.SelectionProxy;
@@ -28,7 +30,7 @@ import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.gui.AutoCompleter;
 
-public class CodeBox extends JTextArea {
+public class CodeBox extends JTextArea implements JumpToExecutor{
 
 	Codeable currentlyShowing;
 
@@ -49,8 +51,10 @@ public class CodeBox extends JTextArea {
 	DocumentListener completerListener;
 
 	public CodeBox(final ProjectProxy project, SelectionProxy selection,
-			GmandaInfoBox gmandaInfoBox, final CodeDetailProxy codeDetailProxy) {
+			GmandaInfoBox gmandaInfoBox, final CodeDetailProxy codeDetailProxy, GmandaHyperlinkListener linkListener) {
 		super();
+		
+		linkListener.addExecutor(this);
 
 		// setBorder(BorderFactory.createEmptyBorder());
 		setWrapStyleWord(true);
@@ -157,17 +161,10 @@ public class CodeBox extends JTextArea {
 					}
 
 					if (i == -1) {
-						String codeDetail = codeDetailProxy.getVariable();
-						if (codeDetail != null
-								&& codeDetail.trim().length() > 0) {
-							i = getText().indexOf(codeDetail);
-						}
+						i = getCodePosition(codeDetailProxy.getVariable());
 					}
 					
-					if (i != -1) {
-						setCaretPosition(Math.max(0, Math.min(i, getText()
-								.length())));
-					}
+					jumpToPosition(i);
 
 					setEnabled(true);
 				} else {
@@ -220,6 +217,25 @@ public class CodeBox extends JTextArea {
 	}
 
 	public void jumpTo(String query) {
+		jumpToPosition(getCodePosition(query));
+	}
 
+	public int getCodePosition(String codeDetail) {
+		
+		int i = -1;
+		if (codeDetail != null
+				&& codeDetail.trim().length() > 0) {
+			i = getText().indexOf(codeDetail + ":");
+			if (i == -1)
+				i = getText().indexOf(codeDetail);
+		}
+		return i;
+	}
+
+	public void jumpToPosition(int i) {
+		if (i != -1) {
+			setCaretPosition(Math.max(0, Math.min(i, getText()
+					.length())));
+		}
 	}
 }
