@@ -23,7 +23,7 @@ import java.util.EnumSet;
 public class ExportSettings {
 
 	public enum ExportSetting {
-		SELFLOOPS, CLUSTER, UNDIRECTED, ONLYGIANTCOMPONENT, INTERCLUSTERGRAPH;
+		SELFLOOPS, CLUSTER, UNDIRECTED, ONLYGIANTCOMPONENT, INTERCLUSTERGRAPH, SCALENODES, SCALEEDGES, COLOR, COLLAPSEEDGES;
 	}
 
 	EnumSet<ExportSetting> exportSetting;
@@ -40,9 +40,8 @@ public class ExportSettings {
 	}
 
 	public ExportSettings(ExportSettings copy) {
-		this(EnumSet.copyOf(copy.exportSetting),
-				copy.coloration, copy.colorPalette, copy.fontColorPalette,
-				copy.clusterBuilder);
+		this(EnumSet.copyOf(copy.exportSetting), copy.coloration,
+				copy.colorPalette, copy.fontColorPalette, copy.clusterBuilder);
 	}
 
 	protected Coloration coloration;
@@ -63,9 +62,9 @@ public class ExportSettings {
 
 	private ExportSettings copyAndSet(ExportSetting setting, boolean set) {
 		ExportSettings copy = new ExportSettings(this);
-		if (set) 
+		if (set)
 			copy.exportSetting.add(setting);
-		else 
+		else
 			copy.exportSetting.remove(setting);
 		return copy;
 	}
@@ -140,5 +139,30 @@ public class ExportSettings {
 
 	public boolean isOnlyGiantComponent() {
 		return exportSetting.contains(ExportSetting.ONLYGIANTCOMPONENT);
+	}
+
+	public ExportSettings setScaleNodes(boolean scaleNodes) {
+		return copyAndSet(ExportSetting.SCALENODES, scaleNodes);
+	}
+
+	public ExportSettings setScaleEdges(boolean scaleEdges) {
+		return copyAndSet(ExportSetting.SCALEEDGES, scaleEdges);
+	}
+
+	public ExportSettings setCollapseEdges(boolean collapseEdges) {
+		return copyAndSet(ExportSetting.COLLAPSEEDGES, collapseEdges);
+	}
+
+	
+	public boolean isScaleNodes() {
+		return exportSetting.contains(ExportSetting.SCALENODES);
+	}
+
+	public boolean isScaleEdges() {
+		return exportSetting.contains(ExportSetting.SCALEEDGES);
+	}
+
+	public boolean isCollapseEdges() {
+		return exportSetting.contains(ExportSetting.COLLAPSEEDGES);
 	}
 }

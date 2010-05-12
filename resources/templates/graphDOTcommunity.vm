@@ -20,6 +20,6 @@ graph G {
     }
   #end
   #foreach ($edge in $edges)
-    "$edge.fromID" -- "$edge.toID" [weight=$edge.weight,penwidth=$edge.weight,tooltip="Mailing-list participants $edge.from.name and $edge.to.name wrote $edge.emailsWritten e-mails in reply to each other"];
+    "$edge.fromID" -- "$edge.toID" [penwidth=$edge.weight,tooltip="Mailing-list participants $edge.from.name and $edge.to.name wrote $edge.emailsWritten e-mails in reply to each other"];
   #end
 }

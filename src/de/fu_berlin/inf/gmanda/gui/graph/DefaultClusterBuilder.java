@@ -1,5 +1,6 @@
 package de.fu_berlin.inf.gmanda.gui.graph;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import de.fu_berlin.inf.gmanda.graph.Graph.Node;
  * 
  * The builder returns a cluster with the given name and color.
  */
-public class DefaultClusterBuilder implements SingleClusterBuilder {
+public class DefaultClusterBuilder implements SingleClusterBuilder, ClusterBuilder {
 	
 	protected Predicate<Node> memberPredicate;
 	
@@ -46,5 +47,11 @@ public class DefaultClusterBuilder implements SingleClusterBuilder {
 
 		System.out.println("Cluster '"+result.getName()+"' (color: "+ result.getColor()+ ") contains all people for who are " + memberPredicate.toString());
 		return result;
+	}
+
+
+	@Override
+	public List<Cluster> getClusters(Graph g, List<Node> nodes, List<Edge> edges) {
+		return Arrays.asList(getCluster(g, nodes, edges));
 	}
 }

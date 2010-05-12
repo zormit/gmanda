@@ -19,5 +19,5 @@
 package de.fu_berlin.inf.gmanda.gui.graph;
 
 public enum Coloration {
-	MONTH, WEEK, FIXED;
+	MONTH, WEEK, FIXED, NONE;
 }

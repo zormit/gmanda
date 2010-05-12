@@ -173,6 +173,10 @@ public class SocialNetworkModule {
 		public Collection<Node> getMembers() {
 			return members;
 		}
+		
+		public boolean isPrintMembers(){
+			return members != null && members.size() > 0;
+		}
 
 		public int getClusterID() {
 			return clusterID;
@@ -320,7 +324,7 @@ public class SocialNetworkModule {
 
 			Node cluster0 = g.new Node("cluster0");
 			cluster0.cluster = clusters.get(0);
-			if (settings.isCluster()) {
+			if (settings.isCluster() && settings.isCollapseEdges()) {
 
 				List<Edge> collapsedEdges = new ArrayList<Edge>(edges.size());
 				HashMap<Node, Edge> collapsing = new HashMap<Node, Edge>();
@@ -412,7 +416,7 @@ public class SocialNetworkModule {
 			if ("gmane.comp.db.axion.devel".equals(project.name)) {
 				project.name = "gmane.comp.lang.uml.argouml.devel";
 			}
-			if (clusters.size() == 0) {
+			if (clusters.size() == 0 || !settings.isCluster()) {
 				project.members = new ArrayList<Node>();
 			} else {
 				project.members = clusters.get(0).getAuthors();

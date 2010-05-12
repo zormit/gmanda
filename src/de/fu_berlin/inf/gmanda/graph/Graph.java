@@ -227,7 +227,11 @@ public class Graph {
 		}
 
 		public double getWeight() {
-			return Math.sqrt(emailsWritten) / 2.0;
+			if (settings.isScaleNodes()){
+				return Math.sqrt(emailsWritten) / 2.0;
+			} else {
+				return 2.0;
+			}
 		}
 
 		public String getColor(String[] palette) {
@@ -398,7 +402,11 @@ public class Graph {
 		}
 
 		public int getWeight() {
-			return weight;
+			if (settings.isScaleEdges()){
+				return weight;
+			} else {
+				return 1;
+			}
 		}
 	}
 
