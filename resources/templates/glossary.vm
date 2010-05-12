@@ -3,7 +3,7 @@
   \\${section.sectionMacro}{$section.title}\label{$section.label}
 	
     #if ($section.definition)
-      \textbf{Def.:} $section.definition
+      $section.definition
     #end
  
     #if ($section.items.size() > 0)
