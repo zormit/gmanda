@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project Gmanda with Jar-in-Jar Loader">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <target name="create_run_jar">
+        <jar destfile="GmanDA-0.9.1.jar">
+            <manifest>
+                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+                <attribute name="Rsrc-Main-Class" value="de.fu_berlin.inf.gmanda.GmandaMain"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Rsrc-Class-Path" value="./ activation.jar gnumail.jar gnumail-providers.jar inetlib.jar commons-collections-3.2.jar commons-io-1.3.2.jar commons-lang-2.3.jar glazedlists-1.7.0_java15.jar joda-time-1.5.2.jar lucene-core-2.3.1.jar xpp3_min-1.1.3.4.O.jar xstream-1.2.2.jar args4j-2.0.8.jar dockingFramesCommon-1.0.6p3.jar dockingFramesCore-1.0.6p3.jar jvyaml-0.2.1.jar velocity-dep-1.5.jar piccolo.jar piccolox.jar batik-awt-util.jar batik-css.jar batik-dom.jar batik-ext.jar batik-gui-util.jar batik-gvt.jar batik-parser.jar batik-svg-dom.jar batik-svggen.jar batik-util.jar batik-xml.jar batik-extension.jar batik-codec.jar picocontainer-2.6.jar log4j-1.2.15.jar google-collect-1.0.jar junit.jar org.hamcrest.core_1.1.0.v20090501071000.jar"/>
+            </manifest>
+            <zipfileset dir="lib" includes="jar-in-jar-loader.zip"/>
+            <fileset dir="bin"/>
+            <fileset dir="." includes="resources/**"/>
+            <zipfileset dir="lib" includes="activation.jar"/>
+            <zipfileset dir="lib" includes="gnumail.jar"/>
+            <zipfileset dir="lib" includes="gnumail-providers.jar"/>
+            <zipfileset dir="lib" includes="inetlib.jar"/>
+            <zipfileset dir="lib" includes="commons-collections-3.2.jar"/>
+            <zipfileset dir="lib" includes="commons-io-1.3.2.jar"/>
+            <zipfileset dir="lib" includes="commons-lang-2.3.jar"/>
+            <zipfileset dir="lib" includes="glazedlists-1.7.0_java15.jar"/>
+            <zipfileset dir="lib" includes="joda-time-1.5.2.jar"/>
+            <zipfileset dir="lib" includes="lucene-core-2.3.1.jar"/>
+            <zipfileset dir="lib" includes="xpp3_min-1.1.3.4.O.jar"/>
+            <zipfileset dir="lib" includes="xstream-1.2.2.jar"/>
+            <zipfileset dir="lib" includes="args4j-2.0.8.jar"/>
+            <zipfileset dir="lib" includes="dockingFramesCommon-1.0.6p3.jar"/>
+            <zipfileset dir="lib" includes="dockingFramesCore-1.0.6p3.jar"/>
+            <zipfileset dir="lib" includes="jvyaml-0.2.1.jar"/>
+            <zipfileset dir="lib" includes="velocity-dep-1.5.jar"/>
+            <zipfileset dir="lib" includes="piccolo.jar"/>
+            <zipfileset dir="lib" includes="piccolox.jar"/>
+            <zipfileset dir="lib" includes="batik-awt-util.jar"/>
+            <zipfileset dir="lib" includes="batik-css.jar"/>
+            <zipfileset dir="lib" includes="batik-dom.jar"/>
+            <zipfileset dir="lib" includes="batik-ext.jar"/>
+            <zipfileset dir="lib" includes="batik-gui-util.jar"/>
+            <zipfileset dir="lib" includes="batik-gvt.jar"/>
+            <zipfileset dir="lib" includes="batik-parser.jar"/>
+            <zipfileset dir="lib" includes="batik-svg-dom.jar"/>
+            <zipfileset dir="lib" includes="batik-svggen.jar"/>
+            <zipfileset dir="lib" includes="batik-util.jar"/>
+            <zipfileset dir="lib" includes="batik-xml.jar"/>
+            <zipfileset dir="lib" includes="batik-extension.jar"/>
+            <zipfileset dir="lib" includes="batik-codec.jar"/>
+            <zipfileset dir="lib" includes="picocontainer-2.6.jar"/>
+            <zipfileset dir="lib" includes="log4j-1.2.15.jar"/>
+            <zipfileset dir="lib" includes="google-collect-1.0.jar"/>
+        </jar>
+    </target>
+</project>

@@ -74,8 +74,8 @@ public class VelocityWhitespaceRepair {
 		for (String eachLine : indentedLines) {
 
 			for (String split : eachLine.split("\\n")) {
-				
-				String startOfLine = StringUtils.stripStart(split, " "); 
+
+				String startOfLine = StringUtils.stripStart(split, " ");
 				if (startOfLine.startsWith("#if")
 						|| startOfLine.startsWith("#macro")
 						|| startOfLine.startsWith("#foreach")
@@ -102,11 +102,10 @@ public class VelocityWhitespaceRepair {
 
 	public static void main(String[] args) throws IOException {
 
+		String a = "resources/templates/glossary.vm";
 		FileUtils.writeStringToFile(new File(
 				"resources/templates/glossaryWhitespace.vm"),
-				new VelocityWhitespaceRepair().fixWhitespace(FileUtils
-						.readFileToString(new File(
-								"resources/templates/glossary.vm"))));
+				new VelocityWhitespaceRepair().fixWhitespace(CUtils.getResourceAsString(a)));
 
 	}
 

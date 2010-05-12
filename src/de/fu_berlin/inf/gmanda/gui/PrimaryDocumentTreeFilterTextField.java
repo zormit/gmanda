@@ -2,7 +2,6 @@ package de.fu_berlin.inf.gmanda.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -23,6 +22,7 @@ import de.fu_berlin.inf.gmanda.proxies.FilterProxy;
 import de.fu_berlin.inf.gmanda.proxies.FilterTextProxy;
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.CUtils;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 import de.fu_berlin.inf.gmanda.util.gui.AutoCompleter;
 import de.fu_berlin.inf.gmanda.util.gui.ProxyTextComponentBridge;
@@ -56,9 +56,8 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 
 		private FilterKind(String tooltip, String iconName) {
 			this.tooltip = tooltip;
-			normal = new ImageIcon(Toolkit.getDefaultToolkit().getImage(
-				"resources/icons/" + iconName));
-			disabled = new ImageIcon(Toolkit.getDefaultToolkit().getImage(
+			normal = new ImageIcon(CUtils.loadImageResource("resources/icons/" + iconName));
+			disabled = new ImageIcon(CUtils.loadImageResource(
 				"resources/icons/disabled/" + iconName));
 		}
 	}
@@ -107,16 +106,16 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 				tree.nextFilterItem();
 			}
 		});
-		nextHitButton.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage("resources/icons/search_next.gif")));
-		nextHitButton.setDisabledIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage("resources/icons/disabled/search_next.gif")));
+		nextHitButton.setIcon(new ImageIcon(CUtils.loadImageResource("resources/icons/search_next.gif")));
+		nextHitButton.setDisabledIcon(new ImageIcon(CUtils.loadImageResource("resources/icons/disabled/search_next.gif")));
 		
 		previousHitButton = new Button(new AbstractAction() {
 			public void actionPerformed(ActionEvent arg0) {
 				tree.previousFilterItem();
 			}
 		});
-		previousHitButton.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage("resources/icons/search_prev.gif")));
-		previousHitButton.setDisabledIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage("resources/icons/disabled/search_prev.gif")));
+		previousHitButton.setIcon(new ImageIcon(CUtils.loadImageResource("resources/icons/search_prev.gif")));
+		previousHitButton.setDisabledIcon(new ImageIcon(CUtils.loadImageResource("resources/icons/disabled/search_prev.gif")));
 
 		filterKindButton = new Button(new AbstractAction() {
 			public void actionPerformed(ActionEvent arg0) {

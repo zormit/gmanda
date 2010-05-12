@@ -1,8 +1,15 @@
 package de.fu_berlin.inf.gmanda.util;
 
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.LinkedList;
+
+import org.apache.commons.io.IOUtils;
 
 public class CUtils {
 
@@ -91,6 +98,23 @@ public class CUtils {
 		name = name.replaceAll("\\s+", " ");
 		name = name.trim();
 		return CStringUtils.convertNonAscii(name);
+	}
+
+	public static Image loadImageResource(String resourcePath) {
+		return Toolkit.getDefaultToolkit().getImage(getResource(resourcePath));
+	}
+
+	public static URL getResource(String resourcePath) {
+		return CUtils.class.getClassLoader().getResource(resourcePath);
+	}
+
+	public static String getResourceAsString(String resourcePath) throws IOException {
+		return IOUtils.toString(CUtils.getResourceAsStream(resourcePath));
+	}
+
+	public static InputStream getResourceAsStream(String resourcePath) throws IOException {
+		return getResource(resourcePath)
+				.openConnection().getInputStream();
 	}
 
 }

@@ -1,7 +1,6 @@
 package de.fu_berlin.inf.gmanda.gui.search;
 
 import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -17,6 +16,7 @@ import javax.swing.KeyStroke;
 
 import de.fu_berlin.inf.gmanda.proxies.ProjectProxy;
 import de.fu_berlin.inf.gmanda.qda.Project;
+import de.fu_berlin.inf.gmanda.util.CUtils;
 import de.fu_berlin.inf.gmanda.util.VariableProxyListener;
 
 public class SearchPanel extends JPanel {
@@ -30,8 +30,8 @@ public class SearchPanel extends JPanel {
 			setPreferredSize(new Dimension(28,28));
 			setFocusPainted(false);
 			setFocusable(false);
-			setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(path + name)));
-			setDisabledIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(path + "disabled/" + name)));
+			setIcon(new ImageIcon(CUtils.loadImageResource(path + name)));
+			setDisabledIcon(new ImageIcon(CUtils.loadImageResource(path + "disabled/" + name)));
 		}
 	}
 

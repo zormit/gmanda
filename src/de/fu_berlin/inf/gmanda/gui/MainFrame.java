@@ -7,7 +7,6 @@ package de.fu_berlin.inf.gmanda.gui;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.LinkedList;
@@ -23,6 +22,7 @@ import de.fu_berlin.inf.gmanda.gui.docking.ViewManager;
 import de.fu_berlin.inf.gmanda.gui.menu.MainWindowMenuBar;
 import de.fu_berlin.inf.gmanda.proxies.ForegroundWindowProxy;
 import de.fu_berlin.inf.gmanda.startup.Stoppable;
+import de.fu_berlin.inf.gmanda.util.CUtils;
 import de.fu_berlin.inf.gmanda.util.Configuration;
 import de.fu_berlin.inf.gmanda.util.StateChangeListener;
 
@@ -38,10 +38,10 @@ public class MainFrame extends JFrame implements Stoppable {
 		super("Gmanda - GMANE Mailinglist Qualitative Editor");
 		
 		List<Image> icons = new LinkedList<Image>();
-		icons.add(Toolkit.getDefaultToolkit().getImage("resources/gmanda128.png"));
-		icons.add(Toolkit.getDefaultToolkit().getImage("resources/gmanda64.png"));
-		icons.add(Toolkit.getDefaultToolkit().getImage("resources/gmanda32.png"));
-		icons.add(Toolkit.getDefaultToolkit().getImage("resources/gmanda16.png"));
+		icons.add(CUtils.loadImageResource("resources/gmanda128.png"));
+		icons.add(CUtils.loadImageResource("resources/gmanda64.png"));
+		icons.add(CUtils.loadImageResource("resources/gmanda32.png"));
+		icons.add(CUtils.loadImageResource("resources/gmanda16.png"));
 
 		setIconImages(icons);
 
@@ -97,7 +97,7 @@ public class MainFrame extends JFrame implements Stoppable {
 
 		setBounds(left, top, width, height);
 	}
-	
+
 	public void stop()  {
 		dispose();
 	}

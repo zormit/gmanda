@@ -15,6 +15,7 @@ import org.picocontainer.annotations.Inject;
 
 import de.fu_berlin.inf.gmanda.exceptions.DoNotShowToUserException;
 import de.fu_berlin.inf.gmanda.gui.preferences.DebugModeProperty;
+import de.fu_berlin.inf.gmanda.util.CUtils;
 import de.fu_berlin.inf.gmanda.util.VelocityWhitespaceRepair;
 
 public class VelocitySupport {
@@ -54,9 +55,8 @@ public class VelocitySupport {
 
 			FileUtils.writeStringToFile(new File("resources/templates/"
 					+ velocityFile + "Whitespace.vm"),
-					new VelocityWhitespaceRepair().fixWhitespace(FileUtils
-							.readFileToString(new File("resources/templates/"
-									+ velocityFile + ".vm"))));
+					new VelocityWhitespaceRepair().fixWhitespace(CUtils.getResourceAsString("resources/templates/"
+									+ velocityFile + ".vm")));
 
 			latexTemplate = engine.getTemplate("resources/templates/"
 					+ velocityFile + "Whitespace.vm");

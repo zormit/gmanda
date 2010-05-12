@@ -1,4 +1,9 @@
 
+2010-05-12
+  
+   * [FEATURE] Support for Content-type: text/html
+   * [FEATURE] Improved export options for SNA graphs
+
 2010-04-24
 
    * [FEATURE] Improve export of Citations to LaTeX
