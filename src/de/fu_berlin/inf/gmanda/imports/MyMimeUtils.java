@@ -33,6 +33,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
+import de.fu_berlin.inf.gmanda.gui.TextView;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress.ProgressStyle;
 
@@ -52,20 +53,25 @@ public class MyMimeUtils {
 			String date = getDate(message);
 
 			// Build text blob
-			sb.append("From: " + from).append("\n");
-			if (to != null && to.trim().length() > 0) {
+			if (isSet(from)) {
+				sb.append("From: " + from).append("\n");
+			}
+			if (isSet(to)) {
 				sb.append("To  : " + to).append("\n");
 			}
-			if (cc != null && cc.trim().length() > 0) {
+			if (isSet(cc)) {
 				sb.append("CC  : " + cc).append("\n");
 			}
-			if (bcc != null && bcc.trim().length() > 0) {
+			if (isSet(bcc)) {
 				sb.append("BCC : " + bcc).append("\n");
 			}
-			sb.append("Date: " + date).append("\n");
-			sb.append("Subj: " + subject).append("\n");
-			sb.append("\n");
-			sb.append(toString(message));
+			if (isSet(date)) {
+				sb.append("Date: " + date).append("\n");
+			}
+			sb.append("Subj: " + subject);
+			
+			sb = new StringBuilder(TextView.toHTMLBody(sb.toString()) + "<br><br>\n");
+			sb.append(toString((Part) message));
 		} catch (Exception e) {
 			sb.append("Error reading mail content").append("\n");
 			StringWriter sw = new StringWriter();
@@ -74,6 +80,10 @@ public class MyMimeUtils {
 			log.error(sb.toString(), e);
 		}
 		return sb.toString();
+	}
+
+	private static boolean isSet(String cc) {
+		return cc != null && cc.trim().length() > 0 && !"unknown".equals(cc);
 	}
 
 	public static Folder getFolder(File mboxFile) throws MessagingException {
@@ -127,41 +137,38 @@ public class MyMimeUtils {
 	public static String getDate(Message message) throws MessagingException {
 		Date sentDate = message.getSentDate();
 		String date;
-		if (sentDate != null){
+		if (sentDate != null) {
 			date = new DateTime(sentDate).toString();
 		} else {
 			date = MyMimeUtils.getFirst(message.getHeader("Date"));
-			if (date == null){
+			if (date == null) {
 				log.warn("Message contains no date!");
-				date = "Unknown";
 			} else {
 				date = date.trim().replaceAll("\\s+", " ");
 				DateTime time = parse("EE MMM d HH:mm:ss yyyy", date);
-				if (time == null){
+				if (time == null) {
 					date = date.replaceAll(",", "").trim();
 					time = parse("d MMM yyyy HH:mm:ss Z", date);
 				}
-				if (time == null){
+				if (time == null) {
 					log.warn("Could not parse date: " + date);
-					date = "Unknown";
+					date = null;
 				} else {
 					date = time.toString();
 				}
 			}
 		}
-		return date;
+		return unknown(date);
 	}
-	
+
 	public static DateTime parse(String format, String date) {
 		try {
-			return DateTimeFormat.forPattern(format)
-					.parseDateTime(date);
+			return DateTimeFormat.forPattern(format).parseDateTime(date);
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-	
 	public static String getFrom(Message m) throws MessagingException {
 		return unknown(getFromInternal(m));
 	}
@@ -256,9 +263,9 @@ public class MyMimeUtils {
 		try {
 			if (part.getDisposition() != null
 					&& !part.getDisposition().equals("inline"))
-				sb.append(">-- " + part.getDisposition()).append('\n');
+				sb.append(TextView.toHTMLBody(">-- " + part.getDisposition() + '\n'));
 		} catch (ParseException e) {
-			sb.append(">-- Disposition decoding problem\n");
+			sb.append(TextView.toHTMLBody(">-- Disposition decoding problem\n"));
 		}
 
 		Object content;
@@ -269,7 +276,12 @@ public class MyMimeUtils {
 		}
 
 		if (content instanceof String) {
-			sb.append((String) content);
+			if (!"text/html".equals(part.getContentType()))
+				sb.append(TextView.toHTMLBody((String) content));
+			else
+				sb.append(((String) content)
+						.replaceFirst("^.*?<body[^>]*>", "").replaceFirst(
+								"</body>.*?$", ""));
 		} else if (content instanceof Message) {
 			sb.append(getBody((Message) content));
 		} else if (content instanceof Multipart) {
@@ -277,11 +289,12 @@ public class MyMimeUtils {
 		} else if (content instanceof Part) {
 			sb.append(toString((Part) content));
 		} else if (content instanceof InputStream) {
-			sb.append(IOUtils.toString((InputStream) content));
+			sb.append(TextView.toHTMLBody(StringUtils.abbreviate(IOUtils
+					.toString((InputStream) content), 1000)));
 		} else {
-			sb.append("UNKNOWN CONTENT: " + content);
+			sb.append(TextView.toHTMLBody("UNKNOWN CONTENT: " + content));
 		}
-		sb.append('\n');
+		sb.append("<br>\n");
 
 		return sb.toString();
 	}
@@ -330,16 +343,25 @@ public class MyMimeUtils {
 		return unknown(message.getSubject());
 	}
 
-	public static String getMessageID(Message message) throws MessagingException {
-		
+	public static String getMessageID(Message message)
+			throws MessagingException {
+
 		String[] mids = message.getHeader("Message-ID");
 
 		if (mids == null || mids.length == 0 || mids[0].trim().length() == 0) {
 			log.error("No message ID found: " + Arrays.toString(mids));
-			mids = new String[]{ String.valueOf((long)(Math.random() * Integer.MAX_VALUE)) + String.valueOf((long)(Math.random() * Integer.MAX_VALUE)) };
+			mids = new String[] { String
+					.valueOf((long) (Math.random() * Integer.MAX_VALUE))
+					+ String
+							.valueOf((long) (Math.random() * Integer.MAX_VALUE)) };
 			log.error("Generated MID: " + Arrays.toString(mids));
 		}
 		return mids[0];
+	}
+
+	public static String getContentType(Message message)
+			throws MessagingException {
+		return MyMimeUtils.getFirst(message.getHeader("Content-type"));
 	}
 
 }

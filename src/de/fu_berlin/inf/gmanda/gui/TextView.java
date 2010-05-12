@@ -147,7 +147,7 @@ public class TextView extends JScrollPane {
 		});
 	}
 
-	public static String toHTML(String html) {
+	public static String toHTMLBody(String html) {
 
 		html = html.replace(">", "&gt;");
 		html = html.replace("<", "&lt;");
@@ -179,9 +179,6 @@ public class TextView extends JScrollPane {
 		html = html.replaceAll("<br>([ \t]*&gt;.*?)(?=<br>)",
 			"<br><span style=\"color:#ee0000;\">$1</span>");
 
-		// html and body
-		html = "<html><body>" + html + "</body></html>";
-
 		html = toHyperLink(html);
 
 		// www.xxxxx
@@ -206,11 +203,19 @@ public class TextView extends JScrollPane {
 		html = html.replace("<br>", "\n<br>");
 
 		// remove very first br
-		html = html.replaceFirst("<body>(\\s*<br>)*",
-			"<body style=\"font-family: monospace; font-size: 12pt;\">\n    ");
-		html = html.replaceFirst("(<br>\\s*)*</body>", "<br><br></body>");
+		html = html.replaceFirst("^(\\s*<br>)*",
+			"    ");
+		html = html.replaceFirst("(<br>\\s*)*$", "");
 
 		return html;
+	}
+	
+	public static String embedIntoHTMLBody(String html){
+		return "<html><body style=\"font-family: monospace; font-size: 12pt;\">\n" + html + "<br><br></body></html>"; 
+	}
+	
+	public static String toHTML(String html){
+		return embedIntoHTMLBody(toHTMLBody(html));
 	}
 
 	public static String toHyperLink(String html) {
@@ -314,7 +319,12 @@ public class TextView extends JScrollPane {
 					public void run() {
 						String text = pd.getText(gmane);
 
-						String html = toHTML(text);
+						String html = text;
+						if (!"text/html".equals(pd.getMetaData("Content-type"))) {
+							html = toHTML(text);
+						} else {
+							html = embedIntoHTMLBody(text);
+						}
 
 						pane.setText(html);
 

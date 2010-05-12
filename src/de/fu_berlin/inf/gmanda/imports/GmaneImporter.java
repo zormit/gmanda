@@ -241,12 +241,8 @@ public class GmaneImporter {
 				meta.put("list", list);
 			}
 		} catch (Exception e) {
-			log
-					.error(
-							String
-									.format(
-											"Error in Mail with ID '%d' while parsing metadata",
-											id), e);
+			log.error(String.format("Error in Mail with ID '%d'"
+					+ " while parsing metadata", id), e);
 		}
 	}
 
@@ -328,6 +324,7 @@ public class GmaneImporter {
 			previousId = id;
 
 			String messageBody = MyMimeUtils.getBody(message);
+			child.metadata.put("Content-type", "text/html");
 
 			fillMetaData(child.metadata, message, settings.listName, id);
 
@@ -358,7 +355,7 @@ public class GmaneImporter {
 
 			pds.put(message, child);
 
-			String mid = (String)child.metadata.get("mid");
+			String mid = (String) child.metadata.get("mid");
 
 			mid = mid.replaceAll("__\\d+\\.\\d+\\$\\d+\\$gmane\\$org", "");
 
