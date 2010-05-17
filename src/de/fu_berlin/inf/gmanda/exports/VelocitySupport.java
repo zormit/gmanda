@@ -1,6 +1,7 @@
 package de.fu_berlin.inf.gmanda.exports;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,7 +63,7 @@ public class VelocitySupport {
 					+ velocityFile + "Whitespace.vm");
 
 		} catch (Exception e) {
-			throw new DoNotShowToUserException(e);
+			throw new DoNotShowToUserException(new IOException("Could not load Velocity template " + velocityFile, e));
 		}
 
 		StringWriter writer = new StringWriter();

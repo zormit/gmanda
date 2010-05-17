@@ -20,6 +20,8 @@ package de.fu_berlin.inf.gmanda.gui.graph;
 
 import java.util.EnumSet;
 
+import de.fu_berlin.inf.gmanda.qda.Code;
+
 public class ExportSettings {
 
 	public enum ExportSetting {
@@ -164,5 +166,23 @@ public class ExportSettings {
 
 	public boolean isCollapseEdges() {
 		return exportSetting.contains(ExportSetting.COLLAPSEEDGES);
+	}
+
+	public ExportSettings setFromCode(Code choice) {
+		
+		ExportSettings result = this;
+		
+		for (ExportSetting setting : ExportSetting.values()){
+			
+			if (choice.getProperties(setting.toString().toLowerCase()).contains("true")){
+				result = result.copyAndSet(setting, true);
+			} else {
+				if (choice.getProperties(setting.toString().toLowerCase()).contains("false")){
+					result = result.copyAndSet(setting, false);
+				}
+			}
+		}
+		
+		return result;
 	}
 }

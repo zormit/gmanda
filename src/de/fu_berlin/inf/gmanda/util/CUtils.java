@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.Collection;
 import java.util.LinkedList;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 
 public class CUtils {
@@ -115,6 +117,13 @@ public class CUtils {
 	public static InputStream getResourceAsStream(String resourcePath) throws IOException {
 		return getResource(resourcePath)
 				.openConnection().getInputStream();
+	}
+
+	public static <S, T extends Collection<S>> T addAll(
+			T collection,
+			Iterable<S> iterable) {
+		CollectionUtils.addAll(collection, iterable.iterator());
+		return collection;
 	}
 
 }

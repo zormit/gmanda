@@ -22,6 +22,7 @@ import de.fu_berlin.inf.gmanda.imports.GmaneFacade;
 import de.fu_berlin.inf.gmanda.imports.GmaneImporter;
 import de.fu_berlin.inf.gmanda.imports.GmaneMboxFetcher;
 import de.fu_berlin.inf.gmanda.imports.MyMimeUtils;
+import de.fu_berlin.inf.gmanda.util.CUtils;
 import de.fu_berlin.inf.gmanda.util.HashMapUtils;
 import de.fu_berlin.inf.gmanda.util.StateChangeNotifier;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
@@ -210,6 +211,10 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 	public static TreeWalker<PrimaryDocument> getTreeWalker(
 			PrimaryDocument primaryDocument) {
 		return new TreeWalker<PrimaryDocument>(primaryDocument, getTreeMaker());
+	}
+	
+	public static Collection<PrimaryDocument> getTreeItems(PrimaryDocument pd){
+		return CUtils.addAll(new ArrayList<PrimaryDocument>(), PrimaryDocument.getTreeWalker(pd));
 	}
 
 	public static TreeWalker<PrimaryDocument> getTreeWalker(

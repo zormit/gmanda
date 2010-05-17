@@ -21,9 +21,12 @@ import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.colorbrewer.ColorBrewerPalettes;
 import org.picocontainer.annotations.Inject;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Ordering;
 
@@ -35,25 +38,35 @@ import de.fu_berlin.inf.gmanda.graph.Graph.Edge;
 import de.fu_berlin.inf.gmanda.graph.Graph.Node;
 import de.fu_berlin.inf.gmanda.gui.graph.ExportSettings.ExportSetting;
 import de.fu_berlin.inf.gmanda.gui.misc.ExtensionDescriptor;
+import de.fu_berlin.inf.gmanda.gui.search.SearchService;
+import de.fu_berlin.inf.gmanda.qda.AbstractCodedString;
+import de.fu_berlin.inf.gmanda.qda.Code;
 import de.fu_berlin.inf.gmanda.qda.PrimaryDocument;
+import de.fu_berlin.inf.gmanda.qda.Project;
 import de.fu_berlin.inf.gmanda.util.AutoHashMap;
 import de.fu_berlin.inf.gmanda.util.CMultimap;
 import de.fu_berlin.inf.gmanda.util.CUtils;
+import de.fu_berlin.inf.gmanda.util.Nullable;
 import de.fu_berlin.inf.gmanda.util.Pair;
 import de.fu_berlin.inf.gmanda.util.StringJoiner;
 import de.fu_berlin.inf.gmanda.util.progress.IProgress;
+import de.fu_berlin.inf.gmanda.util.progress.IProgress.ProgressStyle;
 
 public class SocialNetworkModule {
 
 	@Inject
 	VelocitySupport velocitySupport;
 
+	@Inject
+	SearchService searchService;
+
 	public enum SNAFileType implements ExtensionDescriptor {
 
 		DOT("graphDOT", "Graphviz Dot with Core Cluster *.dot", ".dot") {
 			ExportSettings defaultSettings = new DefaultExportSettings(
 					ExportSetting.SELFLOOPS, ExportSetting.CLUSTER,
-					ExportSetting.UNDIRECTED);
+					ExportSetting.UNDIRECTED, ExportSetting.SCALENODES, 
+					ExportSetting.SCALEEDGES, ExportSetting.COLLAPSEEDGES);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -63,7 +76,8 @@ public class SocialNetworkModule {
 		DOTNOCLUSTER("graphDOTnocluster",
 				"Graphviz Dot without Core Cluster *.dot", ".dot") {
 			ExportSettings defaultSettings = new DefaultExportSettings(
-					ExportSetting.SELFLOOPS, ExportSetting.UNDIRECTED);
+					ExportSetting.SELFLOOPS, ExportSetting.UNDIRECTED, ExportSetting.SCALENODES, 
+					ExportSetting.SCALEEDGES, ExportSetting.COLLAPSEEDGES);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -73,7 +87,8 @@ public class SocialNetworkModule {
 		COMMUNITYDOT("graphDOTcommunity",
 				"Graphviz Dot Community Assignment *.dot", ".dot") {
 			ExportSettings defaultSettings = new DefaultExportSettings(
-					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT);
+					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT, ExportSetting.SCALENODES, 
+					ExportSetting.SCALEEDGES);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -82,7 +97,8 @@ public class SocialNetworkModule {
 		},
 		GRAPHML("graphML", "GraphML *.graphml", ".graphml") {
 			ExportSettings defaultSettings = new DefaultExportSettings(
-					ExportSetting.UNDIRECTED);
+					ExportSetting.UNDIRECTED, ExportSetting.SCALENODES, 
+					ExportSetting.SCALEEDGES);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -91,7 +107,8 @@ public class SocialNetworkModule {
 		},
 		EDGE("edge", "Edge format *.edge", ".edge") {
 			ExportSettings defaultSettings = new DefaultExportSettings(
-					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT);
+					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT, ExportSetting.SCALENODES, 
+					ExportSetting.SCALEEDGES);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -100,7 +117,8 @@ public class SocialNetworkModule {
 		},
 		PREFUSE("prefuse", "Prefuse Graph Format *.xml", ".xml") {
 			ExportSettings defaultSettings = new DefaultExportSettings(
-					ExportSetting.UNDIRECTED);
+					ExportSetting.UNDIRECTED, ExportSetting.SCALENODES, 
+					ExportSetting.SCALEEDGES);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -109,7 +127,8 @@ public class SocialNetworkModule {
 		},
 		TAB("tab", "Tabbed format *.tab", ".tab") {
 			ExportSettings defaultSettings = new DefaultExportSettings(
-					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT);
+					ExportSetting.UNDIRECTED, ExportSetting.ONLYGIANTCOMPONENT, ExportSetting.SCALENODES, 
+					ExportSetting.SCALEEDGES);
 
 			@Override
 			public ExportSettings getDefaultSettings() {
@@ -119,13 +138,140 @@ public class SocialNetworkModule {
 		ICC("icc", "GraphViz Dot Inter Cluster Graph *.dot", ".dot") {
 			ExportSettings defaultSettings = new ExportSettings(EnumSet.of(
 					ExportSetting.SELFLOOPS, ExportSetting.INTERCLUSTERGRAPH,
-					ExportSetting.CLUSTER), Coloration.FIXED, null, null,
+					ExportSetting.CLUSTER, ExportSetting.SCALENODES, 
+					ExportSetting.SCALEEDGES), Coloration.FIXED, null, null,
 					new MonthClusterBuilder(1, 9));
 
 			@Override
 			public ExportSettings getDefaultSettings() {
 				return defaultSettings;
 			}
+		},
+		DOTPROGRESSION("graphDOT",
+				"GraphViz Dot step-by-step development *.dot", ".dot") {
+			ExportSettings defaultSettings = new DefaultExportSettings(
+					ExportSetting.SELFLOOPS);
+
+			@Override
+			public ExportSettings getDefaultSettings() {
+				return defaultSettings;
+			}
+
+			@Override
+			public void exportSNA(SocialNetworkModule socialNetworkModule,
+					Project project, File directory, String prefix,
+					String extension, Code payload, IProgress progress) {
+
+				IProgress subProgress = progress.getSub(70,
+						ProgressStyle.ROTATING);
+				subProgress.setScale(120);
+
+				for (PrimaryDocument root : project.getPrimaryDocuments()) {
+
+					if (root.getShortListGuess() == null)
+						continue;
+
+					Collection<PrimaryDocument> pds = PrimaryDocument
+							.getTreeItems(root);
+
+					ExportSettings settings = SNAFileType.DOT
+							.getDefaultSettings();
+
+					// 1 - Show plain graph, bidirectional and without node size
+					File targetFile = buildFile(directory, prefix, root,
+							extension, "-", "-1");
+					Predicate<Node> alwaysTrue = Predicates.alwaysTrue();
+
+					settings = settings.setCluster(false).setCollapseEdges(
+							false).setUndirected(false).setScaleNodes(false)
+							.setScaleEdges(false).setColorPalette(
+									new String[] { "#ffffff" })
+							.setFontColorPalette(new String[] { "#000000" })
+							.setClusterBuilder(
+									new DefaultClusterBuilder(alwaysTrue,
+											"everybody", "#000000"));
+					socialNetworkModule.createNetwork(pds, this, settings,
+							targetFile, subProgress.getSub(1));
+
+					// 2 - Scale nodes
+					targetFile = buildFile(directory, prefix, root, extension,
+							"-", "-2");
+					settings = settings.setScaleNodes(true);
+					socialNetworkModule.createNetwork(pds, this, settings,
+							targetFile, subProgress.getSub(1));
+
+					// 3 - Make vertices unidirectional and add width
+					targetFile = buildFile(directory, prefix, root, extension,
+							"-", "-3");
+					settings = settings.setUndirected(true).setScaleEdges(true);
+					socialNetworkModule.createNetwork(pds, this, settings,
+							targetFile, subProgress.getSub(1));
+
+					// 4 - Color nodes
+					targetFile = buildFile(directory, prefix, root, extension,
+							"-", "-4");
+					settings = settings.setColoration(Coloration.MONTH)
+							.setColorPalette(ColorBrewerPalettes.ylorrd6)
+							.setFontColorPalette(
+									ColorBrewerPalettes.ylorrd6Font);
+					socialNetworkModule.createNetwork(pds, this, settings,
+							targetFile, subProgress.getSub(1));
+
+					// 5 - Layout core separately
+					targetFile = buildFile(directory, prefix, root, extension,
+							"-", "-5");
+					settings = settings.setCluster(true).setClusterBuilder(
+							new MonthClusterBuilder(2, 8));
+					socialNetworkModule.createNetwork(pds, this, settings,
+							targetFile, subProgress.getSub(1));
+
+					// 6 - Collapse nodes
+					targetFile = buildFile(directory, prefix, root, extension,
+							"-", "-6");
+					settings = settings.setCollapseEdges(true);
+					socialNetworkModule.createNetwork(pds, this, settings,
+							targetFile, subProgress.getSub(1));
+				}
+			}
+
+		},
+		DOTFILTER("graphDOT", "Graphviz Dot with Core Cluster using Filter Settings *.dot", ".dot") {
+			@Override
+			public ExportSettings getDefaultSettings() {
+				return DOT.getDefaultSettings();
+			}
+
+			public void exportSNA(SocialNetworkModule module, Project project,
+					File directory, String prefix, String extension,
+					Code exportSettings, IProgress progress) {
+
+				IProgress subProgress = progress.getSub(70,
+						ProgressStyle.ROTATING);
+				subProgress.setScale(120);
+
+				String filter = AbstractCodedString.getFirstPropertyValueClean(
+						exportSettings, "filter", "");
+
+				if ("".equals(filter)) {
+					super.exportSNA(module, project, directory, prefix,
+							extension, exportSettings, progress);
+					return;
+				}
+
+				Collection<PrimaryDocument> pds = module.getSearchService()
+						.filter(filter, progress.getSub(10), project);
+
+				if (pds.size() == 0)
+					return;
+
+				File targetFile = buildFile(directory, prefix, null, extension,
+						2 + "-" + 8 + "-", "");
+
+				module.createNetwork(pds, this, this.getDefaultSettings()
+						.setClusterBuilder(new MonthClusterBuilder(2, 8)),
+						targetFile, subProgress.getSub(1));
+			}
+
 		};
 
 		protected String description;
@@ -156,6 +302,58 @@ public class SocialNetworkModule {
 		public String getVelocityFileName() {
 			return velocityFileName;
 		}
+
+		public void exportSNA(SocialNetworkModule module, Project project,
+				File directory, String prefix, String extension,
+				Code exportSettings, IProgress progress) {
+
+			IProgress subProgress = progress.getSub(70, ProgressStyle.ROTATING);
+			subProgress.setScale(120);
+
+			for (int periphery : new int[] { 2 }) {
+				for (int core : new int[] { 8 }) {
+
+					for (PrimaryDocument pd : project.getPrimaryDocuments()) {
+						if (pd.getShortListGuess() == null)
+							continue;
+
+						File targetFile = buildFile(directory, prefix, pd,
+								extension, periphery + "-" + core + "-", "");
+
+						module.createNetwork(PrimaryDocument.getTreeItems(pd),
+								this, this.getDefaultSettings()
+										.setClusterBuilder(
+												new MonthClusterBuilder(
+														periphery, core)),
+								targetFile, subProgress.getSub(1));
+
+						// // Max Edge NO Aggregate
+						// socialNetworkModule.createNetwork(pd, type, type
+						// .getDefaultSettings().setClusterBuilder(
+						// new MaxEdgePeripheryBuilder(periphery, core)),
+						// targetFile, subProgress.getSub(1));
+
+						// // Max Edge Aggregate!
+						// socialNetworkModule.createNetwork(pd, type, type
+						// .getDefaultSettings().setClusterBuilder(
+						// new MaxEdgeAggregatePeripheryBuilder(periphery,
+						// core)),
+						// targetFile, subProgress.getSub(1));
+					}
+				}
+			}
+		}
+
+		public static File buildFile(File directory, String prefix,
+				@Nullable PrimaryDocument pd, String extension, String preID,
+				String postID) {
+			File targetFile = new File(directory, prefix
+					+ preID
+					+ (pd != null ? pd.getShortListGuess().replaceAll("\\.",
+							"-") : "") + postID + "." + extension);
+			return targetFile;
+		}
+
 	}
 
 	public class ProjectToPlot {
@@ -173,8 +371,8 @@ public class SocialNetworkModule {
 		public Collection<Node> getMembers() {
 			return members;
 		}
-		
-		public boolean isPrintMembers(){
+
+		public boolean isPrintMembers() {
 			return members != null && members.size() > 0;
 		}
 
@@ -183,8 +381,14 @@ public class SocialNetworkModule {
 		}
 	}
 
-	public Map<String, Object> computeSocialNetwork(PrimaryDocument root,
-			ExportSettings settings, File targetFile, IProgress pm) {
+	public Map<String, Object> computeSocialNetwork(
+			Collection<PrimaryDocument> pds, ExportSettings settings,
+			File targetFile, IProgress pm) {
+
+		if (pds.size() == 0)
+			return null;
+
+		PrimaryDocument list = pds.iterator().next().getMailingList();
 
 		pm.setScale(100);
 		pm.start();
@@ -196,7 +400,7 @@ public class SocialNetworkModule {
 
 			HashMap<String, Node> authors = new HashMap<String, Node>();
 
-			int numberOfPds = PrimaryDocument.getTreeWalker(root).size();
+			int numberOfPds = pds.size();
 			pm.work(5);
 
 			System.out.println("# of PDs: " + numberOfPds);
@@ -208,7 +412,7 @@ public class SocialNetworkModule {
 				pToFetch.setScale(numberOfPds);
 				pToFetch.start();
 
-				for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(root)) {
+				for (PrimaryDocument pd : pds) {
 
 					if (pd.isMailingList())
 						continue;
@@ -315,7 +519,7 @@ public class SocialNetworkModule {
 			}
 
 			HashMap<String, Object> icc = printInterClusterCommunication(
-					settings, root, plainAuthors, edges, targetFile);
+					settings, pds, plainAuthors, edges, targetFile);
 			if (settings.isInterClusterGraph()) {
 				return icc;
 			}
@@ -412,7 +616,7 @@ public class SocialNetworkModule {
 			}
 
 			ProjectToPlot project = new ProjectToPlot();
-			project.name = root.getMetaData("list");
+			project.name = list.getMetaData("list");
 			if ("gmane.comp.db.axion.devel".equals(project.name)) {
 				project.name = "gmane.comp.lang.uml.argouml.devel";
 			}
@@ -434,9 +638,17 @@ public class SocialNetworkModule {
 		}
 	}
 
+	public SearchService getSearchService() {
+		return searchService;
+	}
+
 	protected HashMap<String, Object> printInterClusterCommunication(
-			ExportSettings settings, PrimaryDocument root,
+			ExportSettings settings, Collection<PrimaryDocument> pds,
 			List<Node> plainAuthors, List<Edge> edges, File targetFile) {
+
+		assert pds.size() > 0;
+
+		PrimaryDocument list = pds.iterator().next().getMailingList();
 
 		final AutoHashMap<Cluster, AutoHashMap<Cluster, Integer>> interClusterCommunication = new AutoHashMap<Cluster, AutoHashMap<Cluster, Integer>>(
 				new Supplier<AutoHashMap<Cluster, Integer>>() {
@@ -518,7 +730,7 @@ public class SocialNetworkModule {
 
 		// Print ICC to Console
 		StringJoiner joiner = new StringJoiner("\t");
-		joiner.append(root.getShortListGuess());
+		joiner.append(list.getShortListGuess());
 		for (String two : columnTitles) {
 			joiner.append(two);
 		}
@@ -736,14 +948,18 @@ public class SocialNetworkModule {
 		return projectMembers;
 	}
 
-	public void createNetwork(PrimaryDocument pd, SNAFileType type,
-			ExportSettings settings, File targetFile, IProgress progress) {
+	public void createNetwork(Collection<PrimaryDocument> pds,
+			SNAFileType type, ExportSettings settings, File targetFile,
+			IProgress progress) {
 
 		if (settings == null)
 			settings = type.getDefaultSettings();
 
-		Map<String, Object> data = computeSocialNetwork(pd, settings,
+		Map<String, Object> data = computeSocialNetwork(pds, settings,
 				targetFile, progress);
+
+		if (data == null)
+			return;
 
 		// Run template engine
 		String result = velocitySupport.run(data, type.getVelocityFileName());

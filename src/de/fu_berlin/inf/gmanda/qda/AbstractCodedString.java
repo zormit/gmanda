@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 
 import de.fu_berlin.inf.gmanda.util.tree.TreeMaker;
@@ -130,6 +131,8 @@ public abstract class AbstractCodedString implements CodedString {
 			return defaultValue;
 		
 		result = StringUtils.strip(result, ",. \r\n\f\t'\"");
+		
+		result = StringEscapeUtils.unescapeJava(result);
 		
 		if (result == null || result.trim().length() == 0)
 			return defaultValue;

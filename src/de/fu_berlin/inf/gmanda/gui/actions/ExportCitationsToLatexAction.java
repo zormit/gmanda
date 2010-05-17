@@ -168,7 +168,7 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 				try {
 					List<String> citations = getCitationList(openDir);
 
-					for (Code c : p.getCodeModel().getAllCodesDeep("export")) {
+					for (Code c : p.getCodeModel().getAllCodesDeep("export").values()) {
 						export(c, p, openDir, citations);
 					}
 

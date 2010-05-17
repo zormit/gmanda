@@ -42,7 +42,7 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 	@Inject
 	DotFileFileChooser dotFileChooser;
-	
+
 	@Inject
 	SocialNetworkModule socialNetworkModule;
 
@@ -83,7 +83,7 @@ public class SocialNetworkThreadAction extends AbstractAction {
 
 					if (dotFile == null)
 						return;
- 
+
 					SNAFileType type = dotFileChooser.getSelectedFileType();
 
 					if (type == null) {
@@ -91,7 +91,8 @@ public class SocialNetworkThreadAction extends AbstractAction {
 								"Must choose a file type for SNA Export");
 					}
 
-					socialNetworkModule.createNetwork(pd, type, null, dotFile, progress);
+					socialNetworkModule.createNetwork(PrimaryDocument
+							.getTreeItems(pd), type, null, dotFile, progress);
 
 				} catch (Exception e) {
 					throw new ReportToUserException(e);
