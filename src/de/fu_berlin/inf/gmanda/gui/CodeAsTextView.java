@@ -121,13 +121,14 @@ public class CodeAsTextView extends JScrollPane {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html>");
 		sb
-			.append("<body style=\"font-family: monospace; font-size: 12pt; padding: 2px; margin: 2px;\">");
+			.append("<body style=\"font-family: monospace; font-size: 12pt; padding: 1px; margin: 1px;\">");
 
 		sb.append(codeToHTML(p, codeToShow));
 
 		sb.append("</body></html>");
 
 		pane.setText(sb.toString());
+		System.out.println(sb.toString());
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {

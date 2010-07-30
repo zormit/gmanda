@@ -13,7 +13,7 @@ import de.fu_berlin.inf.gmanda.util.tree.TreeStructure;
 import de.fu_berlin.inf.gmanda.util.tree.TreeWalker;
 
 public abstract class AbstractCodedString implements CodedString {
- 
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -25,8 +25,8 @@ public abstract class AbstractCodedString implements CodedString {
 		}
 		return variations;
 	}
-	
-	public Collection<String> getAllDeep(){
+
+	public Collection<String> getAllDeep() {
 		Collection<String> variations = new LinkedList<String>();
 
 		for (Code c : getAllCodesDeep()) {
@@ -34,8 +34,8 @@ public abstract class AbstractCodedString implements CodedString {
 		}
 		return variations;
 	}
-	
-	public Collection<? extends Code> getAllDeep(String code){
+
+	public Collection<? extends Code> getAllDeep(String code) {
 		code = code.trim();
 		Collection<Code> result = new LinkedList<Code>();
 		for (Code c : getAllCodesDeep()) {
@@ -44,39 +44,45 @@ public abstract class AbstractCodedString implements CodedString {
 		}
 		return result;
 	}
-	
-	public Iterable<? extends Code> getAllCodesDeep(){
-		
-		TreeWalker<? extends Code> result = new TreeWalker<Code>(getAllCodes(), new TreeMaker<Code>(){
- 
-			public TreeStructure<Code> toStructure(final Code t){
-				return new TreeStructure<Code>(){
 
-					public Code get(){
-						return t;
+	public Iterable<? extends Code> getAllCodesDeep() {
+
+		TreeWalker<? extends Code> result = new TreeWalker<Code>(getAllCodes(),
+				new TreeMaker<Code>() {
+
+					public TreeStructure<Code> toStructure(final Code t) {
+						return new TreeStructure<Code>() {
+
+							public Code get() {
+								return t;
+							}
+
+							public Iterable<Code> getChildren() {
+								List<? extends Code> children = t
+										.getProperties();
+								if (children.size() == 1
+										&& children.get(0).getTag().equals(
+												"desc"))
+									return Collections.emptyList();
+								else {
+									// Casting here is not a problem, since
+									// Iterators are read only
+									@SuppressWarnings("unchecked")
+									Iterable<Code> result = (Iterable<Code>) children;
+
+									return result;
+								}
+
+							}
+						};
 					}
 
-					public Iterable<Code> getChildren() {
-						List<? extends Code> children = t.getProperties();
-						if (children.size() == 1 && children.get(0).getTag().equals("desc"))
-							return Collections.emptyList();
-						else {
-							// Casting here is not a problem, since Iterators are read only
-							@SuppressWarnings("unchecked")
-							Iterable<Code> result = (Iterable<Code>)children;
-							
-							return result;
-						}
-							
-					}
-				};}
-			
-		});
+				});
 
 		return result;
 	}
-	
-	public Collection<Code> getAll(String code){
+
+	public Collection<Code> getAll(String code) {
 		code = code.trim();
 		Collection<Code> result = new LinkedList<Code>();
 		for (Code c : getAllCodes()) {
@@ -85,14 +91,15 @@ public abstract class AbstractCodedString implements CodedString {
 		}
 		return result;
 	}
-	
-	public Collection<? extends Code> getProperties(String code, String propName){
+
+	public Collection<? extends Code> getProperties(String code, String propName) {
 		return getProperties(getAll(code), propName);
 	}
-	
-	public static Collection<? extends Code> getProperties(Collection<? extends Code> codes, String propName){
+
+	public static Collection<? extends Code> getProperties(
+			Collection<? extends Code> codes, String propName) {
 		List<Code> result = new LinkedList<Code>();
-		for (Code c : codes){
+		for (Code c : codes) {
 			result.addAll(getProperties(c, propName));
 		}
 		return result;
@@ -100,9 +107,9 @@ public abstract class AbstractCodedString implements CodedString {
 
 	public static List<Code> getProperties(Code c, String propName) {
 		List<Code> result = new LinkedList<Code>();
-		
-		for (Code sub : c.getProperties()){
-			if (sub.getTag().equals(propName)){
+
+		for (Code sub : c.getProperties()) {
+			if (sub.getTag().equals(propName)) {
 				result.add(sub);
 			}
 		}
@@ -110,42 +117,65 @@ public abstract class AbstractCodedString implements CodedString {
 	}
 
 	/**
-	 * Returns the first property in the given code matching the given name, or null.
+	 * Returns the first property in the given code matching the given name, or
+	 * null.
 	 */
-	public static Code getFirstProperty(Code c, String propertyName){
-		for (Code prop : getProperties(c, propertyName)){
+	public static Code getFirstProperty(Code c, String propertyName) {
+		for (Code prop : getProperties(c, propertyName)) {
 			return prop;
 		}
 		return null;
 	}
-	
-	public static String getFirstPropertyValueClean(Code c, String propertyName, String defaultValue){
+
+	/**
+	 * Returns the text value of the first property of the given code with the
+	 * given property name or the given defaultValue.
+	 */
+	public static String getFirstPropertyValue(Code c, String propertyName,
+			String defaultValue) {
 		Code c2 = getFirstProperty(c, propertyName);
-	
+
 		if (c2 == null)
 			return defaultValue;
-		
+
 		String result = c2.getValue();
-		
-		if (result == null || result.trim().length() == 0)
+
+		if (result == null || (result = result.trim()).length() == 0)
 			return defaultValue;
-		
+
+		return result;
+	}
+
+	/**
+	 * Returns the cleaned text value of the first property of the given code
+	 * with the given property name or the given defaultValue.
+	 * 
+	 * Cleaning means that the value is stripped of line-endings, spaces, commas
+	 * and periods and is unescaped from Java notation.
+	 */
+	public static String getFirstPropertyValueClean(Code c,
+			String propertyName, String defaultValue) {
+
+		String result = getFirstPropertyValue(c, propertyName, null);
+
+		if (result == null)
+			return defaultValue;
+
 		result = StringUtils.strip(result, ",. \r\n\f\t'\"");
-		
-		result = StringEscapeUtils.unescapeJava(result);
-		
-		if (result == null || result.trim().length() == 0)
+		result = StringEscapeUtils.unescapeJava(result).trim();
+
+		if (result.length() == 0)
 			return defaultValue;
-		
+
 		return result;
 	}
 
 	public Collection<String> getAllValues(String code) {
-		
+
 		Collection<String> result = new LinkedList<String>();
-		for (Code c : getAll(code)){
+		for (Code c : getAll(code)) {
 			String value = c.getValue();
-			if (value != null){
+			if (value != null) {
 				result.add(value);
 			}
 		}
@@ -205,7 +235,7 @@ public abstract class AbstractCodedString implements CodedString {
 		}
 		return false;
 	}
-	
+
 	public boolean containsAnyDeep(String code) {
 
 		Code search = parse(code);
@@ -218,7 +248,6 @@ public abstract class AbstractCodedString implements CodedString {
 		return false;
 
 	}
-
 
 	public boolean containsAny(Iterable<? extends Code> codes) {
 

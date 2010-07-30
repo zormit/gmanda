@@ -6,8 +6,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +18,7 @@ import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
+import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.picocontainer.annotations.Inject;
@@ -77,12 +81,15 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<String> getCitationList(File dir) {
+	public Set<String> getCitationList(File dir) {
 
-		List<String> result = new ArrayList<String>();
+		Set<String> result = new HashSet<String>();
+		Set<String> labels = new HashSet<String>();
 
 		for (File tex : (Collection<File>) FileUtils.listFiles(dir,
 				new String[] { "tex" }, true)) {
+			
+			
 
 			String input;
 			try {
@@ -99,12 +106,19 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 					result);
 			extractCodes(input, "\\\\ddref"
 					+ "\\s*\\{((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}", result);
+
+			// Find labels 
+			if (!tex.getName().endsWith("glossary.tex"))
+				extractCodes(input, "\\\\label\\s*\\{\\s*def:((?:\\w|\\s|[@\\-.?!'\\(\\)])+?)\\}", labels);
 		}
+		
+		// Already defined defs should not be included in the Glossary
+		result.removeAll(labels);
 		return result;
 	}
 
 	protected void extractCodes(String input, String pattern,
-			List<String> result) {
+			Set<String> result) {
 
 		Pattern p = Pattern.compile(pattern);
 
@@ -166,9 +180,10 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 						"Exporting LaTeX-Citations", 5);
 
 				try {
-					List<String> citations = getCitationList(openDir);
+					Set<String> citations = getCitationList(openDir);
 
-					for (Code c : p.getCodeModel().getAllCodesDeep("export").values()) {
+					for (Code c : p.getCodeModel().getAllCodesDeep("export")
+							.values()) {
 						export(c, p, openDir, citations);
 					}
 
@@ -224,13 +239,12 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		}
 
 		public String getSectionMacro() {
-			
-			String result = sectionDepths.get((Integer)getSectionDepth());
+
+			String result = sectionDepths.get((Integer) getSectionDepth());
 			if (result == null)
 				return "section";
 			return result;
 		}
-		
 
 		public String getCodeHyp() {
 			return hyphenate(code);
@@ -274,19 +288,13 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 
 				for (Code def : defCode.getProperties("desc")) {
 
-					String value = def.getValue();
+					String value = cleanText(def.getValue());
 
-					if (value != null) {
-						value = StringUtils.strip(value, " \"");
-
-						value = value.split("----", 2)[0].trim();
-
-						if (value.length() > 0) {
-							if (definition == null)
-								definition = value;
-							else
-								definition += "\n\n" + value;
-						}
+					if (value != null && value.length() > 0) {
+						if (definition == null)
+							definition = value;
+						else
+							definition += "\n\n" + value;
 					}
 				}
 			}
@@ -324,20 +332,21 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 	}
 
 	protected BiMap<Integer, String> sectionDepths;
-	
+
 	protected void export(Code exportInstructions, Project p, File openDir,
-			List<String> citations) {
+			Set<String> citations) {
 
 		String exportSectionDepth = AbstractCodedString
-				.getFirstPropertyValueClean(exportInstructions, "sectionDepths",
+				.getFirstPropertyValueClean(exportInstructions,
+						"sectionDepths",
 						"section,subsection,subsubsection,paragraph,subparagraph");
-		
+
 		sectionDepths = HashBiMap.create();
 		int i = 0;
-		for (String depth : exportSectionDepth.split("\\s*,\\s*")){
+		for (String depth : exportSectionDepth.split("\\s*,\\s*")) {
 			sectionDepths.put(i++, depth);
 		}
-		
+
 		List<Section> categoriesNested = new ArrayList<Section>();
 
 		for (Code subCode : exportInstructions.getProperties("section")) {
@@ -364,7 +373,50 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		 */
 		uncategorized.definition = "";
 
-		Multimap<Section, String> citationsByCategory = TreeMultimap.create();
+		@SuppressWarnings("unchecked")
+		Comparator<Section> sectionComparator = ComparatorUtils
+				.naturalComparator();
+		Multimap<Section, String> citationsByCategory = TreeMultimap.create(
+				sectionComparator, new Comparator<String>() {
+
+					@Override
+					public int compare(String o1, String o2) {
+						String[] a1 = o1.split("\\.");
+						String[] a2 = o2.split("\\.");
+
+						int i = 0;
+						while (i < a1.length && i < a2.length) {
+
+							String s1 = a1[i];
+							String s2 = a2[i];
+							int p1 = s1.indexOf('@');
+							int p2 = s2.indexOf('@');
+
+							if (p1 != -1 && p2 != -1) {
+								int projectComparison = s1.substring(p1)
+										.compareTo(s2.substring(p2));
+								if (projectComparison == 0) {
+									int episodeComparison = s1.substring(0, p1)
+											.compareTo(s2.substring(0, p2));
+									if (episodeComparison != 0)
+										return episodeComparison;
+								} else {
+									return projectComparison;
+								}
+							} else {
+								int comparison = s1.compareTo(s2);
+								if (comparison != 0)
+									return comparison;
+							}
+							i++;
+						}
+						if (a1.length < a2.length)
+							return -1;
+						if (a2.length < a1.length)
+							return +1;
+						return 0;
+					}
+				});
 
 		nextCitation: for (String citation : citations) {
 
@@ -408,6 +460,17 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 		}
 	}
 
+	public String cleanText(String value) {
+
+		if (value == null)
+			return null;
+
+		value = StringUtils.strip(value, " \"");
+		value = value.split("----", 2)[0].trim();
+
+		return value;
+	}
+
 	private Section buildCategories(Section parent, Code c) {
 
 		String title = AbstractCodedString.getFirstPropertyValueClean(c,
@@ -416,8 +479,8 @@ public class ExportCitationsToLatexAction extends AbstractAction {
 				null);
 		String label = AbstractCodedString.getFirstPropertyValueClean(c,
 				"label", null);
-		String text = AbstractCodedString.getFirstPropertyValueClean(c, "text",
-				null);
+		String text = cleanText(AbstractCodedString
+				.getFirstPropertyValue(c, "text", null));
 
 		Section newSection = new Section(parent, title, code, label, text);
 

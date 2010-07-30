@@ -12,6 +12,7 @@ import javax.swing.JSeparator;
 import de.fu_berlin.inf.gmanda.gui.PrimaryDocumentTree;
 import de.fu_berlin.inf.gmanda.gui.actions.ComputeEmailStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ComputeThreadStatisticsAction;
+import de.fu_berlin.inf.gmanda.gui.actions.CopyLinksAction;
 import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExportMessageIDHyperLinks;
 import de.fu_berlin.inf.gmanda.gui.actions.RefetchAction;
@@ -25,6 +26,7 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 	public PrimaryDocumentTreePopup(
 		final PrimaryDocumentTree tree, 
 		RefetchAction refetch,
+		CopyLinksAction copyLink,
 		RefetchRecursiveAction refetchRecursive,
 		RefetchListAction refetchList,
 		DeletePrimaryDocumentAction delete,
@@ -44,6 +46,7 @@ public class PrimaryDocumentTreePopup extends JPopupMenu  {
 		add(network);
 		add(latexID);
 		add(new JSeparator());
+		add(copyLink);
 		add(delete);
 
 		tree.addMouseListener(new MouseAdapter() {

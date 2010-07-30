@@ -51,6 +51,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.BasicStatisticalReportAction;
 import de.fu_berlin.inf.gmanda.gui.actions.CloseAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ComputeEmailStatisticsAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ComputeThreadStatisticsAction;
+import de.fu_berlin.inf.gmanda.gui.actions.CopyLinksAction;
 import de.fu_berlin.inf.gmanda.gui.actions.CreateDSVFileAction;
 import de.fu_berlin.inf.gmanda.gui.actions.DeletePrimaryDocumentAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ExecuteTrailAction;
@@ -120,8 +121,8 @@ import de.fu_berlin.inf.gmanda.gui.preferences.CacheDirectoryProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.CodedColorProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.DebugModePreferenceUI;
 import de.fu_berlin.inf.gmanda.gui.preferences.DebugModeProperty;
-import de.fu_berlin.inf.gmanda.gui.preferences.MatchColorProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.GmandaPreferenceWindow;
+import de.fu_berlin.inf.gmanda.gui.preferences.MatchColorProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.PrimaryDocumentDirectoryProperty;
 import de.fu_berlin.inf.gmanda.gui.preferences.ScrollOnShowPreferenceUI;
 import de.fu_berlin.inf.gmanda.gui.preferences.ScrollOnShowProperty;
@@ -274,6 +275,7 @@ public class GmandaMain {
 			.addComponent(FetchGmaneListToFileAction.class)
 			.addComponent(SetCacheLocationAction.class)
 			.addComponent(RefetchAction.class)
+			.addComponent(CopyLinksAction.class)
 			.addComponent(CreateDSVFileAction.class)
 			.addComponent(RefetchRecursiveAction.class)
 			.addComponent(RefetchListAction.class)

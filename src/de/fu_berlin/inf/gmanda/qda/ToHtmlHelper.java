@@ -60,7 +60,7 @@ public class ToHtmlHelper {
 		List<? extends Code> values = c.getProperties();
 
 		if ((values.size() == 1 && c.getTag().equals("desc")) || !expandSubCodes) {
-			sb.append(surround("<p>", c.getValue().replaceAll("\n[ \t]*\n", "</p><p/><p>"), "</p>"));
+			sb.append(surround("<p>", c.getValue().replaceAll("\n[ \t]*\n", "</p><p>"), "</p>"));
 			return sb.toString();
 		}
 
@@ -69,7 +69,7 @@ public class ToHtmlHelper {
 
 		if (values.size() == 1 && values.get(0).getTag().equals("desc")) {
 			sb.append(surround("<p>", values.get(0).getValue().replaceAll("\n[ \t]*\n",
-				"</p><p/><p>"), "</p>"));
+				"</p><p>"), "</p>"));
 		} else {
 			sb.append("<ul>");
 			for (Code sub : c.getProperties()) {

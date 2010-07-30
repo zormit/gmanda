@@ -1,4 +1,10 @@
 
+2010-07-24 
+
+   * Export - Improved sort order of codes including @ notation.
+   * Export - Exclude codes from export already defined in other .tex files.
+   * [FEATURE] Added ability to copy links from currently selected PD
+
 2010-05-17
 
    * [BUILD] For release version 0.9, the loading of resources was moved to the classloader mechanism.
