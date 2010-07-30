@@ -12,6 +12,7 @@
           \phantomsection
           \item \emph{$item.title} \label{def:$item.code} {\small(\texttt{\hyphenchar\font45\relax $item.codeHyp})}\\
           $item.definition
+          
         #end
       \end{itemize} 
     #end
