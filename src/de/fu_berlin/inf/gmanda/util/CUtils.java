@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -55,13 +57,13 @@ public class CUtils {
 
 		// Flip "Doe, John" into "John Doe"
 		author = author.replaceAll("(\\w*?), *(.*)$", "$2 $1");
-		
+
 		// Add space after dot
 		author = author.replaceAll("\\.", ". ");
-		
+
 		// Collapse spaces
 		author = author.replaceAll("\\s+", " ");
-		
+
 		// Make case canonical
 		author = upperCaseEachFirstCharacter(author);
 
@@ -84,7 +86,7 @@ public class CUtils {
 			result.append(upperCaseFirstCharacter(word));
 			result.append(" ");
 		}
-		
+
 		return result.toString().trim();
 	}
 
@@ -110,20 +112,52 @@ public class CUtils {
 		return CUtils.class.getClassLoader().getResource(resourcePath);
 	}
 
-	public static String getResourceAsString(String resourcePath) throws IOException {
+	public static String getResourceAsString(String resourcePath)
+			throws IOException {
 		return IOUtils.toString(CUtils.getResourceAsStream(resourcePath));
 	}
 
-	public static InputStream getResourceAsStream(String resourcePath) throws IOException {
-		return getResource(resourcePath)
-				.openConnection().getInputStream();
+	public static InputStream getResourceAsStream(String resourcePath)
+			throws IOException {
+		return getResource(resourcePath).openConnection().getInputStream();
 	}
 
-	public static <S, T extends Collection<S>> T addAll(
-			T collection,
+	public static <S, T extends Collection<S>> T addAll(T collection,
 			Iterable<S> iterable) {
 		CollectionUtils.addAll(collection, iterable.iterator());
 		return collection;
 	}
 
+	/**
+	 * Returns a list of arrays containing all combinations of k elements from
+	 * input.
+	 * 
+	 * e.g. combinations(new Integer[]{1,2,3,4,5}, 3) == [[1, 2, 3], [1, 2, 4],
+	 * [1, 2, 5], [1, 3, 4], [1, 3, 5], [1, 4, 5], [2, 3, 4], [2, 3, 5], [2, 4,
+	 * 5], [3, 4, 5]]
+	 */
+	public static <T> List<T[]> combinations(T[] input, int k) {
+
+		List<T[]> result = new LinkedList<T[]>();
+
+		@SuppressWarnings("unchecked")
+		T[] current = (T[]) new Object[k];
+		combinations(input, 0, k, current, result);
+
+		return result;
+	}
+
+	public static <T> void combinations(T[] input, int d, int k, T[] current,
+			List<T[]> output) {
+
+		if (k == 0) {
+			output.add(Arrays.copyOf(current, current.length));
+			return;
+		}
+
+		for (int i = d; i <= input.length - k; i++) {
+			current[current.length - k] = input[i];
+			combinations(input, i + 1, k - 1, current, output);
+		}
+	}
 }
