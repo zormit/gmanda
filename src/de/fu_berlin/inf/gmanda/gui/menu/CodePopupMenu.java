@@ -19,19 +19,15 @@ public class CodePopupMenu extends JPopupMenu  {
 		
 		list.getTable().addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
-				if (e.isPopupTrigger()) {
-					try {
-						Robot robot = new java.awt.Robot();
-						robot.mousePress(InputEvent.BUTTON1_MASK);
-						robot.mouseRelease(InputEvent.BUTTON1_MASK);
-					} catch (AWTException ae) {
-						System.out.println(ae);
-					}
-				}
+				maybeShowPopup(e);
 			}
 
 			public void mouseReleased(MouseEvent e) {
-				if (e.isPopupTrigger()){
+				maybeShowPopup(e);
+			}
+
+			private void maybeShowPopup(MouseEvent e) {
+				if (e.isPopupTrigger()) {
 					show(list.getTable(), e.getX(), e.getY());
 				}
 			}
