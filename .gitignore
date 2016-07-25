@@ -1,0 +1,7 @@
+/target/
+/bin/
+/log/
+/lucene/
+/mboxes/
+/messages/
+configuration.dat
