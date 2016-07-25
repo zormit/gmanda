@@ -1,8 +1,5 @@
 package de.fu_berlin.inf.gmanda.gui.menu;
 
-import java.awt.AWTException;
-import java.awt.Robot;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
