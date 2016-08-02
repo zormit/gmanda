@@ -318,14 +318,7 @@ public class TextView extends JScrollPane {
 				commonService.run(new Runnable() {
 					public void run() {
 						String text = pd.getText(gmane);
-
-						String html = text;
-						if (!"text/html".equals(pd.getMetaData("Content-type"))) {
-							html = toHTML(text);
-						} else {
-							html = embedIntoHTMLBody(text);
-						}
-
+						String html = embedIntoHTMLBody(text);
 						pane.setText(html);
 
 						updateHighlight();
