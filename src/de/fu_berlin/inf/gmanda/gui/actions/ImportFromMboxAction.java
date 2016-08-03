@@ -125,7 +125,7 @@ public class ImportFromMboxAction extends AbstractAction {
 					settings.rangeStart = -1;
 					settings.rangeEnd = -1;
 				}
-				settings.useIDsFromEmails = false;
+				settings.useIDsFromEmails = importDialog.getUseIDsFromEmails();
 				
 				// Read mbox file
 				List<PrimaryDocumentData> imported = importer.importPrimaryDocuments(pm, settings);

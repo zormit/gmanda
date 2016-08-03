@@ -70,6 +70,7 @@ public class ImportFromGmaneDialog extends javax.swing.JDialog {
 		tStartDate = new javax.swing.JTextField();
 		cancelButton = new javax.swing.JButton();
 		okButton = new javax.swing.JButton();
+		useIDsFromEmails = new javax.swing.JCheckBox();
 
 		setName("Form"); // NOI18N
 		addWindowListener(new java.awt.event.WindowAdapter() {
@@ -82,6 +83,8 @@ public class ImportFromGmaneDialog extends javax.swing.JDialog {
 
 		jLabel1.setText("Name of the List to Fetch:");
 		jLabel1.setName("jLabel1"); // NOI18N
+
+		useIDsFromEmails.setText("import Gmane IDs (Archived-At)");
 
 		jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 		jPanel1.setName("jPanel1"); // NOI18N
@@ -119,6 +122,7 @@ public class ImportFromGmaneDialog extends javax.swing.JDialog {
 
 		tStartDate.setName("tStartDate"); // NOI18N
 
+		useIDsFromEmails.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 		javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
 		jPanel1.setLayout(jPanel1Layout);
 		jPanel1Layout.setHorizontalGroup(jPanel1Layout.createParallelGroup(
@@ -210,41 +214,48 @@ public class ImportFromGmaneDialog extends javax.swing.JDialog {
 		});
 
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+		layout.setHorizontalGroup(
+			layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+				.addGroup(layout.createSequentialGroup()
+					.addGap(20)
+					.addComponent(tListName, javax.swing.GroupLayout.PREFERRED_SIZE, 601, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+					.addComponent(useIDsFromEmails)
+					.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.addGroup(layout.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(layout.createSequentialGroup()
+							.addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 609, Short.MAX_VALUE)
+							.addContainerGap())
+						.addGroup(layout.createSequentialGroup()
+							.addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addGap(438))))
+				.addGroup(layout.createSequentialGroup()
+					.addContainerGap(455, Short.MAX_VALUE)
+					.addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+					.addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addContainerGap())
+		);
+		layout.setVerticalGroup(
+			layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+				.addGroup(layout.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(jLabel1)
+					.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+					.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+						.addComponent(tListName, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+						.addComponent(useIDsFromEmails))
+					.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+					.addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+					.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+						.addComponent(okButton)
+						.addComponent(cancelButton))
+					.addGap(16))
+		);
 		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(layout.createParallelGroup(
-			javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-			layout.createSequentialGroup().addGap(20, 20, 20).addComponent(tListName,
-				javax.swing.GroupLayout.DEFAULT_SIZE, 543, Short.MAX_VALUE).addContainerGap())
-			.addGroup(
-				layout.createSequentialGroup().addContainerGap().addGroup(
-					layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-						layout.createSequentialGroup().addComponent(jPanel1,
-							javax.swing.GroupLayout.DEFAULT_SIZE,
-							javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-							.addContainerGap()).addGroup(
-						layout.createSequentialGroup().addComponent(jLabel1,
-							javax.swing.GroupLayout.DEFAULT_SIZE,
-							javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addGap(438, 438,
-							438)))).addGroup(
-				javax.swing.GroupLayout.Alignment.TRAILING,
-				layout.createSequentialGroup().addContainerGap(397, Short.MAX_VALUE).addComponent(
-					cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80,
-					javax.swing.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-					javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(okButton,
-					javax.swing.GroupLayout.PREFERRED_SIZE, 80,
-					javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap()));
-		layout.setVerticalGroup(layout.createParallelGroup(
-			javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-			javax.swing.GroupLayout.Alignment.TRAILING,
-			layout.createSequentialGroup().addContainerGap().addComponent(jLabel1).addPreferredGap(
-				javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(tListName,
-				javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-				.addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE,
-					javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(
-					layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-						.addComponent(okButton).addComponent(cancelButton)).addGap(16, 16, 16)));
 
 		pack();
 	}// </editor-fold>
@@ -286,6 +297,7 @@ public class ImportFromGmaneDialog extends javax.swing.JDialog {
 	private javax.swing.JTextField tEndId;
 	private javax.swing.JTextField tListName;
 	private javax.swing.JTextField tStartDate;
+	private javax.swing.JCheckBox useIDsFromEmails;
 	// End of variables declaration
 
 	private int returnStatus = RET_CANCEL;
@@ -308,5 +320,9 @@ public class ImportFromGmaneDialog extends javax.swing.JDialog {
 	
 	public void setListName(String listName){
 		tListName.setText(listName);
+	}
+
+	public boolean getUseIDsFromEmails() {
+		return useIDsFromEmails.isSelected();
 	}
 }
