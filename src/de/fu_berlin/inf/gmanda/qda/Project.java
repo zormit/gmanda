@@ -70,6 +70,35 @@ public class Project {
 		nonLocalChangeNotifier.notify(this);
 	}
 
+	public boolean mergeToRootPD(List<PrimaryDocumentData> pdds) {
+		for (PrimaryDocument document : PrimaryDocumentData.toPrimaryDocuments(pdds)) {
+			PrimaryDocument existingRootPD = findRootPD(document.getName());
+			if (existingRootPD == null)
+				return false;
+
+			existingRootPD.getNonTextChangeNotifier().add(childChangeListener);
+
+			for (PrimaryDocument child : document.getChildren()) {
+				child.setParent(existingRootPD);
+				existingRootPD.getChildren().add(child);
+				add(child);
+			}
+
+			childChangeNotifier.notify(existingRootPD);
+		}
+		nonLocalChangeNotifier.notify(this);
+		return true;
+	}
+
+	public PrimaryDocument findRootPD(String name) {
+		for (PrimaryDocument rootPD : rootPDs) {
+			if (rootPD.getName().equals(name)) {
+				return rootPD;
+			}
+		}
+		return null;
+	}
+
 	public Map<String, Map<String, List<PrimaryDocument>>> getMetaData() {
 		return metadata;
 	}

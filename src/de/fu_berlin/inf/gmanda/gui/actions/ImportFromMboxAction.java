@@ -130,7 +130,8 @@ public class ImportFromMboxAction extends AbstractAction {
 				// Read mbox file
 				List<PrimaryDocumentData> imported = importer.importPrimaryDocuments(pm, settings);
 
-				project.addRootPDDs(imported);
+				if (!project.mergeToRootPD(imported))
+					project.addRootPDDs(imported);
 
 			} catch (Exception e) {
 				throw new ReportToUserException(e);

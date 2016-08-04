@@ -56,6 +56,10 @@ public class PrimaryDocument implements Comparable<PrimaryDocument>, Codeable {
 		return parent;
 	}
 
+	public void setParent(PrimaryDocument parent) {
+		this.parent = parent;
+	}
+
 	public String toString() {
 		return getName();
 	}
