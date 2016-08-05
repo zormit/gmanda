@@ -63,6 +63,7 @@ import de.fu_berlin.inf.gmanda.gui.actions.FormatCodeAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ForwardSelectionAction;
 import de.fu_berlin.inf.gmanda.gui.actions.FullscreenTextViewAction;
 import de.fu_berlin.inf.gmanda.gui.actions.ImportFromMboxAction;
+import de.fu_berlin.inf.gmanda.gui.actions.ImportFromProjectAction;
 import de.fu_berlin.inf.gmanda.gui.actions.InsertDateAction;
 import de.fu_berlin.inf.gmanda.gui.actions.InsertSessionLogTemplateAction;
 import de.fu_berlin.inf.gmanda.gui.actions.InsertSubCodeTemplateAction;
@@ -303,6 +304,7 @@ public class GmandaMain {
 			.addComponent(ComputeEmailStatisticsAction.class)
 			.addComponent(SocialNetworkThreadAction.class)
 			.addComponent(ImportFromMboxAction.class)
+			.addComponent(ImportFromProjectAction.class)
 			.addComponent(ReindexWithLuceneTreeAction.class)
 			.addComponent(ExportMessageIDHyperLinks.class)
 			.addComponent(ExportSocialNetworksAction.class)

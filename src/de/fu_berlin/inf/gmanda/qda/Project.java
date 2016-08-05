@@ -90,6 +90,48 @@ public class Project {
 		return true;
 	}
 
+	public void mergeDataToExistingPDs(List<PrimaryDocumentData> data) {
+		for (PrimaryDocument listWithCodes : PrimaryDocumentData.toPrimaryDocuments(data)) {
+
+			PrimaryDocument existingRootPD = findRootPD(listWithCodes.getName());
+			Map<String, PrimaryDocument> existingDocumentsById = new HashMap<String, PrimaryDocument>();
+			try {
+				System.out.println("indexing existing documents");
+				for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(existingRootPD)) {
+					String id = pd.getMetaData("id");
+					if (id != null) {
+						existingDocumentsById.put(id, pd);
+					}
+				}
+
+				if (existingRootPD == null) {
+					System.out.println(existingRootPD + " not found.");
+					continue;
+				}
+
+				System.out.println("inserting codes");
+				for (PrimaryDocument pd : PrimaryDocument.getTreeWalker(listWithCodes)) {
+					String id = pd.getMetaData("id");
+					if (id != null) {
+						if (existingDocumentsById.containsKey(id)) {
+							PrimaryDocument expd = existingDocumentsById.get(id);
+							if (pd.code != null)
+								expd.setCode(pd.getCodeAsString());
+							if (pd.metadata.containsKey("lastseen"))
+								expd.setMetaData("lastseen", pd.getMetaData("lastseen"));
+						} else {
+							if (pd.code != null)
+								System.out.println("not found, but has code: " + existingRootPD + "/" + id);
+						}
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("failed to walk " + existingRootPD + " or " + listWithCodes);
+				System.err.println(e);
+			}
+		}
+	}
+
 	public PrimaryDocument findRootPD(String name) {
 		for (PrimaryDocument rootPD : rootPDs) {
 			if (rootPD.getName().equals(name)) {
