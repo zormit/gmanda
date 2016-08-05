@@ -72,7 +72,12 @@ public class CodeModel {
 							t);
 					if (removed
 							&& codeMap.get(partialQualifiedCode).size() == 0) {
-						internalList.remove(partialQualifiedCode);
+						internalList.getReadWriteLock().writeLock().lock();
+						try {
+							internalList.remove(partialQualifiedCode);
+						} finally {
+							internalList.getReadWriteLock().writeLock().unlock();
+						}
 					}
 				}
 			}
@@ -103,7 +108,12 @@ public class CodeModel {
 				if (!list.contains(t)) {
 					list.add(t);
 					if (codeMap.get(partialQualifiedCode).size() == 1) {
-						internalList.add(partialQualifiedCode);
+						internalList.getReadWriteLock().writeLock().lock();
+						try {
+							internalList.add(partialQualifiedCode);
+						} finally {
+							internalList.getReadWriteLock().writeLock().unlock();
+						}
 					}
 				}
 			}
