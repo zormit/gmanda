@@ -15,5 +15,5 @@
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="de.fu_berlin.inf.gmanda.GmandaMain"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Gmanda"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx512m -ea"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx4096m -ea"/>
 </launchConfiguration>
