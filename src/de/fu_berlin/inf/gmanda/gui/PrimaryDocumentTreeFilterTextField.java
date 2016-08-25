@@ -83,7 +83,9 @@ public class PrimaryDocumentTreeFilterTextField extends JPanel {
 	"The following special syntax may be used:" +
 	"<ul>" +
 	"  <li><code>search: \"search text\"</code> Search the text (instead of the codes) of the message<br>" +
-	"		for the given keywords. The syntax is the same as Google's.</li>" + 
+	"		for the given keywords. The syntax is the same as Google's.<br>" +
+	"		For Metadata use: <code>search: { from: \"Bogdan\", OR from: \"Aleksandr\" }</code><br>" +
+	"		For Date based filtering use: <code>date: <2007-04-01T12:00:00</code></li>" +
 	"  <li><code>*</code> Show all documents that have any code at all.</li>" +
 	"  <li><code>-</code> Show all documents that do not contain the given code or search.<br>Caution: This might be slow.</li>" +
 	"  <li><code>|</code> Add the documents to the results (works like OR)." +
